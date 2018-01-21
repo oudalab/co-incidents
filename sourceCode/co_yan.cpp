@@ -31,6 +31,8 @@ class Incidence
 		/*will be a list of snetence id that is in the incidence*/
 		vector<string> sentencesid;
 		vector<string> subincidencesid;
+
+	    Incidence(string incidenceid,vector<string> sentences):inci_id(incidenceid),sentencesid(move(sentences)){}
 };
 
 class Subincidence
@@ -50,8 +52,10 @@ class SuperIncidence
 	  /****list of freatures that super incidence care about***/
 };
 
+//global variables
 int xlength=1000;
 int length=(xlength*xlength-xlength)/2+xlength;
+/**** ok, the goal of the simulatio for now is to cluster all the sentences that are similar to each otehr say who has the similarity bigger than .5*****/
 
 double* loadMatrix()
 {
@@ -88,8 +92,64 @@ double* loadMatrix()
     return similarity;
 }
 
+double getSimilarityByMatrixIndex(double* matrix,int row, int col)
+{ 
+   if(row==col)
+   	 return 1.0;
+   	else if(row>col)
+   	{
+   		//return matrix[row*xlength+col];
+   		// row is 0 then add 1
+   		// row is 1 add in 1 and 2
+   		// row is 2 then add in 1,2 and 3
+   		int index=(1+row)*row/2+col;
+   		return matrix[index];
 
+   	}
+   	else
+   	{
+   		//since it is symmetric 
+   		return getSimilarityByMatrixIndex(matrix,col,row);
+   	}
+  
+}
+
+/*****generate a random number within a range,  include min and max value *****/
+int generateRandomInteger(int min, int max)
+{
+	return min + (rand() % static_cast<int>(max - min + 1));
+}
+
+
+/**link a sentence to a coincidence*, when bigger than the threshold the stuff should be moved*/
+/***array is by default pass by reference**/
+void linkSentenceToIncidence(string incidenceid, string sentenceid,double* matrix,double threshold,Incidence* incidenceArray[xlength])
+{
+    //let say when the sentece similarity within the average similarity for the coincidence is above some value then move.
+    double sentenceWithIncidenceSimilarity=0;
+    vector<string> sentencesid=(*(incidenceArray[stoi(incidenceid)])).sentencesid;
+    int count=0;
+    int sen1=0;
+    int sen2=stoi(sentenceid);
+    for(string id:sentencesid)
+    {
+    	sen1=stoi(id);
+    	count=count+1;
+    	sentenceWithIncidenceSimilarity=sentenceWithIncidenceSimilarity+getSimilarityByMatrixIndex(matrix,sen1,sen2);
+    }
+    if(sentenceWithIncidenceSimilarity/count>=threshold)
+    {
+    	//if bigger than threshhold, then link it
+    	cout<<"linked!!"<<endl;
+    }
+    else
+    {
+    	cout<<"not linked!!"<<endl;
+    }
+    
+}
 int main()
+
 {
 
 	 time_t now = time(0);
@@ -100,27 +160,43 @@ int main()
 
 	 cout << "The local date and time is: " << dt << endl;
 	 //loadMatrix();
-
-	 double* matrix=loadMatrix();
+     /*load the simulated probability matrxi.*/
+	double* matrix=loadMatrix();
 
      
      int i=0;
      Sentence* sentenceArray[xlength];
+     Incidence* incidenceArray[xlength]; 
 
      for(int i=0;i<xlength;i++)
      {
         sentenceArray[i]=new Sentence(to_string(i));
      }
 
-     cout<<"print the id:"<<(*(sentenceArray[10])).sen_id<<endl;
-
-	 // int index=0;
-	 // for(index=0;index<length;index++)
-	 // {
-	 // 	cout<<"output: "<<matrix[index]<<endl;
-	 // }
-	 /***create length many sentences with id range from 0 to 500549*/
-
+     for(int i=0;i<xlength;i++)
+     {
+     	vector<string> sentencesid;
+     	sentencesid.push_back(to_string(i));
+     	incidenceArray[i]=new Incidence(to_string(i),sentencesid);
+     }
+     
+   //  cout<<"sentenceid in the incidence: "<<(*(incidenceArray[11])).sentencesid[0]<<endl;
+     int sentenceToMove=0;
+     int incidenceDestination=0;
+     for(i=0;i<200;i++)
+     {
+     	try{
+     		sentenceToMove=generateRandomInteger(0,999);
+	     	incidenceDestination=generateRandomInteger(0,999);
+	     	linkSentenceToIncidence(to_string(sentenceToMove),to_string(incidenceDestination),matrix,0.5,incidenceArray);
+     	}
+     	catch (...)
+		{
+		    // catch anything thrown within try block that derives from std::exception
+		    cout<<"what is the error???"<<endl;
+		    //cout << exc.what();
+		}
+     }
 	
 }
 
