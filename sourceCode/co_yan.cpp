@@ -123,7 +123,7 @@ int generateRandomInteger(int min, int max)
 
 /**link a sentence to a coincidence*, when bigger than the threshold the stuff should be moved*/
 /***array is by default pass by reference**/
-void linkSentenceToIncidence(string incidenceid, string sentenceid,double* matrix,double threshold,Incidence* incidenceArray[xlength])
+void linkSentenceToIncidence(int desincidenceindex,string incidenceid, int sourceincidenceindex,string sourceincidenceid,string sentenceid,int indexOfSentenceId,double* matrix,double threshold,vector<Incidence*>& incidenceArray)
 {
     //let say when the sentece similarity within the average similarity for the coincidence is above some value then move.
     double sentenceWithIncidenceSimilarity=0;
@@ -141,11 +141,22 @@ void linkSentenceToIncidence(string incidenceid, string sentenceid,double* matri
     {
     	//if bigger than threshhold, then link it
     	cout<<"linked!!"<<endl;
+    	//remove from the old incidence and add into the new incidence.
+        vector<string>& sentenceids=(*(incidenceArray[sourceincidenceindex])).sentencesid;
+        sentenceids.erase(sentenceids.begin()+indexOfSentenceId);
+
+         //add the sentence to the destination incidence
+
+        (*(incidenceArray[desincidenceindex])).sentencesid.push_back(sentenceid);
+
     }
     else
     {
     	cout<<"not linked!!"<<endl;
     }
+    //now need to make the linked sentecnes into the incidence list, and need to get rid of the incidence if there is nothing belong to it any more,
+
+
     
 }
 int main()
@@ -165,35 +176,60 @@ int main()
 
      
      int i=0;
-     Sentence* sentenceArray[xlength];
-     Incidence* incidenceArray[xlength]; 
+     //Sentence* sentenceArray[xlength];
+     vector<Sentence*> sentenceArray;
+     vector<Incidence*> incidenceArray;
+     //Incidence* incidenceArray[xlength]; 
 
      for(int i=0;i<xlength;i++)
      {
-        sentenceArray[i]=new Sentence(to_string(i));
+        sentenceArray.push_back(new Sentence(to_string(i)));
      }
-
+     //initialize all the incidence.
      for(int i=0;i<xlength;i++)
      {
      	vector<string> sentencesid;
      	sentencesid.push_back(to_string(i));
-     	incidenceArray[i]=new Incidence(to_string(i),sentencesid);
+     	incidenceArray.push_back(new Incidence(to_string(i),sentencesid));
      }
      
    //  cout<<"sentenceid in the incidence: "<<(*(incidenceArray[11])).sentencesid[0]<<endl;
      int sentenceToMove=0;
-     int incidenceDestination=0;
+     int incidenceDestinationIndex=0;
+     //this will be the incidenceid.
+     string incidenceDestination="";
+     int sourceIncidenceIndex=0;
+     int sizeOfIncidenceArray=0;
+     string sentenceid="";
+     string sourceIncidenceId="";
      for(i=0;i<200;i++)
      {
      	try{
-     		sentenceToMove=generateRandomInteger(0,999);
-	     	incidenceDestination=generateRandomInteger(0,999);
-	     	linkSentenceToIncidence(to_string(sentenceToMove),to_string(incidenceDestination),matrix,0.5,incidenceArray);
+     		//source Incidence will be where the to be moved sentence belong to
+     		//sourceIncidence=generateRandomInteger(0,xlength-1);
+            sizeOfIncidenceArray=incidenceArray.size();
+            sourceIncidenceIndex=generateRandomInteger(0,sizeOfIncidenceArray-1);
+            Incidence sourceIncidence=*(incidenceArray[sourceIncidenceIndex]);
+            sourceIncidenceId=sourceIncidence.inci_id;
+     		int size=sourceIncidence.sentencesid.size();
+     		//cout<<"size: "<<size<<endl;
+     		//cout<<"size: "<<size<<endl;
+     		if(size==0)
+     		{
+     			continue;
+     		}
+     		sentenceToMove=generateRandomInteger(0,size-1);
+
+     		sentenceid=sourceIncidence.sentencesid[sentenceToMove];
+     		cout<<"sentenceid: "<<sentenceid<<endl;
+	     	incidenceDestinationIndex=generateRandomInteger(0,xlength-1);
+	     	incidenceDestination=(*(incidenceArray[incidenceDestinationIndex])).inci_id;
+	     	linkSentenceToIncidence(incidenceDestinationIndex,incidenceDestination,sourceIncidenceIndex,sourceIncidenceId,sentenceid,sentenceToMove,matrix,0.5,incidenceArray);
      	}
      	catch (...)
 		{
 		    // catch anything thrown within try block that derives from std::exception
-		    cout<<"what is the error???"<<endl;
+		    cout<<"what is the error???"<<i<<endl;
 		    //cout << exc.what();
 		}
      }
