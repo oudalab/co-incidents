@@ -5,6 +5,10 @@
 #include <vector>
 #include <fstream>
 #include <stdlib.h>
+#include <algorithm>
+#include <array> 
+#include <random>       // std::default_random_engine
+#include <chrono>       // std::chrono::system_clock
 
 using namespace std;
 
@@ -129,6 +133,11 @@ vector<int>* splitTheIntegerIntoRandomPart(int sum)
 	while(sum>0)
 	{
 		numberGenerate=generateRandomInteger(0,sum);
+		//continue if the numberGenerated is 0, since that is useless
+		if(numberGenerate==0)
+		{
+			continue;
+		}
 		(*randomNumberArray).push_back(numberGenerate);
 		sum=sum-numberGenerate;
 
@@ -136,17 +145,48 @@ vector<int>* splitTheIntegerIntoRandomPart(int sum)
 	return randomNumberArray;
 }
 
-void splitIncidenceIntoSubincidence(int incidenceIndex, string incidenceId, vector<Subincidence*>& subincidenceArray)
+//split the target incidence if new stuff get added in , 
+//the current thought might need to change later.
+void splitIncidenceIntoSubincidence(int incidenceIndex, string incidenceId, vector<Subincidence*>& subincidenceArray,vector<Incidence*>& incidenceArray)
 {
-	//when a new sentence add into the incidence we need to randomly split the target incidence into subincidence.
-	//how to choose the number of the incidences that should split into?
+	
+	//randomly split the sn
+	int sentencesCount=(*incidenceArray[incidenceIndex]).sentencesid.size();
+	vector<int> randomArray=*splitTheIntegerIntoRandomPart(sentencesCount);
+	//might give it an probablity to split or not.
+	//first shuffle the list then, make them in to subgroup, shuffle is provided by c++ native lib.
+	for(int num:randomArray)
+	{
+		//cout<<"num to be split is:"<<num<<endl;
+
+
+	}
 
 
 }
 
+vector<int>& shuffleTheIndexOfVector(int n)
+{
+	//shuffle the number ={0,1,2,3.....n-1}
+	 //std::array<int,5> foo={1,2,3,4,5};
+	vector<int> * random=new vector<int>();
+	for(int i=0;i<n;i++)
+	{
+		(*random).push_back(i);
+	}
+    // obtain a time-based seed:
+	srand(std::chrono::system_clock::now().time_since_epoch().count());
+	random_shuffle((*random).begin(), (*random).end());
+	cout << "startShuffle:"<<endl;
+	  for (int& x: (*random)) 
+	  	cout << x<<endl;
+
+	return (*random);
+}
+
 /**link a sentence to a coincidence*, when bigger than the threshold the stuff should be moved*/
 /***array is by default pass by reference**/
-void linkSentenceToIncidence(int desincidenceindex,string incidenceid, int sourceincidenceindex,string sourceincidenceid,string sentenceid,int indexOfSentenceId,double* matrix,double threshold,vector<Incidence*>& incidenceArray)
+void linkSentenceToIncidence(int desincidenceindex,string incidenceid, int sourceincidenceindex,string sourceincidenceid,string sentenceid,int indexOfSentenceId,double* matrix,double threshold,vector<Incidence*>& incidenceArray,vector<Subincidence*>& subincidenceArray)
 {
     //let say when the sentece similarity within the average similarity for the coincidence is above some value then move.
     double sentenceWithIncidenceSimilarity=0;
@@ -174,6 +214,7 @@ void linkSentenceToIncidence(int desincidenceindex,string incidenceid, int sourc
          //add the sentence to the destination incidence
 
         (*(incidenceArray[desincidenceindex])).sentencesid.push_back(sentenceid);
+        splitIncidenceIntoSubincidence(desincidenceindex,incidenceid,subincidenceArray,incidenceArray);
 
     }
     else
@@ -202,7 +243,7 @@ int main()
 
      
      int i=0;
-     //Sentence* sentenceArray[xlength];
+     //Sentence* sentenceArray[xlength];, 
      vector<Sentence*> sentenceArray;
      vector<Incidence*> incidenceArray;
      vector<Subincidence*> subincidenceArray;
@@ -251,7 +292,7 @@ int main()
      		cout<<"sentenceid: "<<sentenceid<<endl;
 	     	incidenceDestinationIndex=generateRandomInteger(0,xlength-1);
 	     	incidenceDestination=(*(incidenceArray[incidenceDestinationIndex])).inci_id;
-	     	linkSentenceToIncidence(incidenceDestinationIndex,incidenceDestination,sourceIncidenceIndex,sourceIncidenceId,sentenceid,sentenceToMove,matrix,0.5,incidenceArray);
+	     	linkSentenceToIncidence(incidenceDestinationIndex,incidenceDestination,sourceIncidenceIndex,sourceIncidenceId,sentenceid,sentenceToMove,matrix,0.5,incidenceArray,subincidenceArray);
      	}
      	catch (...)
 		{
@@ -271,13 +312,19 @@ int main()
      }
      cout<<"max sentenceids is this: "<<maxSentenceCount<<endl;
 
-     //test generateRandomInteger
+     //test generateRandomInteger, 
      vector<int> test=*(splitTheIntegerIntoRandomPart(17));
      for(int i: test)
      {
      	cout<<"hey number"<<i<<endl;
      }
      cout<<"test size is: "<<test.size()<<endl;
+vector<int> ressult=shuffleTheIndexOfVector(10);
+//check the version of c++ that using here.
+if( __cplusplus == 201103L ) std::cout << "C++11\n" ;
+else if( __cplusplus == 19971L ) std::cout << "C++98\n" ;
+else std::cout << "pre-standard C++\n" ;
+//  return 0;
 	
 }
 
