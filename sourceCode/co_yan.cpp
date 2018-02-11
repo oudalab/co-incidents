@@ -20,7 +20,7 @@ class Sentence
 		string time_occur;
         vector<int> doc_embed;
 
-        Sentence(string sentenceid):sen_id(sentenceid) {}
+        Sentence(string sentenceid):sen_id(sentenceid) {};
 };
 
 class Incidence
@@ -32,7 +32,7 @@ class Incidence
 		vector<string> sentencesid;
 		vector<string> subincidencesid;
 
-	    Incidence(string incidenceid,vector<string> sentences):inci_id(incidenceid),sentencesid(move(sentences)){}
+	    Incidence(string incidenceid,vector<string> sentences):inci_id(incidenceid),sentencesid(move(sentences)){};
 };
 
 class Subincidence
@@ -40,7 +40,8 @@ class Subincidence
 	public: 
 		string sub_id;
 		string inci_id;
-		/*****list of features that subincidence care about*/
+		/*****list of features that subincidence care about*/;
+		Subincidence(string subid,string inciid):sub_id(subid),inci_id(inciid){}
 };
 
 class SuperIncidence
@@ -120,6 +121,28 @@ int generateRandomInteger(int min, int max)
 	return min + (rand() % static_cast<int>(max - min + 1));
 }
 
+//give an integer split it into several other integers randomly and will add up to the integer
+vector<int>* splitTheIntegerIntoRandomPart(int sum)
+{
+	vector<int>* randomNumberArray=new vector<int>();
+	int numberGenerate=0;
+	while(sum>0)
+	{
+		numberGenerate=generateRandomInteger(0,sum);
+		(*randomNumberArray).push_back(numberGenerate);
+		sum=sum-numberGenerate;
+
+	}
+	return randomNumberArray;
+}
+
+void splitIncidenceIntoSubincidence(int incidenceIndex, string incidenceId, vector<Subincidence*>& subincidenceArray)
+{
+	//when a new sentence add into the incidence we need to randomly split the target incidence into subincidence.
+	//how to choose the number of the incidences that should split into?
+
+
+}
 
 /**link a sentence to a coincidence*, when bigger than the threshold the stuff should be moved*/
 /***array is by default pass by reference**/
@@ -144,6 +167,9 @@ void linkSentenceToIncidence(int desincidenceindex,string incidenceid, int sourc
     	//remove from the old incidence and add into the new incidence.
         vector<string>& sentenceids=(*(incidenceArray[sourceincidenceindex])).sentencesid;
         sentenceids.erase(sentenceids.begin()+indexOfSentenceId);
+        //if there is no sentence inside of the incidence any more, remove the incidence from the incidence list
+        if(sentenceids.size()==0)
+        	incidenceArray.erase(incidenceArray.begin()+sourceincidenceindex);
 
          //add the sentence to the destination incidence
 
@@ -179,6 +205,7 @@ int main()
      //Sentence* sentenceArray[xlength];
      vector<Sentence*> sentenceArray;
      vector<Incidence*> incidenceArray;
+     vector<Subincidence*> subincidenceArray;
      //Incidence* incidenceArray[xlength]; 
 
      for(int i=0;i<xlength;i++)
@@ -214,10 +241,10 @@ int main()
      		int size=sourceIncidence.sentencesid.size();
      		//cout<<"size: "<<size<<endl;
      		//cout<<"size: "<<size<<endl;
-     		if(size==0)
-     		{
-     			continue;
-     		}
+     		// if(size==0)
+     		// {
+     		// 	continue;
+     		// }
      		sentenceToMove=generateRandomInteger(0,size-1);
 
      		sentenceid=sourceIncidence.sentencesid[sentenceToMove];
@@ -233,6 +260,24 @@ int main()
 		    //cout << exc.what();
 		}
      }
+     //let see how many incidence left in incidenceArray
+     cout<<"incidence get left is here: "<<incidenceArray.size()<<endl;
+     //to see what incidence has the most sentenceId.
+     unsigned long maxSentenceCount=0;
+     for(Incidence* inc:incidenceArray)
+     {
+     	   maxSentenceCount=max(maxSentenceCount,(*inc).sentencesid.size());
+
+     }
+     cout<<"max sentenceids is this: "<<maxSentenceCount<<endl;
+
+     //test generateRandomInteger
+     vector<int> test=*(splitTheIntegerIntoRandomPart(17));
+     for(int i: test)
+     {
+     	cout<<"hey number"<<i<<endl;
+     }
+     cout<<"test size is: "<<test.size()<<endl;
 	
 }
 
