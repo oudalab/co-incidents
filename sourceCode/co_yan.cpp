@@ -9,6 +9,7 @@
 #include <array> 
 #include <random>       // std::default_random_engine
 #include <chrono>       // std::chrono::system_clock
+#include <uuid/uuid.h>
 
 using namespace std;
 
@@ -41,9 +42,11 @@ class Incidence
 
 class Subincidence
 {
-	public: 
+	public:
+	//it hard to generate guid in c++, so maybe Subincidence don't need a guid 
 		string sub_id;
 		string inci_id;
+		vector<string> sentencesid;
 		/*****list of features that subincidence care about*/;
 		Subincidence(string subid,string inciid):sub_id(subid),inci_id(inciid){}
 };
@@ -145,25 +148,23 @@ vector<int>* splitTheIntegerIntoRandomPart(int sum)
 	return randomNumberArray;
 }
 
-//split the target incidence if new stuff get added in , 
-//the current thought might need to change later.
-void splitIncidenceIntoSubincidence(int incidenceIndex, string incidenceId, vector<Subincidence*>& subincidenceArray,vector<Incidence*>& incidenceArray)
-{
-	
-	//randomly split the sn
-	int sentencesCount=(*incidenceArray[incidenceIndex]).sentencesid.size();
-	vector<int> randomArray=*splitTheIntegerIntoRandomPart(sentencesCount);
-	//might give it an probablity to split or not.
-	//first shuffle the list then, make them in to subgroup, shuffle is provided by c++ native lib.
-	for(int num:randomArray)
-	{
-		//cout<<"num to be split is:"<<num<<endl;
+// void generateGuidString(string guidStr)
+// {
+// 	_TUCHAR *guidStr = 0x00;
 
+// 	GUID *pguid = 0x00;
 
-	}
+// 	pguid = new GUID; 
 
+// 	CoCreateGuid(pguid); 
 
-}
+// 	// Convert the GUID to a string
+// 	UuidToString(pguid, &guidStr);
+
+// 	delete pguid;
+
+// }
+
 
 vector<int>& shuffleTheIndexOfVector(int n)
 {
@@ -183,6 +184,45 @@ vector<int>& shuffleTheIndexOfVector(int n)
 
 	return (*random);
 }
+
+//split the target incidence if new stuff get added in , 
+//the current thought might need to change later.
+void splitIncidenceIntoSubincidence(int incidenceIndex, string incidenceId, vector<Subincidence*>& subincidenceArray,vector<Incidence*>& incidenceArray)
+{
+	
+	//randomly split the sn
+	vector<string> sentences=(*incidenceArray[incidenceIndex]).sentencesid;
+	int sentencesCount=sentences.size();
+	vector<int> randomArray=*splitTheIntegerIntoRandomPart(sentencesCount);
+	//might give it an probablity to split or not.
+	//first shuffle the list then, make them in to subgroup, shuffle is provided by c++ native lib.
+	vector<int> shuffledIndex=shuffleTheIndexOfVector(sentencesCount);
+	int sizeid=0;
+	int accumulateIndex=0;
+	int sentenceIndex=0;
+	string subid="";
+	for(int num:randomArray)
+	{
+		sizeid=subincidenceArray.size();
+        subid=to_string(sizeid);
+		Subincidence* sub=new Subincidence(subid,incidenceId);
+		subincidenceArray.push_back(sub);
+		for(int i=0;i<num;i++)
+		{
+			
+			sentenceIndex=shuffledIndex[accumulateIndex];
+			(*sub).sentencesid.push_back(sentences[sentenceIndex]);
+			//be careful this needs to be called at last, otherwise it will get a segmentation fault
+			accumulateIndex=accumulateIndex+1;
+		}
+		(*incidenceArray[incidenceIndex]).subincidencesid.push_back(subid);
+
+	}
+	cout<<"subcount: "<<(*incidenceArray[incidenceIndex]).subincidencesid.size()<<endl;
+
+
+}
+
 
 /**link a sentence to a coincidence*, when bigger than the threshold the stuff should be moved*/
 /***array is by default pass by reference**/
@@ -205,6 +245,7 @@ void linkSentenceToIncidence(int desincidenceindex,string incidenceid, int sourc
     	//if bigger than threshhold, then link it
     	cout<<"linked!!"<<endl;
     	//remove from the old incidence and add into the new incidence.
+
         vector<string>& sentenceids=(*(incidenceArray[sourceincidenceindex])).sentencesid;
         sentenceids.erase(sentenceids.begin()+indexOfSentenceId);
         //if there is no sentence inside of the incidence any more, remove the incidence from the incidence list
@@ -275,7 +316,10 @@ int main()
      	try{
      		//source Incidence will be where the to be moved sentence belong to
      		//sourceIncidence=generateRandomInteger(0,xlength-1);
+     		cout<<"index i is: "<<i<<endl;
             sizeOfIncidenceArray=incidenceArray.size();
+            //cout<<"size of incidence array is: "<<sizeOfIncidenceArray<<endl;
+
             sourceIncidenceIndex=generateRandomInteger(0,sizeOfIncidenceArray-1);
             Incidence sourceIncidence=*(incidenceArray[sourceIncidenceIndex]);
             sourceIncidenceId=sourceIncidence.inci_id;
@@ -290,8 +334,9 @@ int main()
 
      		sentenceid=sourceIncidence.sentencesid[sentenceToMove];
      		cout<<"sentenceid: "<<sentenceid<<endl;
-	     	incidenceDestinationIndex=generateRandomInteger(0,xlength-1);
+	     	incidenceDestinationIndex=generateRandomInteger(0,sizeOfIncidenceArray-1);
 	     	incidenceDestination=(*(incidenceArray[incidenceDestinationIndex])).inci_id;
+
 	     	linkSentenceToIncidence(incidenceDestinationIndex,incidenceDestination,sourceIncidenceIndex,sourceIncidenceId,sentenceid,sentenceToMove,matrix,0.5,incidenceArray,subincidenceArray);
      	}
      	catch (...)
@@ -325,6 +370,9 @@ if( __cplusplus == 201103L ) std::cout << "C++11\n" ;
 else if( __cplusplus == 19971L ) std::cout << "C++98\n" ;
 else std::cout << "pre-standard C++\n" ;
 //  return 0;
+
+//test guid string generator
+
 	
 }
 
