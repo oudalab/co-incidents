@@ -238,6 +238,7 @@ void linkSentenceToIncidence(int desincidenceindex,string incidenceid, int sourc
     {
     	sen1=stoi(id);
     	count=count+1;
+      //pairwisely calculate the similarity of the current add in stuff with the snetence already in the list and compare the similarity with some threshhold.
     	sentenceWithIncidenceSimilarity=sentenceWithIncidenceSimilarity+getSimilarityByMatrixIndex(matrix,sen1,sen2);
     }
     if(sentenceWithIncidenceSimilarity/count>=threshold)
@@ -297,6 +298,7 @@ int main()
      //initialize all the incidence.
      for(int i=0;i<xlength;i++)
      {
+      //this will allocate on the stack.
      	vector<string> sentencesid;
      	sentencesid.push_back(to_string(i));
      	incidenceArray.push_back(new Incidence(to_string(i),sentencesid));
@@ -311,19 +313,23 @@ int main()
      int sizeOfIncidenceArray=0;
      string sentenceid="";
      string sourceIncidenceId="";
-     for(i=0;i<200;i++)
+     int globalSize=incidenceArray.size();
+     for(i=0;i<100000;i++)
      {
      	try{
      		//source Incidence will be where the to be moved sentence belong to
      		//sourceIncidence=generateRandomInteger(0,xlength-1);
-     		cout<<"index i is: "<<i<<endl;
+     		    cout<<"index i is: "<<i<<endl;
             sizeOfIncidenceArray=incidenceArray.size();
             //cout<<"size of incidence array is: "<<sizeOfIncidenceArray<<endl;
-
             sourceIncidenceIndex=generateRandomInteger(0,sizeOfIncidenceArray-1);
             Incidence sourceIncidence=*(incidenceArray[sourceIncidenceIndex]);
             sourceIncidenceId=sourceIncidence.inci_id;
-     		int size=sourceIncidence.sentencesid.size();
+     		    int size=sourceIncidence.sentencesid.size();
+            if(size==0)
+            {
+              continue;
+            }
      		//cout<<"size: "<<size<<endl;
      		//cout<<"size: "<<size<<endl;
      		// if(size==0)
@@ -348,14 +354,28 @@ int main()
      }
      //let see how many incidence left in incidenceArray
      cout<<"incidence get left is here: "<<incidenceArray.size()<<endl;
-     //to see what incidence has the most sentenceId.
+     //to see what incidence has the most sentenceId. to see what is the max sentence count in the incidence.
      unsigned long maxSentenceCount=0;
+     Incidence* needToCheck;
      for(Incidence* inc:incidenceArray)
      {
-     	   maxSentenceCount=max(maxSentenceCount,(*inc).sentencesid.size());
+       if(maxSentenceCount<(*inc).sentencesid.size())
+       {
+        needToCheck=inc;
+       }
 
+     	   maxSentenceCount=max(maxSentenceCount,(*inc).sentencesid.size());
+       
      }
-     cout<<"max sentenceids is this: "<<maxSentenceCount<<endl;
+     // cout<<"incidenceid looking at is: "<<(*needToCheck).inci_id<<endl;
+     // cout<<"max sentenceids is this: "<<maxSentenceCount<<endl;
+     for(string index :(*needToCheck).sentencesid)
+     {
+      cout<<"sentenceid to check: "<<index<<endl;
+     }
+     // cout<<"similarirty: "<<getSimilarityByMatrixIndex(matrix,stoi((*needToCheck).sentencesid[0]),stoi((*needToCheck).sentencesid[1]))<<endl;
+     // cout<<"similarirty: "<<getSimilarityByMatrixIndex(matrix,stoi((*needToCheck).sentencesid[1]),stoi((*needToCheck).sentencesid[2]))<<endl;
+     // cout<<"similarirty: "<<getSimilarityByMatrixIndex(matrix,stoi((*needToCheck).sentencesid[0]),stoi((*needToCheck).sentencesid[2]))<<endl;
 
      //test generateRandomInteger, 
      vector<int> test=*(splitTheIntegerIntoRandomPart(17));
@@ -365,7 +385,6 @@ int main()
      }
      cout<<"test size is: "<<test.size()<<endl;
 vector<int> ressult=shuffleTheIndexOfVector(10);
-//check the version of c++ that using here.
 if( __cplusplus == 201103L ) std::cout << "C++11\n" ;
 else if( __cplusplus == 19971L ) std::cout << "C++98\n" ;
 else std::cout << "pre-standard C++\n" ;
