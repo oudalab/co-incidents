@@ -230,18 +230,47 @@ void linkSentenceToIncidence(int desincidenceindex,string incidenceid, int sourc
 {
     //let say when the sentece similarity within the average similarity for the coincidence is above some value then move.
     double sentenceWithIncidenceSimilarity=0;
+    double similarityInOldIncidence=0;
     vector<string> sentencesid=(*(incidenceArray[stoi(incidenceid)])).sentencesid;
-    int count=0;
+    //int count=0;
     int sen1=0;
     int sen2=stoi(sentenceid);
-    for(string id:sentencesid)
+    //in order for the proces to start do this:
+    if(sentencesid.size()==1)
     {
-    	sen1=stoi(id);
-    	count=count+1;
-      //pairwisely calculate the similarity of the current add in stuff with the snetence already in the list and compare the similarity with some threshhold.
-    	sentenceWithIncidenceSimilarity=sentenceWithIncidenceSimilarity+getSimilarityByMatrixIndex(matrix,sen1,sen2);
+      sentenceWithIncidenceSimilarity=generateRandomInteger(0,100)/100.0;
     }
-    if(sentenceWithIncidenceSimilarity/count>=threshold)
+    else{
+      sentenceWithIncidenceSimilarity=0;
+        for(string id:sentencesid)
+      {
+        sen1=stoi(id);
+        //count=count+1;
+        //pairwisely calculate the similarity of the current add in stuff with the snetence already in the list and compare the similarity with some threshhold.
+        sentenceWithIncidenceSimilarity=sentenceWithIncidenceSimilarity+getSimilarityByMatrixIndex(matrix,sen1,sen2);
+      }
+
+    }
+    
+    //now need to calculat sen2 affinity within its old icnidence
+    vector<string> sourceSentencesid=(*(incidenceArray[stoi(sourceincidenceid)])).sentencesid;
+    if(sourceSentencesid.size()==0)
+    {
+      similarityInOldIncidence=generateRandomInteger(0,100)/100.0;
+    }
+    else
+    {
+      similarityInOldIncidence=0;
+        for(string id:sourceSentencesid)
+      {
+        sen1=stod(id);
+        similarityInOldIncidence=similarityInOldIncidence+getSimilarityByMatrixIndex(matrix,sen1,sen2);
+      }
+
+    }
+    
+    //if(sentenceWithIncidenceSimilarity/count>=threshold)
+    if(sentenceWithIncidenceSimilarity>=similarityInOldIncidence)
     {
     	//if bigger than threshhold, then link it
     	cout<<"linked!!"<<endl;
