@@ -1,7 +1,9 @@
 """
 This file contains the actual experiment (with command line + default arguments),
-alongside a couple of supporting functions. NOTE: Be sure to create sub-directories
-clusters, run_logs, and graphs if they do not already exist, so that outputs save.
+alongside a couple of supporting functions. 
+
+IMPORTANT NOTE: Be sure to create sub-directories 'clusters', 'run_logs', and 
+'graphs' if they do not already exist, so that outputs save out properly.
 
 @author: Elena Montes
 """

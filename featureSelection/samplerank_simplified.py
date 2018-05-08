@@ -16,11 +16,20 @@ import json
 import logging
 import numpy as np
 import matplotlib.pyplot as plt
+import re
 
 from copy import deepcopy
 from functools import lru_cache
-from random import choice, random
+from itertools import combinations
+from gensim.models import Doc2Vec
+from gensim.models.doc2vec import TaggedDocument
+from gensim.utils import to_unicode
+from nltk.stem.porter import PorterStemmer
+from nltk.tokenize import RegexpTokenizer
+from random import choice, random, sample
+from stop_words import get_stop_words
 from time import time, localtime, asctime
+# from gensim.models.keyedvectors import Doc2VecKeyedVectors
 
 
 class Feature:
@@ -148,7 +157,7 @@ class Incident:
         self.id = id(self)
         self.features_on = np.zeros((num_inc_features,), dtype=int)
         self.sentences = dict()
-        self.pairs = dict()
+        self.pairs = list()
 
         # Remember for purpose of initializing Pair objects
         self.num_pair_features = num_pair_features
@@ -164,14 +173,10 @@ class Incident:
         for other in self.sentences.values():
 
             # Create new pair object
-            pair = Pair(self.num_pair_features, sentence, other)
-
-            # Save references in both sentences in pair
-            sentence.pair_ids.append(pair.id)
-            other.pair_ids.append(pair.id)
+            pair = (sentence, other)
 
             # Save to this incident
-            self.pairs[pair.id] = pair
+            self.pairs.append(pair)
 
         # Add this sentences
         self.sentences[sentence.id_num] = sentence
@@ -197,8 +202,9 @@ class Incident:
             self.features_on[i] = on
 
         # Evaluate pairwise feature scores
-        for pair in self.pairs.values():
-            total += pair.calculate_score(pair_features)
+        for pair in self.pairs:
+            for feature in pair_features:
+                total += feature.assoc_function(frozenset(pair))
 
         return total
 
@@ -217,73 +223,10 @@ class Incident:
         """
 
         # Delete all associated pairs
-        try:
-            for pair_id in self.sentences[sent_id].pair_ids:
-                self.pairs[pair_id].first_sent.pair_ids.remove(pair_id)
-                print(pair_id in self.pairs[pair_id].first_sent.pair_ids)
-                self.pairs[pair_id].second_sent.pair_ids.remove(pair_id)
-                print(pair_id in self.pairs[pair_id].second_sent.pair_ids)
-                del self.pairs[pair_id]
-                print(pair_id in self.pairs)
-        except KeyError:
-            pass
+        self.pairs[:] = [pair for pair in self.pairs if not (pair[0].id_num == sent_id or pair[1].id_num == sent_id)]
 
         # Remove and return sentence object
         return self.sentences.pop(sent_id)
-
-
-class Pair:
-    """
-    One pair of two sentences (must be clustered together in an Incident). 
-    """
-
-    def __init__(self, num_features, first_sent, second_sent):
-        """ 
-        Initialize this pair with first & second given sentences.
-        :param num_features: number of features to be used for scoring
-        :param first_sent: first sentence object in pair
-        :param second_sent: second sentence object in pair
-        """
-        self.id = id(self)
-        self.features_on = np.zeros((num_features,), dtype=int)
-        self.sentences = dict()
-
-        # Add the two sentences to this pair
-        self.first_sent = first_sent
-        self.second_sent = second_sent
-
-    def __str__(self):
-        """ 
-        :return: string representation of this pair. 
-        """
-        return 'pair {}: '.format(self.id) + ' '.join(self.sentences)
-
-    def calculate_score(self, pair_features):
-        """
-        Calculate total score for this pair based on given features. 
-        Records which features turned on.
-        :param pair_features: features to be evaluated
-        :return: total score as a float
-        """
-        # Total score for this sub-incident
-        total = 0.0
-
-        # Evaluate all relevant features for this sub incident
-        for i, feature in enumerate(pair_features):
-            on = feature.assoc_function(frozenset(self.get_sentences()))
-            total += on * feature.weight
-
-            # Record result of feature
-            self.features_on[i] = on
-
-        return total
-
-    def get_sentences(self):
-        """
-        Method to return all sentences contained within this cluster. 
-        :return: list of sentences
-        """
-        return [self.first_sent, self.second_sent]
 
 
 class Configuration:
@@ -360,6 +303,34 @@ class Configuration:
 
         return new_updates
 
+    def calculate_accuracy(self, labeled_samples):
+        num_correct = 0
+        total = 0
+        for incident in self.incidents:
+            # Get all labeled points in this incident cluster
+            data = [s for s in incident.sentences.keys() if s in labeled_samples]
+            labels = dict()
+
+            # Generate counts for all labels seen
+            for d in data:
+                label = labeled_samples[d]
+                if label in labels:
+                    labels[label] += 1
+                else:
+                    labels[label] = 1
+
+            # Mark majority label
+            majority_label = max(labels, key=labels.get)
+
+            # Calculate number correctly assigned data points in this cluster
+            num_correct += len([s for s in data if labeled_samples[s] == majority_label])
+
+            # Running total of labeled points
+            total += len(data)
+
+        # Return purity for all clusters
+        return num_correct/total
+
 
 def gen_sentences(filename):
     """
@@ -368,6 +339,7 @@ def gen_sentences(filename):
     :return: list of all Sentence objects
     """
     sentences = []
+    docs = dict()
 
     logging.info('Loading json file and generating sentences.')
 
@@ -394,7 +366,9 @@ def gen_sentences(filename):
                             tgt_other_agent, country_code, geoname, latitude, longitude)
         sentences.append(sentence)
 
-    return sentences
+        docs[id_num] = elt['doc']
+
+    return sentences, docs
 
 
 def gen_starting_config(is_clustered, sentences, num_inc_features, num_pair_features):
@@ -468,21 +442,152 @@ def gen_config_update(current_config, prob_isolation, num_inc_features, num_pair
     # Scrap old incident if it's now empty
     if len(old_incident.get_sentences()) == 0:
         del new_config.incidents[old_inc_id]
-        print(old_inc_id in new_config.incidents)
         log += 'Incident {} was emptied and deleted\n'.format(old_inc_id)
 
+        print(len(new_config.incidents))
+
     return new_config, log
+
+
+def printProgressBar(iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█'):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+    """
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end = '\r')
+    # Print New Line on Complete
+    if iteration == total:
+        print()
+
+
+def train_doc2vec_model(data_filename, num_docs):
+
+    # Necessary NLP tools
+    tokenizer = RegexpTokenizer(r'\w+')
+    en_stop_words = get_stop_words('en')
+    p_stemmer = PorterStemmer()
+
+    tagged_docs = list()
+    texts = list()
+
+    # Load in training data file
+    with open(data_filename, 'r') as infile:
+        raw_file = json.load(infile)
+
+    raw_docs = [{'doc': piece['doc'], 'id': piece['id']} for piece in raw_file]
+    raw_docs = sample(raw_docs, num_docs)
+    l = len(raw_docs)
+
+    printProgressBar(0, l, prefix='Progress:', suffix='Complete', length=50)
+
+    # Tokenize, stem all documents
+    for index, raw in enumerate(raw_docs):
+        logging.basicConfig(level=logging.INFO)
+
+        # Clean and tokenize document string
+        raw_doc = raw['doc'].lower()
+        tokens = tokenizer.tokenize(raw_doc)
+
+        # Remove stop words from tokens
+        tokens = [token for token in tokens if token not in en_stop_words]
+
+        # Remove and stem number tokens
+        number_tokens = [re.sub(r'[\d]', ' ', token) for token in tokens]
+        number_tokens = ' '.join(number_tokens).split()
+        stemmed_tokens = [p_stemmer.stem(token) for token in number_tokens]
+
+        # Remove empty tokens
+        valid_tokens = [token for token in stemmed_tokens if len(token) > 1]
+
+        # Add tokens to list
+        texts.append(valid_tokens)
+
+        # Save tagged document
+        tagged_doc = TaggedDocument(to_unicode(' '.join(stemmed_tokens)).split(), [raw['id']])
+        tagged_docs.append(tagged_doc)
+
+        printProgressBar(index + 1, l, prefix = 'Progress:', suffix = 'Complete', length = 50)
+
+    # Create and train Doc2Vec model
+    model = Doc2Vec(tagged_docs, dm=0, size=len(tagged_docs), alpha=0.025, min_alpha=0.025, min_count=0, workers=8)
+
+    logging.info('Training.')
+    model.train(tagged_docs, total_examples=len(tagged_docs), epochs=10)
+
+    return model
+
+
+def tokenize(doc):
+    tokenizer = RegexpTokenizer(r'\w+')
+    en_stop_words = get_stop_words('en')
+    p_stemmer = PorterStemmer()
+
+    # Clean and tokenize document string
+    raw_doc = doc.lower()
+    tokens = tokenizer.tokenize(raw_doc)
+
+    # Remove stop words from tokens
+    tokens = [token for token in tokens if token not in en_stop_words]
+
+    # Remove and stem number tokens
+    number_tokens = [re.sub(r'[\d]', ' ', token) for token in tokens]
+    number_tokens = ' '.join(number_tokens).split()
+    stemmed_tokens = [p_stemmer.stem(token) for token in number_tokens]
+
+    # Remove empty tokens
+    valid_tokens = [token for token in stemmed_tokens if len(token) > 1]
+
+    return valid_tokens
+
+
+'''def score_final_config(config, model, docs):
+    """
+    Score the final configuration using random sampled Doc2Vec similarities. 
+    :param config: the config to be scored
+    :return: final score
+    """
+
+    valid_incs = [incident for incident in config.incidents.values() if len(incident.sentences) > 5]
+    for inc in valid_incs:
+        print(len(inc.sentences))
+    #incs = sample([incident for incident in config.incidents.values() if len(incident.sentences) > 5], 2)
+    #print(len(incs[0].sentences))
+    #print(len(incs[1].sentences))
+    #samples = sample(incs[0].sentences.keys(), 5)
+    #samples2 = sample(incs[1].sentences.keys(), 5)
+
+    sims = list()
+
+    keyed = Doc2VecKeyedVectors(model.vector_size, 'doc2vec_model')
+
+    # Calculate similarity within sample
+    for pair in combinations(samples, 2):
+        tokens1 = tokenize(docs[pair[0]])
+        tokens2 = tokenize(docs[pair[1]])
+        sims.append(keyed.similarity_unseen_docs(model, tokens1, tokens2))
+
+    return sum(sims) / len(sims)
+
+    return 0, 0'''
 
 
 @click.command()
 @click.option('--filename', default='datawithdoc.txt', help='Name of file with data')
 @click.option('--is_clustered', default=False, help='Start all sentences together or separate')
-@click.option('--num_iterations', default=50, help='Number of iterations to run')
+@click.option('--num_iterations', default=10000, help='Number of iterations to run')
 @click.option('--prob_isolation', default=0.4,
               help='prob [0.0, 1.0] that an incident will be moved to its own new incident')
-@click.option('--prob_acceptance', default=0.25,
-              help='prob [0.0, 1.0] that a configuration is accepted even with a lower score')
-def experiment(filename, is_clustered, num_iterations, prob_isolation, prob_acceptance):
+def experiment(filename, is_clustered, num_iterations, prob_isolation):
     logging.basicConfig(filename='run_{}.log'.format(asctime(localtime(time())).replace(' ', '')),
                         level=logging.INFO)
 
@@ -510,8 +615,13 @@ def experiment(filename, is_clustered, num_iterations, prob_isolation, prob_acce
     feature_updates = np.zeros((len(inc_features),), dtype=int)
 
     # Generate objects to represent data
-    sentences = gen_sentences(filename)
-    sentences = sentences[:1000]
+    sentences, docs = gen_sentences(filename)
+    labeled_docs = dict()
+    for actor in {'USA', 'RUS', 'AUS', 'JPN', 'MEX', 'KEN', 'BRA', 'CAN', 'ZAF', 'CHN'}:
+        actor_docs = [s for s in sentences if s.src_actor == actor][:50]
+        doc_updates = {se.id_num: se for se in actor_docs}
+        labeled_docs.update(doc_updates)
+    # sentences = sentences[:1000]
     logging.info('COMPLETE: {} sentences generated.\n'.format(len(sentences)))
 
     # Create a random starting configuration
@@ -526,13 +636,12 @@ def experiment(filename, is_clustered, num_iterations, prob_isolation, prob_acce
     scores = []
     iterations = []
 
+    # Doc2Vec model
+    doc2vec = Doc2Vec.load('doc2vec_model')
+
     times_unaccepted = 0
-    iter_num = 0
 
-    while times_unaccepted < 10:
-    #for iter_num in range(num_iterations):
-
-        iter_num += 1
+    for iter_num in range(num_iterations):
 
         logging.info('Beginning iteration {}.\n'.format(iter_num))
 
@@ -541,8 +650,12 @@ def experiment(filename, is_clustered, num_iterations, prob_isolation, prob_acce
         new_score = new_config.calculate_score(inc_features, pair_features)
         score_diff = new_score - current_score
 
-        # If score difference is positive or this is chosen to randomly change
-        if score_diff > 0.0 or random() <= prob_acceptance:
+        # Metropolis Hastings probability of acceptance
+        mh_acceptance = new_score / current_score
+        print('MH acceptance: {}'.format(mh_acceptance))
+
+        # Acceptance test: score diff is positive or is chosen to randomly change
+        if random() <= min(1.0, mh_acceptance):
 
             times_unaccepted = 0
 
@@ -561,23 +674,31 @@ def experiment(filename, is_clustered, num_iterations, prob_isolation, prob_acce
             scores.append(current_score)
             iterations.append(iter_num)
 
+            # Total weight update for all features
+            total_weight = sum(feature_updates)
+
             # Is it time to update feature weights?
-            if iter_num % 5 == 0:
+            if False:
                 for i, feat in enumerate(inc_features):
-                    feat.weight += feature_updates[i]
+                    feat.weight += feature_updates[i] / total_weight if total_weight != 0 else 0
                     feature_updates[i] = 0  # reset running weight update sum
         else:
             times_unaccepted += 1
 
-    for feat in inc_features:
-        print(feat.weight)
+    for i, feat in enumerate(inc_features):
+        print('Feature: {} Weight: {}'.format(feat.feature_id, feature_updates[i]))
+
+    result = score_final_config(current_config, doc2vec, docs)
+    print('\nFinal config similarity score is {}'.format(result))
+
+    current_config.calculate_accuracy(labeled_samples)
 
     # plot results
     plt.plot(iterations, scores)
-    plt.xlabel('Time')
+    plt.xlabel('Iteration')
     plt.ylabel('Configuration Score')
     plt.show()
-    plt.savefig('scores.png', bbox_inches='tight')
+    plt.savefig('run_{}_scores.png'.format(asctime(localtime(time())).replace(' ', '')), bbox_inches='tight')
 
 
 if __name__ == '__main__':
