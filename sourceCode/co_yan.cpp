@@ -12,7 +12,18 @@
 #include <uuid/uuid.h>
 
 using namespace std;
-
+class IncidenceFeature
+{
+  public:
+    string loc;
+    string country;
+    string eventcode;
+    string actor;
+    string target;
+    string year;
+    string lati;
+    stirng longtitude;
+}
 
 class Sentence
 {
@@ -36,8 +47,8 @@ class Incidence
 		/*will be a list of snetence id that is in the incidence*/
 		vector<string> sentencesid;
 		vector<string> subincidencesid;
-
-	    Incidence(string incidenceid,vector<string> sentences):inci_id(incidenceid),sentencesid(move(sentences)){};
+    IncidenceFeature featureMap;
+	  Incidence(string incidenceid,vector<string> sentences):inci_id(incidenceid),sentencesid(move(sentences)){};
 };
 
 class Subincidence
