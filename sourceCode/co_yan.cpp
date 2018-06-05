@@ -10,33 +10,104 @@
 #include <random>       // std::default_random_engine
 #include <chrono>       // std::chrono::system_clock
 #include <uuid/uuid.h>
+#include <map>
+//load json files of features from disk
+#include </usr/local/Cellar/jsoncpp/1.8.4/include/json/value.h>
+#include </usr/local/Cellar/jsoncpp/1.8.4/include/json/reader.h>
+#include </usr/local/Cellar/jsoncpp/1.8.4/include/json/writer.h>
 
 using namespace std;
+//to track if the feature turned on or off on each incidence
 class IncidenceFeature
 {
   public:
-    string loc;
-    string country;
-    string eventcode;
-    string actor;
-    string target;
-    string year;
-    string lati;
-    stirng longtitude;
-}
+  map<string, int> featureMap;
+  IncidenceFeature()
+  {
+    //all the feature should be turned on at the beginning
+    //all the names here are the same as the json file
+    featureMap["code"]=1;
+    featureMap["country_code"]=1;
+    featureMap["date8"]=1;
+    featureMap["geoname"]=1;
+    featureMap["id"]=1;
+    featureMap["year"]=1;
+    featureMap["latitude"]=1;
+    featureMap["longitude"]=1;
+    featureMap["src_actor"]=1;
+    featureMap["src_agent"]=1;
+    featureMap["tgt_actor"]=1;
+    featureMap["tgt_agent"]=1;
+  }
+};
 
+class SentenceFeatureValue
+{
+  public:
+  //map<string,string> featureValue;
+    string code;
+    string country_code;
+    string date8;
+    string geoname;
+    string id;
+    string year;
+    string latitude;
+    string longitude;
+    string src_actor;
+    string src_agent;
+    string tgt_actor;
+    string tgt_agent;
+    string doc;
+    //the parameter name and property name can not be the same.
+  SentenceFeatureValue(string code1,string country_code1, string date81, string geoname1,string id1,string year1,string latitude1,string longitude1,string src_actor1,string src_agent1, string tgt_actor1, string tgt_agent1,string doc1)
+  {
+    code=code1;
+    country_code=country_code1;
+    date8=date81;
+    geoname=geoname1;
+    id=id1;
+    year=year1;
+    latitude=latitude1;
+    longitude=longitude1;
+    src_actor=src_actor1;
+    src_agent=src_agent1;
+    tgt_actor=tgt_actor1;
+    tgt_agent=tgt_agent1;
+    doc=doc1;
+  }
+};
+
+class GlobalFeatureWeight
+{
+public:
+  map<string,int> featureWeight;
+  GlobalFeatureWeight()
+  {
+    featureWeight["code"]=1;
+    featureWeight["country_code"]=1;
+    featureWeight["date8"]=1;
+    featureWeight["geoname"]=1;
+    featureWeight["id"]=1;
+    featureWeight["year"]=1;
+    featureWeight["latitude"]=1;
+    featureWeight["longitude"]=1;
+    featureWeight["src_actor"]=1;
+    featureWeight["src_agent"]=1;
+    featureWeight["tgt_actor"]=1;
+    featureWeight["tgt_agent"]=1;
+    featureWeight["tgt_year"]=1;
+  }
+};
 class Sentence
 {
 	public:
 		string sen_id;
-		string location;
-		string actor;
-		string eventcode;
-		 // current date/time based on current system
-		string time_occur;
-        vector<int> doc_embed;
-
-        Sentence(string sentenceid):sen_id(sentenceid) {};
+    SentenceFeatureValue* featureValue;
+    Sentence(string sentenceid,SentenceFeatureValue* featureValue1)
+    {
+      sen_id=sentenceid;
+      featureValue=featureValue1;
+    }
 };
 
 class Incidence
@@ -308,130 +379,190 @@ void linkSentenceToIncidence(int desincidenceindex,string incidenceid, int sourc
 
     
 }
-int main()
+// int main()
 
-{
+// {
 
-	 time_t now = time(0);
+// 	 time_t now = time(0);
 	   
-	   // convert now to string form
-	 char* dt = ctime(&now);
-	// srand(time(0));
+// 	   // convert now to string form
+// 	 char* dt = ctime(&now);
+// 	// srand(time(0));
 
-	 cout << "The local date and time is: " << dt << endl;
-	 //loadMatrix();
-     /*load the simulated probability matrxi.*/
-	double* matrix=loadMatrix();
+// 	 cout << "The local date and time is: " << dt << endl;
+// 	 //loadMatrix();
+//      /*load the simulated probability matrxi.*/
+// 	double* matrix=loadMatrix();
 
      
-     int i=0;
-     //Sentence* sentenceArray[xlength];, 
-     vector<Sentence*> sentenceArray;
-     vector<Incidence*> incidenceArray;
-     vector<Subincidence*> subincidenceArray;
-     //Incidence* incidenceArray[xlength]; 
+//      int i=0;
+//      //Sentence* sentenceArray[xlength];, 
+//      vector<Sentence*> sentenceArray;
+//      vector<Incidence*> incidenceArray;
+//      vector<Subincidence*> subincidenceArray;
+//      //Incidence* incidenceArray[xlength]; 
 
-     for(int i=0;i<xlength;i++)
-     {
-        sentenceArray.push_back(new Sentence(to_string(i)));
-     }
-     //initialize all the incidence.
-     for(int i=0;i<xlength;i++)
-     {
-      //this will allocate on the stack.
-     	vector<string> sentencesid;
-     	sentencesid.push_back(to_string(i));
-     	incidenceArray.push_back(new Incidence(to_string(i),sentencesid));
-     }
+//      for(int i=0;i<xlength;i++)
+//      {
+//         sentenceArray.push_back(new Sentence(to_string(i)));
+//      }
+//      //initialize all the incidence.
+//      for(int i=0;i<xlength;i++)
+//      {
+//       //this will allocate on the stack.
+//      	vector<string> sentencesid;
+//      	sentencesid.push_back(to_string(i));
+//      	incidenceArray.push_back(new Incidence(to_string(i),sentencesid));
+//      }
      
-   //  cout<<"sentenceid in the incidence: "<<(*(incidenceArray[11])).sentencesid[0]<<endl;
-     int sentenceToMove=0;
-     int incidenceDestinationIndex=0;
-     //this will be the incidenceid.
-     string incidenceDestination="";
-     int sourceIncidenceIndex=0;
-     int sizeOfIncidenceArray=0;
-     string sentenceid="";
-     string sourceIncidenceId="";
-     int globalSize=incidenceArray.size();
-     for(i=0;i<100000;i++)
-     {
-     	try{
-     		//source Incidence will be where the to be moved sentence belong to
-     		//sourceIncidence=generateRandomInteger(0,xlength-1);
-     		    cout<<"index i is: "<<i<<endl;
-            sizeOfIncidenceArray=incidenceArray.size();
-            //cout<<"size of incidence array is: "<<sizeOfIncidenceArray<<endl;
-            sourceIncidenceIndex=generateRandomInteger(0,sizeOfIncidenceArray-1);
-            Incidence sourceIncidence=*(incidenceArray[sourceIncidenceIndex]);
-            sourceIncidenceId=sourceIncidence.inci_id;
-     		    int size=sourceIncidence.sentencesid.size();
-            if(size==0)
-            {
-              continue;
-            }
-     		//cout<<"size: "<<size<<endl;
-     		//cout<<"size: "<<size<<endl;
-     		// if(size==0)
-     		// {
-     		// 	continue;
-     		// }
-     		sentenceToMove=generateRandomInteger(0,size-1);
+//    //  cout<<"sentenceid in the incidence: "<<(*(incidenceArray[11])).sentencesid[0]<<endl;
+//      int sentenceToMove=0;
+//      int incidenceDestinationIndex=0;
+//      //this will be the incidenceid.
+//      string incidenceDestination="";
+//      int sourceIncidenceIndex=0;
+//      int sizeOfIncidenceArray=0;
+//      string sentenceid="";
+//      string sourceIncidenceId="";
+//      int globalSize=incidenceArray.size();
+//      for(i=0;i<100;i++)
+//      {
+//      	try{
+//      		//source Incidence will be where the to be moved sentence belong to
+//      		//sourceIncidence=generateRandomInteger(0,xlength-1);
+//      		    cout<<"index i is: "<<i<<endl;
+//             sizeOfIncidenceArray=incidenceArray.size();
+//             //cout<<"size of incidence array is: "<<sizeOfIncidenceArray<<endl;
+//             sourceIncidenceIndex=generateRandomInteger(0,sizeOfIncidenceArray-1);
+//             Incidence sourceIncidence=*(incidenceArray[sourceIncidenceIndex]);
+//             sourceIncidenceId=sourceIncidence.inci_id;
+//      		    int size=sourceIncidence.sentencesid.size();
+//             if(size==0)
+//             {
+//               continue;
+//             }
+//      		//cout<<"size: "<<size<<endl;
+//      		//cout<<"size: "<<size<<endl;
+//      		// if(size==0)
+//      		// {
+//      		// 	continue;
+//      		// }
+//      		sentenceToMove=generateRandomInteger(0,size-1);
 
-     		sentenceid=sourceIncidence.sentencesid[sentenceToMove];
-     		cout<<"sentenceid: "<<sentenceid<<endl;
-	     	incidenceDestinationIndex=generateRandomInteger(0,sizeOfIncidenceArray-1);
-	     	incidenceDestination=(*(incidenceArray[incidenceDestinationIndex])).inci_id;
+//      		sentenceid=sourceIncidence.sentencesid[sentenceToMove];
+//      		cout<<"sentenceid: "<<sentenceid<<endl;
+// 	     	incidenceDestinationIndex=generateRandomInteger(0,sizeOfIncidenceArray-1);
+// 	     	incidenceDestination=(*(incidenceArray[incidenceDestinationIndex])).inci_id;
 
-	     	linkSentenceToIncidence(incidenceDestinationIndex,incidenceDestination,sourceIncidenceIndex,sourceIncidenceId,sentenceid,sentenceToMove,matrix,0.5,incidenceArray,subincidenceArray);
-     	}
-     	catch (...)
-		{
-		    // catch anything thrown within try block that derives from std::exception
-		    cout<<"what is the error???"<<i<<endl;
-		    //cout << exc.what();
-		}
-     }
-     //let see how many incidence left in incidenceArray
-     cout<<"incidence get left is here: "<<incidenceArray.size()<<endl;
-     //to see what incidence has the most sentenceId. to see what is the max sentence count in the incidence.
-     unsigned long maxSentenceCount=0;
-     Incidence* needToCheck;
-     for(Incidence* inc:incidenceArray)
-     {
-       if(maxSentenceCount<(*inc).sentencesid.size())
-       {
-        needToCheck=inc;
-       }
+// 	     	linkSentenceToIncidence(incidenceDestinationIndex,incidenceDestination,sourceIncidenceIndex,sourceIncidenceId,sentenceid,sentenceToMove,matrix,0.5,incidenceArray,subincidenceArray);
+//      	}
+//      	catch (...)
+// 		{
+// 		    // catch anything thrown within try block that derives from std::exception
+// 		    cout<<"what is the error???"<<i<<endl;
+// 		    //cout << exc.what();
+// 		}
+//      }
+//      //let see how many incidence left in incidenceArray
+//      cout<<"incidence get left is here: "<<incidenceArray.size()<<endl;
+//      //to see what incidence has the most sentenceId. to see what is the max sentence count in the incidence.
+//      unsigned long maxSentenceCount=0;
+//      Incidence* needToCheck;
+//      for(Incidence* inc:incidenceArray)
+//      {
+//        if(maxSentenceCount<(*inc).sentencesid.size())
+//        {
+//         needToCheck=inc;
+//        }
 
-     	   maxSentenceCount=max(maxSentenceCount,(*inc).sentencesid.size());
+//      	   maxSentenceCount=max(maxSentenceCount,(*inc).sentencesid.size());
        
-     }
-     // cout<<"incidenceid looking at is: "<<(*needToCheck).inci_id<<endl;
-     // cout<<"max sentenceids is this: "<<maxSentenceCount<<endl;
-     for(string index :(*needToCheck).sentencesid)
-     {
-      cout<<"sentenceid to check: "<<index<<endl;
-     }
-     // cout<<"similarirty: "<<getSimilarityByMatrixIndex(matrix,stoi((*needToCheck).sentencesid[0]),stoi((*needToCheck).sentencesid[1]))<<endl;
-     // cout<<"similarirty: "<<getSimilarityByMatrixIndex(matrix,stoi((*needToCheck).sentencesid[1]),stoi((*needToCheck).sentencesid[2]))<<endl;
-     // cout<<"similarirty: "<<getSimilarityByMatrixIndex(matrix,stoi((*needToCheck).sentencesid[0]),stoi((*needToCheck).sentencesid[2]))<<endl;
+//      }
+//      // cout<<"incidenceid looking at is: "<<(*needToCheck).inci_id<<endl;
+//      // cout<<"max sentenceids is this: "<<maxSentenceCount<<endl;
+//      for(string index :(*needToCheck).sentencesid)
+//      {
+//       cout<<"sentenceid to check: "<<index<<endl;
+//      }
+//      // cout<<"similarirty: "<<getSimilarityByMatrixIndex(matrix,stoi((*needToCheck).sentencesid[0]),stoi((*needToCheck).sentencesid[1]))<<endl;
+//      // cout<<"similarirty: "<<getSimilarityByMatrixIndex(matrix,stoi((*needToCheck).sentencesid[1]),stoi((*needToCheck).sentencesid[2]))<<endl;
+//      // cout<<"similarirty: "<<getSimilarityByMatrixIndex(matrix,stoi((*needToCheck).sentencesid[0]),stoi((*needToCheck).sentencesid[2]))<<endl;
 
-     //test generateRandomInteger, 
-     vector<int> test=*(splitTheIntegerIntoRandomPart(17));
-     for(int i: test)
-     {
-     	cout<<"hey number"<<i<<endl;
-     }
-     cout<<"test size is: "<<test.size()<<endl;
-vector<int> ressult=shuffleTheIndexOfVector(10);
-if( __cplusplus == 201103L ) std::cout << "C++11\n" ;
-else if( __cplusplus == 19971L ) std::cout << "C++98\n" ;
-else std::cout << "pre-standard C++\n" ;
-//  return 0;
+//      //test generateRandomInteger, 
+//      vector<int> test=*(splitTheIntegerIntoRandomPart(17));
+//      for(int i: test)
+//      {
+//      	cout<<"hey number"<<i<<endl;
+//      }
+//      cout<<"test size is: "<<test.size()<<endl;
+// vector<int> ressult=shuffleTheIndexOfVector(10);
+// if( __cplusplus == 201103L ) std::cout << "C++11\n" ;
+// else if( __cplusplus == 19971L ) std::cout << "C++98\n" ;
+// else std::cout << "pre-standard C++\n" ;
+// //  return 0;
 
-//test guid string generator
+// //test guid string generator
 
 	
+// }
+int main()
+{
+  bool alive = true;
+    while (alive){
+    Json::Value root;   // will contains the root value after parsing.
+    Json::Reader reader;
+    std::ifstream test("../datawithdoc.txt", std::ifstream::binary);
+    cout<<"start to parse!"<<endl;
+    bool parsingSuccessful = reader.parse( test, root, false );
+    cout<<"end parse!"<<endl;
+    vector<Sentence*> sentenceArray;
+    if ( !parsingSuccessful )
+    {
+        // report to the user the failure and their locations in the document.
+        std::cout  << reader.getFormatedErrorMessages()
+               << "\n";
+    }
+    else
+    {
+      //root is json array! here 
+      //u can call root[0], root[1], root.size(); we have 546022 events here.
+      //for each event create a documents.
+      Json::FastWriter fastWriter;
+      for(int i=0;i<root.size();i++)
+      {
+        string doc=fastWriter.write(root[i]["doc"]);
+        string country_code=fastWriter.write(root[i]["country_code"]);
+        string date8=fastWriter.write(root[i]["date8"]);
+        string geoname=fastWriter.write(root[i]["geoname"]);
+        string id=fastWriter.write(root[i]["id"]);
+        string year=fastWriter.write(root[i]["year"]);
+        string latitude=fastWriter.write(root[i]["latitude"]);
+        string longitude=fastWriter.write(root[i]["longitude"]);
+        string src_actor=fastWriter.write(root[i]["src_actor"]);
+        string src_agent=fastWriter.write(root[i]["src_agent"]);
+        string tgt_actor=fastWriter.write(root[i]["tgt_actor"]);
+        string tgt_agent=fastWriter.write(root[i]["tgt_agent"]);
+        //string doc=fastWriter.write(root[i]["doc"]);
+        SentenceFeatureValue* value=new SentenceFeatureValue(doc,country_code,date8,geoname,id,year,latitude,longitude,src_actor,src_agent,tgt_actor,tgt_agent,doc);
+        //sentenceArray.push_back()
+       
+        sentenceArray.push_back(new Sentence(id,value));
+        if(i==0)
+        {
+          //just test this working correctly.
+          cout<<(*((*(sentenceArray[0])).featureValue)).doc<<endl;
+        }
+        if(i>10000&&i<11000)
+        {
+          cout<<(*((*(sentenceArray[i])).featureValue)).src_actor<<endl;
+        }
+      }
+      
+    }
+
+    alive = false;
+    }
+    return 0;
+    
 }
 
