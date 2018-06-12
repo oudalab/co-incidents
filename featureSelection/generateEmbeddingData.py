@@ -28,8 +28,8 @@ with open('datawithdoc.txt','r') as infile:
 #this is not tfidf just bow model using count.
 count=0;
 totalcount=0;
-for doc in docs:
-        totalcount=totalcount+1
+for doc in docs[0:10]:
+        #totalcount=totalcount+1
         try:
                 doctemp=[]
                 doctemp.append(doc["doc"])
@@ -38,11 +38,34 @@ for doc in docs:
                 #nd_features=np.round(nd_tfidf.todense(),2)
                 data={};
                 data["id"]=doc["id"]
-                data["embed"]=hotembedding;
+                data["embed"]=hotembedding.todense().tolist();
+                data['code']=doc['code']
+                data['country_code']=doc['country_code']
+                data['date8']=doc['date8']
+                data['day']=doc['day']
+                data['geoname']=doc['geoname']
+                data['goldstein']=doc['goldstein']
+                data['latitude']=doc['latitude']
+                data['longitude']=doc['longitude']
+                data['month']=doc['month']
+                data['quad_class']=doc['quad_class']
+                data['root_code']=doc['root_code']
+                data['source']=doc['source']
+                data['src_actor']=doc['src_actor']
+                data['src_agent']=doc['src_agent']
+                data['src_other_agent']=doc['src_other_agent']
+                data['target']=doc['target']
+                data['tgt_actor']=doc['tgt_actor']
+                data['tgt_agent']=doc['tgt_agent']
+                data['tgt_other_agent']=doc['tgt_other_agent']
+                data['url']=doc['url']
+                data['year']=doc['year']
                 dataWithVec.append(data)
         except:
                 #print(str(e))
                 count=count+1;
                 print("count:"+count+" "+"totalcount: "+totalcount);
-filename = 'dataWithEmbedding_tfidf.data'
-pickle.dump(dataWithVec, open(filename, 'wb'))
+with open('dataWithAllPropertyWithEmbedding.data','w') as outfile:
+        json.dump(dataWithVec,outfile);
+
+
