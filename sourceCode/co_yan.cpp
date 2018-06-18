@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <algorithm>
 #include <array>
+#include <math.h>  
 #include <random>       // std::default_random_engine
 #include <chrono>       // std::chrono::system_clock
 //#include <uuid/uuid.h>
@@ -15,9 +16,10 @@
 #include <jsoncpp/json/value.h>
 #include <jsoncpp/json/reader.h>
 #include <jsoncpp/json/writer.h>
-
+#define EMBED_SIZE 300
 using namespace std;
 //to track if the feature turned on or off on each incidence
+
 class IncidenceFeature
 {
   public:
@@ -57,9 +59,10 @@ class SentenceFeatureValue
     string src_agent;
     string tgt_actor;
     string tgt_agent;
+    int* embed;
    // string doc;
-    string embed;
-	 SentenceFeatureValue(string code1,string country_code1, string date81, string geoname1,string id1,string year1,string latitude1,string longitude1,string src_actor1,string src_agent1, string tgt_actor1, string tgt_agent1,string embed1)
+    //string embed;
+	 SentenceFeatureValue(string code1,string country_code1, string date81, string geoname1,string id1,string year1,string latitude1,string longitude1,string src_actor1,string src_agent1, string tgt_actor1, string tgt_agent1,int* embed1)
   {
     code=code1;
     country_code=country_code1;
@@ -181,6 +184,33 @@ double* loadMatrix()
     }
     /*still return the object on the stack*/
     return similarity;
+}
+
+int dotProduct(int* vect_A, int* vect_B)
+{
+ 
+    int product = 0;
+ 
+    // Loop for calculate cot product
+    for (int i = 0; i < EMBED_SIZE; i++)
+ 
+        product = product + vect_A[i] * vect_B[i];
+    return product;
+}
+
+double vectorLength(int* vect)
+{
+  double length=0.0;
+  for (int i = 0; i < EMBED_SIZE; i++)
+  {
+	length = length+ (vect[i] *1.0)*(vect[i]*1.0);
+  }	  
+  return sqrt(length);
+}	
+
+double cosineSimilarity(int* vec1, int* vec2)
+{
+   return (dotProduct(vec1,vec2)*1.0)/(vectorLength(vec1)*vectorLength(vec2));
 }
 
 double getSimilarityByMatrixIndex(double* matrix,int row, int col)
@@ -438,7 +468,7 @@ void linkSentenceToIncidence(int desincidenceindex,string incidenceid, int sourc
 //             sourceIncidenceId=sourceIncidence.inci_id;
 //                          int size=sourceIncidence.sentencesid.size();
 //             if(size==0)
- {
+// {
 //               continue;
 //             }
 //                      //cout<<"size: "<<size<<endl;
@@ -515,7 +545,7 @@ int main()
     cout<<"start to parse!"<<endl;
     bool parsingSuccessful = reader.parse( test, root, false );
     cout<<"end parse!"<<endl;
-	        vector<Sentence*> sentenceArray;
+    vector<Sentence*> sentenceArray;
     if ( !parsingSuccessful )
     {
         // report to the user the failure and their locations in the document.
@@ -545,23 +575,43 @@ int main()
         string src_agent=fastWriter.write(root[i]["src_agent"]);
         string tgt_actor=fastWriter.write(root[i]["tgt_actor"]);
         string tgt_agent=fastWriter.write(root[i]["tgt_agent"]);
-        string embed=fastWriter.write(root[i]["embed"]);
+        //string embed=fastWriter.write(root[i]["embed"]);
+	auto embed2=root[i]["embed"];
+	      //this new is very important, otherwise the vector will be deallocated!!!!
+	int* embed3=new int[EMBED_SIZE];
+	for(int j=0;j<EMBED_SIZE;j++)
+	{
+	    embed3[j]=embed2[j].asInt();
+	}
+	      
+	//cout<<"first element"+embed2[0]<<endl;
         //string doc=fastWriter.write(root[i]["doc"]);
-        SentenceFeatureValue* value=new SentenceFeatureValue(code,country_code,date8,geoname,id,year,latitude,longitude,src_actor,src_agent,tgt_actor,tgt_agent,embed);
+        SentenceFeatureValue* value=new SentenceFeatureValue(code,country_code,date8,geoname,id,year,latitude,longitude,src_actor,src_agent,tgt_actor,tgt_agent,embed3);
         //sentenceArray.push_back()
 
         sentenceArray.push_back(new Sentence(id,value));
+	
         //if(i==0)
         //{
           //just test this working correctly.
          // cout<<(*((*(sentenceArray[0])).featureValue)).doc<<endl;
         //}
-        if(i>10000&&i<10050)
-        {
-          cout<<(*((*(sentenceArray[i])).featureValue)).embed<<endl;
-        }
+	      
+	   if(i>10000&&i<10050)
+	   {
+		  int* vec1=(*((*(sentenceArray[i])).featureValue)).embed;
+		  int* vec2=(*((*(sentenceArray[i-1])).featureValue)).embed;
+// 		  double vec1Length=vectorLength(vec1);
+// 		  double vec2Length=vectorLength(vec2);
+// 		  int dot=dotProduct(vec1,vec2);
+// 		  double cosine=dot/(vec1Length*vec2Length);
+// 		  cout<<vec1Length<<endl;
+// 		  cout<<vec2Length<<endl;
+// 		  cout<<dot<<endl;
+		  double cosine=cosineSimilarity(vec1,vec2);
+		  cout<<cosine<<endl;
+	   }
       }
-
     }
 
     alive = false;
