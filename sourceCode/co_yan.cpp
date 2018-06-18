@@ -6,15 +6,15 @@
 #include <fstream>
 #include <stdlib.h>
 #include <algorithm>
-#include <array> 
+#include <array>
 #include <random>       // std::default_random_engine
 #include <chrono>       // std::chrono::system_clock
-#include <uuid/uuid.h>
+//#include <uuid/uuid.h>
 #include <map>
 //load json files of features from disk
-#include </usr/local/Cellar/jsoncpp/1.8.4/include/json/value.h>
-#include </usr/local/Cellar/jsoncpp/1.8.4/include/json/reader.h>
-#include </usr/local/Cellar/jsoncpp/1.8.4/include/json/writer.h>
+#include <jsoncpp/json/value.h>
+#include <jsoncpp/json/reader.h>
+#include <jsoncpp/json/writer.h>
 
 using namespace std;
 //to track if the feature turned on or off on each incidence
@@ -57,9 +57,9 @@ class SentenceFeatureValue
     string src_agent;
     string tgt_actor;
     string tgt_agent;
-    string doc;
-    //the parameter name and property name can not be the same.
-  SentenceFeatureValue(string code1,string country_code1, string date81, string geoname1,string id1,string year1,string latitude1,string longitude1,string src_actor1,string src_agent1, string tgt_actor1, string tgt_agent1,string doc1)
+   // string doc;
+    string embed;
+	 SentenceFeatureValue(string code1,string country_code1, string date81, string geoname1,string id1,string year1,string latitude1,string longitude1,string src_actor1,string src_agent1, string tgt_actor1, string tgt_agent1,string embed1)
   {
     code=code1;
     country_code=country_code1;
@@ -73,7 +73,8 @@ class SentenceFeatureValue
     src_agent=src_agent1;
     tgt_actor=tgt_actor1;
     tgt_agent=tgt_agent1;
-    doc=doc1;
+    //doc=doc1;
+    embed=embed1;
   }
 };
 
@@ -100,8 +101,8 @@ public:
 };
 class Sentence
 {
-	public:
-		string sen_id;
+        public:
+                string sen_id;
     SentenceFeatureValue* featureValue;
     Sentence(string sentenceid,SentenceFeatureValue* featureValue1)
     {
@@ -112,34 +113,34 @@ class Sentence
 
 class Incidence
 {
-	public:
-		string inci_id;
-		string sup_id;
-		/*will be a list of snetence id that is in the incidence*/
-		vector<string> sentencesid;
-		vector<string> subincidencesid;
+        public:
+                string inci_id;
+                string sup_id;
+                /*will be a list of snetence id that is in the incidence*/
+	vector<string> sentencesid;
+                vector<string> subincidencesid;
     IncidenceFeature featureMap;
-	  Incidence(string incidenceid,vector<string> sentences):inci_id(incidenceid),sentencesid(move(sentences)){};
+          Incidence(string incidenceid,vector<string> sentences):inci_id(incidenceid),sentencesid(move(sentences)){};
 };
 
 class Subincidence
 {
-	public:
-	//it hard to generate guid in c++, so maybe Subincidence don't need a guid 
-		string sub_id;
-		string inci_id;
-		vector<string> sentencesid;
-		/*****list of features that subincidence care about*/;
-		Subincidence(string subid,string inciid):sub_id(subid),inci_id(inciid){}
+        public:
+        //it hard to generate guid in c++, so maybe Subincidence don't need a guid 
+                string sub_id;
+                string inci_id;
+                vector<string> sentencesid;
+                /*****list of features that subincidence care about*/;
+                Subincidence(string subid,string inciid):sub_id(subid),inci_id(inciid){}
 };
 
 class SuperIncidence
 {
-	public:
-		string sup_id;
-		/* nodeid when distributed which node this superincidence is on*/
-		string nodeid;
-	  /****list of freatures that super incidence care about***/
+        public:
+                string sup_id;
+                /* nodeid when distributed which node this superincidence is on*/
+                string nodeid;
+          /****list of freatures that super incidence care about***/
 };
 
 //global variables
@@ -149,11 +150,11 @@ int length=(xlength*xlength-xlength)/2+xlength;
 
 double* loadMatrix()
 {
-	int count = 0;
-   
+        int count = 0;
+
     double similarity [length];
     string line;
-    
+
     cout << "Testing loading of file." << endl;
     ifstream myfile ("randommatrix");
     if ( myfile.is_open() )
@@ -164,15 +165,15 @@ double* loadMatrix()
                //cout<<"line: "+line<<endl;
                //logs.at(count) = line;
                try{
-               	similarity[count]=stod(line);
+                similarity[count]=stod(line);
                }
                catch(...)
                {
                 //cout<<"the count is :"<<count<<endl<<endl<<endl;
-               	return similarity;
-               } 
+                return similarity;
+               }
                //cout<<"array: "<<similarity[count]<<endl;
-               count++;
+		  count++;
          }
          myfile.close();
     }else{
@@ -183,124 +184,124 @@ double* loadMatrix()
 }
 
 double getSimilarityByMatrixIndex(double* matrix,int row, int col)
-{ 
+{
    if(row==col)
-   	 return 1.0;
-   	else if(row>col)
-   	{
-   		//return matrix[row*xlength+col];
-   		// row is 0 then add 1
-   		// row is 1 add in 1 and 2
-   		// row is 2 then add in 1,2 and 3
-   		int index=(1+row)*row/2+col;
-   		return matrix[index];
+         return 1.0;
+        else if(row>col)
+        {
+                //return matrix[row*xlength+col];
+                // row is 0 then add 1
+                // row is 1 add in 1 and 2
+                // row is 2 then add in 1,2 and 3
+                int index=(1+row)*row/2+col;
+                return matrix[index];
 
-   	}
-   	else
-   	{
-   		//since it is symmetric 
-   		return getSimilarityByMatrixIndex(matrix,col,row);
-   	}
-  
+        }
+        else
+        {
+                //since it is symmetric 
+                return getSimilarityByMatrixIndex(matrix,col,row);
+        }
+
 }
 
 /*****generate a random number within a range,  include min and max value *****/
 int generateRandomInteger(int min, int max)
 {
-	return min + (rand() % static_cast<int>(max - min + 1));
+        return min + (rand() % static_cast<int>(max - min + 1));
 }
 
 //give an integer split it into several other integers randomly and will add up to the integer
 vector<int>* splitTheIntegerIntoRandomPart(int sum)
 {
-	vector<int>* randomNumberArray=new vector<int>();
-	int numberGenerate=0;
-	while(sum>0)
-	{
-		numberGenerate=generateRandomInteger(0,sum);
-		//continue if the numberGenerated is 0, since that is useless
-		if(numberGenerate==0)
-		{
-			continue;
-		}
-		(*randomNumberArray).push_back(numberGenerate);
-		sum=sum-numberGenerate;
+        vector<int>* randomNumberArray=new vector<int>();
+        int numberGenerate=0;
+        while(sum>0)
+        {
+                numberGenerate=generateRandomInteger(0,sum);
+                //continue if the numberGenerated is 0, since that is useless
+                if(numberGenerate==0)
+                {
+                        continue;
+                }
+                (*randomNumberArray).push_back(numberGenerate);
+                sum=sum-numberGenerate;
 
+        }
+        return randomNumberArray;
 	}
-	return randomNumberArray;
-}
 
 // void generateGuidString(string guidStr)
 // {
-// 	_TUCHAR *guidStr = 0x00;
+//      _TUCHAR *guidStr = 0x00;
 
-// 	GUID *pguid = 0x00;
+//      GUID *pguid = 0x00;
 
-// 	pguid = new GUID; 
+//      pguid = new GUID; 
 
-// 	CoCreateGuid(pguid); 
+//      CoCreateGuid(pguid); 
 
-// 	// Convert the GUID to a string
-// 	UuidToString(pguid, &guidStr);
+//      // Convert the GUID to a string
+//      UuidToString(pguid, &guidStr);
 
-// 	delete pguid;
+//      delete pguid;
 
 // }
 
 
 vector<int>& shuffleTheIndexOfVector(int n)
 {
-	//shuffle the number ={0,1,2,3.....n-1}
-	 //std::array<int,5> foo={1,2,3,4,5};
-	vector<int> * random=new vector<int>();
-	for(int i=0;i<n;i++)
-	{
-		(*random).push_back(i);
-	}
+        //shuffle the number ={0,1,2,3.....n-1}
+         //std::array<int,5> foo={1,2,3,4,5};
+        vector<int> * random=new vector<int>();
+        for(int i=0;i<n;i++)
+        {
+                (*random).push_back(i);
+        }
     // obtain a time-based seed:
-	srand(std::chrono::system_clock::now().time_since_epoch().count());
-	random_shuffle((*random).begin(), (*random).end());
-	cout << "startShuffle:"<<endl;
-	  for (int& x: (*random)) 
-	  	cout << x<<endl;
+        srand(std::chrono::system_clock::now().time_since_epoch().count());
+        random_shuffle((*random).begin(), (*random).end());
+        cout << "startShuffle:"<<endl;
+          for (int& x: (*random))
+                cout << x<<endl;
 
-	return (*random);
+        return (*random);
 }
 
 //split the target incidence if new stuff get added in , 
 //the current thought might need to change later.
 void splitIncidenceIntoSubincidence(int incidenceIndex, string incidenceId, vector<Subincidence*>& subincidenceArray,vector<Incidence*>& incidenceArray)
 {
-	
-	//randomly split the sn
-	vector<string> sentences=(*incidenceArray[incidenceIndex]).sentencesid;
-	int sentencesCount=sentences.size();
-	vector<int> randomArray=*splitTheIntegerIntoRandomPart(sentencesCount);
-	//might give it an probablity to split or not.
-	//first shuffle the list then, make them in to subgroup, shuffle is provided by c++ native lib.
-	vector<int> shuffledIndex=shuffleTheIndexOfVector(sentencesCount);
-	int sizeid=0;
-	int accumulateIndex=0;
-	int sentenceIndex=0;
-	string subid="";
-	for(int num:randomArray)
-	{
-		sizeid=subincidenceArray.size();
-        subid=to_string(sizeid);
-		Subincidence* sub=new Subincidence(subid,incidenceId);
-		subincidenceArray.push_back(sub);
-		for(int i=0;i<num;i++)
-		{
-			
-			sentenceIndex=shuffledIndex[accumulateIndex];
-			(*sub).sentencesid.push_back(sentences[sentenceIndex]);
-			//be careful this needs to be called at last, otherwise it will get a segmentation fault
-			accumulateIndex=accumulateIndex+1;
-		}
-		(*incidenceArray[incidenceIndex]).subincidencesid.push_back(subid);
 
-	}
-	cout<<"subcount: "<<(*incidenceArray[incidenceIndex]).subincidencesid.size()<<endl;
+        //randomly split the sn
+        vector<string> sentences=(*incidenceArray[incidenceIndex]).sentencesid;
+        int sentencesCount=sentences.size();
+        vector<int> randomArray=*splitTheIntegerIntoRandomPart(sentencesCount);
+        //might give it an probablity to split or not.
+        //first shuffle the list then, make them in to subgroup, shuffle is provided by c++ native lib.
+        vector<int> shuffledIndex=shuffleTheIndexOfVector(sentencesCount);
+        int sizeid=0;
+        int accumulateIndex=0;
+        int sentenceIndex=0;
+        string subid="";
+        for(int num:randomArray)
+		{
+                sizeid=subincidenceArray.size();
+        subid=to_string(sizeid);
+                Subincidence* sub=new Subincidence(subid,incidenceId);
+                subincidenceArray.push_back(sub);
+                for(int i=0;i<num;i++)
+                {
+
+                        sentenceIndex=shuffledIndex[accumulateIndex];
+                        (*sub).sentencesid.push_back(sentences[sentenceIndex]);
+                        //be careful this needs to be called at last, otherwise it will get a segmentation fault
+                        accumulateIndex=accumulateIndex+1;
+                }
+                (*incidenceArray[incidenceIndex]).subincidencesid.push_back(subid);
+
+        }
+        cout<<"subcount: "<<(*incidenceArray[incidenceIndex]).subincidencesid.size()<<endl;
 
 
 }
@@ -333,8 +334,7 @@ void linkSentenceToIncidence(int desincidenceindex,string incidenceid, int sourc
       }
 
     }
-    
-    //now need to calculat sen2 affinity within its old icnidence
+	 //now need to calculat sen2 affinity within its old icnidence
     vector<string> sourceSentencesid=(*(incidenceArray[stoi(sourceincidenceid)])).sentencesid;
     if(sourceSentencesid.size()==0)
     {
@@ -350,19 +350,19 @@ void linkSentenceToIncidence(int desincidenceindex,string incidenceid, int sourc
       }
 
     }
-    
+
     //if(sentenceWithIncidenceSimilarity/count>=threshold)
     if(sentenceWithIncidenceSimilarity>=similarityInOldIncidence)
     {
-    	//if bigger than threshhold, then link it
-    	cout<<"linked!!"<<endl;
-    	//remove from the old incidence and add into the new incidence.
+        //if bigger than threshhold, then link it
+        cout<<"linked!!"<<endl;
+        //remove from the old incidence and add into the new incidence.
 
         vector<string>& sentenceids=(*(incidenceArray[sourceincidenceindex])).sentencesid;
         sentenceids.erase(sentenceids.begin()+indexOfSentenceId);
         //if there is no sentence inside of the incidence any more, remove the incidence from the incidence list
         if(sentenceids.size()==0)
-        	incidenceArray.erase(incidenceArray.begin()+sourceincidenceindex);
+                incidenceArray.erase(incidenceArray.begin()+sourceincidenceindex);
 
          //add the sentence to the destination incidence
 
@@ -372,29 +372,29 @@ void linkSentenceToIncidence(int desincidenceindex,string incidenceid, int sourc
     }
     else
     {
-    	cout<<"not linked!!"<<endl;
+        cout<<"not linked!!"<<endl;
     }
     //now need to make the linked sentecnes into the incidence list, and need to get rid of the incidence if there is nothing belong to it any more,
 
 
-    
+
 }
 // int main()
 
 // {
 
-// 	 time_t now = time(0);
-	   
-// 	   // convert now to string form
-// 	 char* dt = ctime(&now);
-// 	// srand(time(0));
+//       time_t now = time(0);
 
-// 	 cout << "The local date and time is: " << dt << endl;
-// 	 //loadMatrix();
+//         // convert now to string form
+//       char* dt = ctime(&now);
+//      // srand(time(0));
+
+//       cout << "The local date and time is: " << dt << endl;
+//       //loadMatrix();
 //      /*load the simulated probability matrxi.*/
-// 	double* matrix=loadMatrix();
+//      double* matrix=loadMatrix();
 
-     
+
 //      int i=0;
 //      //Sentence* sentenceArray[xlength];, 
 //      vector<Sentence*> sentenceArray;
@@ -410,11 +410,11 @@ void linkSentenceToIncidence(int desincidenceindex,string incidenceid, int sourc
 //      for(int i=0;i<xlength;i++)
 //      {
 //       //this will allocate on the stack.
-//      	vector<string> sentencesid;
-//      	sentencesid.push_back(to_string(i));
-//      	incidenceArray.push_back(new Incidence(to_string(i),sentencesid));
+//              vector<string> sentencesid;
+//              sentencesid.push_back(to_string(i));
+//              incidenceArray.push_back(new Incidence(to_string(i),sentencesid));
 //      }
-     
+
 //    //  cout<<"sentenceid in the incidence: "<<(*(incidenceArray[11])).sentencesid[0]<<endl;
 //      int sentenceToMove=0;
 //      int incidenceDestinationIndex=0;
@@ -427,41 +427,41 @@ void linkSentenceToIncidence(int desincidenceindex,string incidenceid, int sourc
 //      int globalSize=incidenceArray.size();
 //      for(i=0;i<100;i++)
 //      {
-//      	try{
-//      		//source Incidence will be where the to be moved sentence belong to
-//      		//sourceIncidence=generateRandomInteger(0,xlength-1);
-//      		    cout<<"index i is: "<<i<<endl;
+//              try{
+//                      //source Incidence will be where the to be moved sentence belong to
+//                      //sourceIncidence=generateRandomInteger(0,xlength-1);
+//                          cout<<"index i is: "<<i<<endl;
 //             sizeOfIncidenceArray=incidenceArray.size();
 //             //cout<<"size of incidence array is: "<<sizeOfIncidenceArray<<endl;
 //             sourceIncidenceIndex=generateRandomInteger(0,sizeOfIncidenceArray-1);
 //             Incidence sourceIncidence=*(incidenceArray[sourceIncidenceIndex]);
 //             sourceIncidenceId=sourceIncidence.inci_id;
-//      		    int size=sourceIncidence.sentencesid.size();
+//                          int size=sourceIncidence.sentencesid.size();
 //             if(size==0)
-//             {
+ {
 //               continue;
 //             }
-//      		//cout<<"size: "<<size<<endl;
-//      		//cout<<"size: "<<size<<endl;
-//      		// if(size==0)
-//      		// {
-//      		// 	continue;
-//      		// }
-//      		sentenceToMove=generateRandomInteger(0,size-1);
+//                      //cout<<"size: "<<size<<endl;
+//                      //cout<<"size: "<<size<<endl;
+//                      // if(size==0)
+//                      // {
+//                      //      continue;
+//                      // }
+//                      sentenceToMove=generateRandomInteger(0,size-1);
 
-//      		sentenceid=sourceIncidence.sentencesid[sentenceToMove];
-//      		cout<<"sentenceid: "<<sentenceid<<endl;
-// 	     	incidenceDestinationIndex=generateRandomInteger(0,sizeOfIncidenceArray-1);
-// 	     	incidenceDestination=(*(incidenceArray[incidenceDestinationIndex])).inci_id;
+//                      sentenceid=sourceIncidence.sentencesid[sentenceToMove];
+//                      cout<<"sentenceid: "<<sentenceid<<endl;
+//              incidenceDestinationIndex=generateRandomInteger(0,sizeOfIncidenceArray-1);
+//              incidenceDestination=(*(incidenceArray[incidenceDestinationIndex])).inci_id;
 
-// 	     	linkSentenceToIncidence(incidenceDestinationIndex,incidenceDestination,sourceIncidenceIndex,sourceIncidenceId,sentenceid,sentenceToMove,matrix,0.5,incidenceArray,subincidenceArray);
-//      	}
-//      	catch (...)
-// 		{
-// 		    // catch anything thrown within try block that derives from std::exception
-// 		    cout<<"what is the error???"<<i<<endl;
-// 		    //cout << exc.what();
-// 		}
+//              linkSentenceToIncidence(incidenceDestinationIndex,incidenceDestination,sourceIncidenceIndex,sourceIncidenceId,sentenceid,sentenceToMove,matrix,0.5,incidenceArray,subincidenceArray);
+//              }
+//              catch (...)
+//              {
+//                  // catch anything thrown within try block that derives from std::exception
+//                  cout<<"what is the error???"<<i<<endl;
+//                  //cout << exc.what();
+//              }
 //      }
 //      //let see how many incidence left in incidenceArray
 //      cout<<"incidence get left is here: "<<incidenceArray.size()<<endl;
@@ -475,12 +475,12 @@ void linkSentenceToIncidence(int desincidenceindex,string incidenceid, int sourc
 //         needToCheck=inc;
 //        }
 
-//      	   maxSentenceCount=max(maxSentenceCount,(*inc).sentencesid.size());
-       
+//                 maxSentenceCount=max(maxSentenceCount,(*inc).sentencesid.size());
+
 //      }
 //      // cout<<"incidenceid looking at is: "<<(*needToCheck).inci_id<<endl;
 //      // cout<<"max sentenceids is this: "<<maxSentenceCount<<endl;
-//      for(string index :(*needToCheck).sentencesid)
+	 //      for(string index :(*needToCheck).sentencesid)
 //      {
 //       cout<<"sentenceid to check: "<<index<<endl;
 //      }
@@ -492,7 +492,7 @@ void linkSentenceToIncidence(int desincidenceindex,string incidenceid, int sourc
 //      vector<int> test=*(splitTheIntegerIntoRandomPart(17));
 //      for(int i: test)
 //      {
-//      	cout<<"hey number"<<i<<endl;
+//              cout<<"hey number"<<i<<endl;
 //      }
 //      cout<<"test size is: "<<test.size()<<endl;
 // vector<int> ressult=shuffleTheIndexOfVector(10);
@@ -503,7 +503,7 @@ void linkSentenceToIncidence(int desincidenceindex,string incidenceid, int sourc
 
 // //test guid string generator
 
-	
+
 // }
 int main()
 {
@@ -511,26 +511,29 @@ int main()
     while (alive){
     Json::Value root;   // will contains the root value after parsing.
     Json::Reader reader;
-    std::ifstream test("../datawithdoc.txt", std::ifstream::binary);
+    std::ifstream test("../dataWithAllPropertyWithEmbedding300.data", std::ifstream::binary);
     cout<<"start to parse!"<<endl;
     bool parsingSuccessful = reader.parse( test, root, false );
     cout<<"end parse!"<<endl;
-    vector<Sentence*> sentenceArray;
+	        vector<Sentence*> sentenceArray;
     if ( !parsingSuccessful )
     {
         // report to the user the failure and their locations in the document.
-        std::cout  << reader.getFormatedErrorMessages()
-               << "\n";
+       // std::cout  << reader.getFormatedErrorMessages()
+         //      << "\n";
+        std::cout<<"failed to parse"<<endl;
     }
     else
     {
       //root is json array! here 
       //u can call root[0], root[1], root.size(); we have 546022 events here.
-      //for each event create a documents.
+      //for each event create a documents
+      std::cout<<"successfully parsed"<<endl;
       Json::FastWriter fastWriter;
-      for(int i=0;i<root.size();i++)
+      for(unsigned i=0;i<root.size();i++)
       {
-        string doc=fastWriter.write(root[i]["doc"]);
+        //string doc=fastWriter.write(root[i]["doc"]);
+        string code=fastWriter.write(root[i]["code"]);
         string country_code=fastWriter.write(root[i]["country_code"]);
         string date8=fastWriter.write(root[i]["date8"]);
         string geoname=fastWriter.write(root[i]["geoname"]);
@@ -542,27 +545,35 @@ int main()
         string src_agent=fastWriter.write(root[i]["src_agent"]);
         string tgt_actor=fastWriter.write(root[i]["tgt_actor"]);
         string tgt_agent=fastWriter.write(root[i]["tgt_agent"]);
+        string embed=fastWriter.write(root[i]["embed"]);
         //string doc=fastWriter.write(root[i]["doc"]);
-        SentenceFeatureValue* value=new SentenceFeatureValue(doc,country_code,date8,geoname,id,year,latitude,longitude,src_actor,src_agent,tgt_actor,tgt_agent,doc);
+        SentenceFeatureValue* value=new SentenceFeatureValue(code,country_code,date8,geoname,id,year,latitude,longitude,src_actor,src_agent,tgt_actor,tgt_agent,embed);
         //sentenceArray.push_back()
-       
+
         sentenceArray.push_back(new Sentence(id,value));
-        if(i==0)
-        {
+        //if(i==0)
+        //{
           //just test this working correctly.
-          cout<<(*((*(sentenceArray[0])).featureValue)).doc<<endl;
-        }
-        if(i>10000&&i<11000)
+         // cout<<(*((*(sentenceArray[0])).featureValue)).doc<<endl;
+        //}
+        if(i>10000&&i<10050)
         {
-          cout<<(*((*(sentenceArray[i])).featureValue)).src_actor<<endl;
+          cout<<(*((*(sentenceArray[i])).featureValue)).embed<<endl;
         }
       }
-      
+
     }
 
     alive = false;
     }
     return 0;
-    
+
 }
+
+
+
+
+
+
+
 
