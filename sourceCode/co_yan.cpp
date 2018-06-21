@@ -18,8 +18,9 @@
 #include <jsoncpp/json/writer.h>
 //this the dimenstion of the word embedding.
 #define EMBED_SIZE 300
-#define ITERATION 1000
+#define ITERATION 100000
 using namespace std;
+int lastActiveIncidenceIndex = 0;
 // Ctrl+Shift+Alt+Q: Quick Format.
 // Ctrl+Shift+Alt+S: Selected Format.
 
@@ -64,9 +65,11 @@ public:
     string tgt_actor;
     string tgt_agent;
     int *embed;
+    //this will be the index in the global sentence array
+    int index;
     // string doc;
     //string embed;
-    SentenceFeatureValue(string code1, string country_code1, string date81, string geoname1, string id1, string year1, string latitude1, string longitude1, string src_actor1, string src_agent1, string tgt_actor1, string tgt_agent1, int *embed1)
+    SentenceFeatureValue(string code1, string country_code1, string date81, string geoname1, string id1, string year1, string latitude1, string longitude1, string src_actor1, string src_agent1, string tgt_actor1, string tgt_agent1, int *embed1, int index1)
     {
         code = code1;
         country_code = country_code1;
@@ -82,6 +85,7 @@ public:
         tgt_agent = tgt_agent1;
         //doc=doc1;
         embed = embed1;
+        index = index1;
     }
 };
 
@@ -415,7 +419,7 @@ vector<int> &shuffleTheIndexOfVector(int n)
 //     //now need to make the linked sentecnes into the incidence list, and need to get rid of the incidence if there is nothing belong to it any more,
 
 // }
-double getSimilarityBySentenceId( vector<Sentence *> &sentenceArray,int sen1index, int sen2index)
+double getSimilarityBySentenceId( vector<Sentence *> &sentenceArray, int sen1index, int sen2index)
 {
     int *vec1 = (*((*(sentenceArray[sen1index])).featureValue)).embed;
     int *vec2 = (*((*(sentenceArray[sen2index])).featureValue)).embed;
@@ -423,10 +427,10 @@ double getSimilarityBySentenceId( vector<Sentence *> &sentenceArray,int sen1inde
     return cosine;
 }
 
-double getSentenceSimilarityWithinIncidence(vector<Sentence *> &sentenceArray,vector<Incidence *> &incidenceArray, int incidenceid, int sentenceindex)
+double getSentenceSimilarityWithinIncidence(vector<Sentence *> &sentenceArray, vector<Incidence *> &incidenceArray, int incidenceid, int sentenceindex)
 {
     double sentenceWithIncidenceSimilarity = 0;
-   // double similarityInOldIncidence = 0;
+    // double similarityInOldIncidence = 0;
     vector<int> sentencesid = (*(incidenceArray[incidenceid])).sentencesid;
     //int count=0;
     int sen1 = 0;
@@ -440,20 +444,39 @@ double getSentenceSimilarityWithinIncidence(vector<Sentence *> &sentenceArray,ve
     {
         for(int id : sentencesid)
         {
-            if(id!=sentenceindex)
+            if(id != sentenceindex)
             {
                 sen1 = id;
-            //count=count+1;
-            //pairwisely calculate the similarity of the current add in stuff with the snetence already in the list and compare the similarity with some threshhold.
+                //count=count+1;
+                //pairwisely calculate the similarity of the current add in stuff with the snetence already in the list and compare the similarity with some threshhold.
                 sentenceWithIncidenceSimilarity = sentenceWithIncidenceSimilarity + getSimilarityBySentenceId(sentenceArray, sen1, sen2);
 
             }
-            
+
         }
 
     }
     return sentenceWithIncidenceSimilarity;
 
+}
+
+void linkSentenceToIncidence(vector<Incidence *> &incidenceArray, int destincidenceindex, int sourceincidenceindex, int sentenceindex, int SenIndexInOriginalSentenceIds)
+{
+    vector<int> sourceSentencesid = (*(incidenceArray[sourceincidenceindex])).sentencesid;
+    //means there is no sentence to move around at all, so we should swap this incidence with the last "active" incidence.
+    sourceSentencesid.erase(sourceSentencesid.begin() + SenIndexInOriginalSentenceIds);
+
+    //if the incidence become empty then move it to the end of the vector.
+    if(sourceSentencesid.empty())
+    {
+       // cout<<"here again??"<<endl;
+        incidenceArray[sourceincidenceindex] = incidenceArray[lastActiveIncidenceIndex];
+        //swap the last active incidenceIndex at the empty spot, then decreas the lastActiveIncidenceIndex.
+        lastActiveIncidenceIndex=lastActiveIncidenceIndex-1;
+        //cout<<lastActiveIncidenceIndex<<endl;
+    }
+
+    (*(incidenceArray[destincidenceindex])).sentencesid.push_back(sentenceindex);
 }
 
 
@@ -634,7 +657,7 @@ int main()
                     embed3[j] = embed2[j].asInt();
                 }
 
-                SentenceFeatureValue *value = new SentenceFeatureValue(code, country_code, date8, geoname, id, year, latitude, longitude, src_actor, src_agent, tgt_actor, tgt_agent, embed3);
+                SentenceFeatureValue *value = new SentenceFeatureValue(code, country_code, date8, geoname, id, year, latitude, longitude, src_actor, src_agent, tgt_actor, tgt_agent, embed3, i);
                 sentenceArray.push_back(new Sentence(id, value));
 
 
@@ -692,7 +715,7 @@ int main()
     }
     cout << "size of the incidence array is " << to_string(incidenceArray.size()) << endl;
 
-    int incidenceDestinationIndex = 0;
+    int  destinationIncidenceIndex = 0;
     //this will be the incidenceid.
     string incidenceDestination = "";
     int sourceIncidenceIndex = 0;
@@ -700,6 +723,9 @@ int main()
     string sentenceid = "";
     string sourceIncidenceId = "";
     int globalSize = incidenceArray.size();
+    lastActiveIncidenceIndex = globalSize - 1;
+    //cout << "last active: " + to_string(lastActiveIncidenceIndex) << endl;
+    int linkedcount = 0;
     for(int i = 0; i < ITERATION; i++)
     {
         try
@@ -708,6 +734,8 @@ int main()
             //sourceIncidence=generateRandomInteger(0,xlength-1);
             //cout << "index i is: " << i << endl;
             sizeOfIncidenceArray = incidenceArray.size();
+            //set the index of the last active incidence
+            
             //cout<<"size of incidence array is: "<<sizeOfIncidenceArray<<endl;
             sourceIncidenceIndex = generateRandomInteger(0, sizeOfIncidenceArray - 1);
             Incidence sourceIncidence = *(incidenceArray[sourceIncidenceIndex]);
@@ -716,14 +744,32 @@ int main()
             //ToFo:if there is no sentence in the incidence we need to replace the tail incidence with the current one.
             if(size == 0)
             {
+                //sawp the incidence with the last one
+                incidenceArray[sourceIncidenceIndex] = incidenceArray[lastActiveIncidenceIndex];
+                //swap the last active incidenceIndex at the empty spot, then decreas the lastActiveIncidenceIndex.
+                lastActiveIncidenceIndex=lastActiveIncidenceIndex-1;
                 continue;
             }
             //otherwise choose a sentence to move
-            int sentenceToMove = generateRandomInteger(0, size - 1);
-            sentenceid = sourceIncidence.sentencesid[sentenceToMove];
-            //cout << "sentenceid: " << sentenceid << endl;
-            incidenceDestinationIndex = generateRandomInteger(0, sizeOfIncidenceArray - 1);
-            incidenceDestination = (*(incidenceArray[incidenceDestinationIndex])).inci_id;
+            int sentenceIndexInSource = generateRandomInteger(0, size - 1);
+            //in the sentencesid store the index of the global sentence array.
+            int sentenceGlobalIndex = sourceIncidence.sentencesid[sentenceIndexInSource];
+            //cout << to_string(sentenceIndexInSource) + " " + to_string(sentenceGlobalIndex) << endl;
+            destinationIncidenceIndex = generateRandomInteger(0, sizeOfIncidenceArray - 1);
+            incidenceDestination = (*(incidenceArray[ destinationIncidenceIndex])).inci_id;
+
+            double originalSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceIndexInSource);
+            double newSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceIndexInSource);
+            //make 0.01 as the treshhold here.
+            if(newSimilarity > originalSimilarity+0.01)
+            {
+                linkedcount++;
+
+                //cout<<"linked!"<<endl;
+                //linkSentenceToIncidence
+                linkSentenceToIncidence(incidenceArray, destinationIncidenceIndex, sourceIncidenceIndex, sentenceGlobalIndex, sentenceIndexInSource);
+            }
+            //cout<<originalSimilarity<<endl;
 
             //linkSentenceToIncidence(incidenceDestinationIndex, incidenceDestination, sourceIncidenceIndex, sourceIncidenceId, sentenceid, sentenceToMove, 0.5, incidenceArray, subincidenceArray);
         }
@@ -734,6 +780,26 @@ int main()
             //cout << exc.what();
         }
     }
+    cout << "linked count: " + to_string(linkedcount) << endl;
+    cout << "last active later: " + to_string(lastActiveIncidenceIndex) << endl;
+
+    for(int i=0;i<lastActiveIncidenceIndex;i++)
+    {
+        vector<int> sentencesid=(*(incidenceArray[i])).sentencesid;
+        if(sentencesid.size()>3)
+        {
+            for(int j=0;j<sentencesid.size();j++)
+            {
+               int curr=sentencesid[j];
+               string realid=(*((*(sentenceArray[curr])).featureValue)).id;
+               cout<<realid<<endl;
+
+            }
+            return 0;
+        }
+
+    }
+
     //let see how many incidence left in incidenceArray
     // cout << "incidence get left is here: " << incidenceArray.size() << endl;
     // //to see what incidence has the most sentenceId. to see what is the max sentence count in the incidence.
