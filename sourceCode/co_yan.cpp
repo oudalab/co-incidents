@@ -24,27 +24,27 @@ int lastActiveIncidenceIndex = 0;
 // Ctrl+Shift+Alt+Q: Quick Format.
 // Ctrl+Shift+Alt+S: Selected Format.
 
-//to track if the feature turned on or off on each incidence
+//to track if the feature turned on or off on each incidence, if incidence feature has a value it means it is turned on, otherwise it means it is turned off.
 class IncidenceFeature
 {
 public:
-    map<string, int> featureMap;
+    map<string, string> featureMap;
     IncidenceFeature()
     {
         //all the feature should be turned on at the beginning
-        //all the names here are the same as the json file
-        featureMap["code"] = 1;
-        featureMap["country_code"] = 1;
-        featureMap["date8"] = 1;
-        featureMap["geoname"] = 1;
-        featureMap["id"] = 1;
-        featureMap["year"] = 1;
-        featureMap["latitude"] = 1;
-        featureMap["longitude"] = 1;
-        featureMap["src_actor"] = 1;
-        featureMap["src_agent"] = 1;
-        featureMap["tgt_actor"] = 1;
-        featureMap["tgt_agent"] = 1;
+        //all the names here are the same as the json file, if it has value means it is turned on, if it is "" string, means this feature is turned off
+        featureMap["code"] = "";
+        featureMap["country_code"] = "";
+        featureMap["date8"] = "";
+        featureMap["geoname"] = "";
+        featureMap["id"] = "";
+        featureMap["year"] = "";
+        featureMap["latitude"] = "";
+        featureMap["longitude"] = "";
+        featureMap["src_actor"] = "";
+        featureMap["src_agent"] = "";
+        featureMap["tgt_actor"] = "";
+        featureMap["tgt_agent"] = "";
     }
 };
 
@@ -608,6 +608,9 @@ void linkSentenceToIncidence(vector<Incidence *> &incidenceArray, int destincide
 // }
 int main()
 {
+    //initialize global feature weight
+    GlobalFeatureWeight globalFeatureWeight;
+    cout<<globalFeatureWeight.featureWeight["code"]<<endl;
     bool alive = true;
     vector<Sentence *> sentenceArray;
     while (alive)
@@ -761,17 +764,26 @@ int main()
             double originalSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceIndexInSource);
             double newSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceIndexInSource);
             //make 0.01 as the treshhold here.
-            if(newSimilarity > originalSimilarity+0.01)
+            //using the metroplis hastings algorithms here
+            double mh_value=min(1.0,newSimilarity/originalSimilarity);
+            //if the new similarity is bigger, then make the link
+            if(mh_value==1)
             {
                 linkedcount++;
-
-                //cout<<"linked!"<<endl;
-                //linkSentenceToIncidence
                 linkSentenceToIncidence(incidenceArray, destinationIncidenceIndex, sourceIncidenceIndex, sentenceGlobalIndex, sentenceIndexInSource);
             }
-            //cout<<originalSimilarity<<endl;
+            else
+            {
+                //mh_value is the probablity to link the two incidence together.
+                int randomnum=generateRandomInteger(1,100);
+                if((randomnum/100.0)<mh_value)
+                {
+                    //then make the move
+                    linkedcount++;
+                    linkSentenceToIncidence(incidenceArray, destinationIncidenceIndex, sourceIncidenceIndex, sentenceGlobalIndex, sentenceIndexInSource);       
+                }
 
-            //linkSentenceToIncidence(incidenceDestinationIndex, incidenceDestination, sourceIncidenceIndex, sourceIncidenceId, sentenceid, sentenceToMove, 0.5, incidenceArray, subincidenceArray);
+            }            
         }
         catch (...)
         {
