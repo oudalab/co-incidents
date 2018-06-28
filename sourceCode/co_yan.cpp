@@ -18,11 +18,13 @@
 #include <jsoncpp/json/writer.h>
 //this the dimenstion of the word embedding.
 #define EMBED_SIZE 300
-#define ITERATION 100000
+#define ITERATION 1000000
 using namespace std;
 int lastActiveIncidenceIndex = 0;
 // Ctrl+Shift+Alt+Q: Quick Format.
 // Ctrl+Shift+Alt+S: Selected Format.
+
+void rtrim(std::string &);
 
 //to track if the feature turned on or off on each incidence, if incidence feature has a value it means it is turned on, otherwise it means it is turned off.
 class IncidenceFeature
@@ -86,7 +88,23 @@ public:
         //doc=doc1;
         embed = embed1;
         index = index1;
-    }
+	trimall();
+    };
+private:
+    void trimall() { 
+	    rtrim(code );
+	    rtrim(country_code );
+	    rtrim(date8 );
+	    rtrim(geoname );
+	    rtrim(id );
+	    rtrim(year);
+	    rtrim(latitude );
+	    rtrim(longitude );
+	    rtrim(src_actor );
+	    rtrim(src_agent );
+	    rtrim(tgt_actor );
+	    rtrim(tgt_agent );
+	  }
 };
 
 class GlobalFeatureWeight
@@ -450,15 +468,129 @@ double getSentenceSimilarityWithinIncidence(vector<Sentence *> &sentenceArray, v
                 //count=count+1;
                 //pairwisely calculate the similarity of the current add in stuff with the snetence already in the list and compare the similarity with some threshhold.
                 sentenceWithIncidenceSimilarity = sentenceWithIncidenceSimilarity + getSimilarityBySentenceId(sentenceArray, sen1, sen2);
-
             }
-
         }
-
     }
     return sentenceWithIncidenceSimilarity;
 
 }
+ void rtrim(std::string &s) {
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch) {
+        return !std::isspace(ch);
+    }).base(), s.end());
+}
+
+bool isTrival(string input)
+{
+ // iinput.erase(std::remove(input.begin(), input.end(), '\n'), input.end());
+     rtrim(input);	
+     if(input=="\"\""||input==""||input==" "||input.empty()||input.length()==0)
+     {
+     	return true;
+     }
+     return false;
+}
+
+//given two sentence check how many pairs property match
+int getMatchWithinSentences(SentenceFeatureValue &feature1, SentenceFeatureValue &feature2)
+{
+    int score = 0;
+    int up=2;
+    int code = 0;
+    if(!isTrival(feature1.code)&&!isTrival(feature2.code)&&feature1.code== feature2.code)
+    {
+	//cout<<"faatyre start"<<endl;
+        //cerr<<"(" << feature1.code << ", " << feature2.code<< ") " << score << endl;
+        code += 1;
+        score+=up;
+    }
+    if(!isTrival(feature1.country_code)&&!isTrival(feature2.country_code)&&feature1.country_code == feature2.country_code)
+    {
+        //cerr<<"(" << feature1.country_code << ", " << feature2.country_code<< ") " << score << endl;
+         code += 2;
+         score+=up;
+    }
+    if(!isTrival(feature1.src_actor)&&!isTrival(feature2.src_actor)&&feature1.src_actor ==feature2.src_actor)
+    {
+        //cerr<<"(" << feature1.src_actor << ", " << feature2.src_actor<< ") " << score << endl;
+         code += 4;
+         score+=up;
+    }
+    if(!isTrival(feature1.src_agent)&&!isTrival(feature2.src_agent)&&feature1.src_agent == feature2.src_agent)
+    {
+        //cerr<<"(" << feature1.src_agent << ", " << feature2.src_agent<< ") " << score << endl;
+         code += 8;
+         score+=up;
+    }
+    if(!isTrival(feature1.tgt_actor)&&!isTrival(feature2.tgt_actor)&&feature1.tgt_actor == feature2.tgt_actor)
+    {
+        //cerr<<"(" << feature1.tgt_actor << ", " << feature2.tgt_actor<< ") " << score << endl;
+         code += 16;
+         score+=up;
+    }
+    if(!isTrival(feature1.tgt_agent)&&!isTrival(feature2.tgt_agent)&&feature1.tgt_agent==feature2.tgt_agent)
+    {
+        //cerr<<"(" << feature1.tgt_agent << ", " << feature2.tgt_agent<< ") " << score << endl;
+        code += 32;
+    	score+=up;
+    }
+    //6 here is 6 features, and 1.0 is the weight for cosine similarity
+    if(score>=2)
+    {
+    	cout<<"score: " <<score<< " --- " << code << endl;
+    	cout<<feature1.id<< "," << feature2.id <<endl;
+    	cout<<feature1.code<< "," << feature2.code <<endl;
+	cout<<feature1.country_code<< "," << feature2.country_code << endl;
+        if(feature1.src_actor=="")
+{
+cout<<"source actor is trival "<<feature1.src_actor<<endl;
+}
+        cout<<feature1.src_actor<< "," << feature2.src_actor <<feature1.src_actor.length()<< endl;
+        cout<<feature1.src_agent<< "," << feature2.src_agent <<endl;
+        cout<<feature1.tgt_actor<< "," << feature2.tgt_actor << endl;
+        cout<<feature1.tgt_agent<< "," << feature2.tgt_agent << endl;
+    }
+    return  score;
+
+}
+
+//this is not for feature weight learning yet, just everybody has the same weight for each property and also the vector similarity
+int getPropertyValueMatch(vector<Sentence *> &sentenceArray, vector<Incidence *> &incidenceArray, int incidenceindex, int sentenceindex)
+{
+    int pairValues = 0;
+    
+    vector<int> sentencesid = (*(incidenceArray[incidenceindex])).sentencesid;
+
+    SentenceFeatureValue sen = (*((*(sentenceArray[sentenceindex])).featureValue));
+
+    //if the original incidence only have 1 sentence which is the sentence to be move, then assign this value to be a random number, I think.
+    if(sentencesid.size() == 1)
+    {
+        //I am using 6 features now, this 5 needs to be changed based on how many features you are considering.
+        pairValues = generateRandomInteger(0, 12);
+        //return pairValues;
+    }
+    else
+    {
+        for(int id : sentencesid)
+        {
+            if(id != sentenceindex)
+            {
+                SentenceFeatureValue currsen = (*((*(sentenceArray[id])).featureValue));
+                pairValues+=getMatchWithinSentences(sen,currsen);
+            }
+        }
+    }
+
+    return pairValues/(sentencesid.size());    
+
+}
+
+//get pairwise feature match value
+// public map<string, int>& getPairwiseFeatureMap(int sentenceindex, int destinationincidenceindex)
+// {
+
+// }
 
 void linkSentenceToIncidence(vector<Incidence *> &incidenceArray, int destincidenceindex, int sourceincidenceindex, int sentenceindex, int SenIndexInOriginalSentenceIds)
 {
@@ -469,10 +601,10 @@ void linkSentenceToIncidence(vector<Incidence *> &incidenceArray, int destincide
     //if the incidence become empty then move it to the end of the vector.
     if(sourceSentencesid.empty())
     {
-       // cout<<"here again??"<<endl;
+        // cout<<"here again??"<<endl;
         incidenceArray[sourceincidenceindex] = incidenceArray[lastActiveIncidenceIndex];
         //swap the last active incidenceIndex at the empty spot, then decreas the lastActiveIncidenceIndex.
-        lastActiveIncidenceIndex=lastActiveIncidenceIndex-1;
+        lastActiveIncidenceIndex = lastActiveIncidenceIndex - 1;
         //cout<<lastActiveIncidenceIndex<<endl;
     }
 
@@ -550,7 +682,7 @@ void linkSentenceToIncidence(vector<Incidence *> &incidenceArray, int destincide
 //                      // }
 //                      sentenceToMove=generateRandomInteger(0,size-1);
 
-//                      sentenceid=sourceIncidence.sentencesid[sentenceToMove];
+//                      sentenceid=sourceIncidence.sentenc:/esid[sentenceToMove];
 //                      cout<<"sentenceid: "<<sentenceid<<endl;
 //              incidenceDestinationIndex=generateRandomInteger(0,sizeOfIncidenceArray-1);
 //              incidenceDestination=(*(incidenceArray[incidenceDestinationIndex])).inci_id;
@@ -610,7 +742,7 @@ int main()
 {
     //initialize global feature weight
     GlobalFeatureWeight globalFeatureWeight;
-    cout<<globalFeatureWeight.featureWeight["code"]<<endl;
+    cout << globalFeatureWeight.featureWeight["code"] << endl;
     bool alive = true;
     vector<Sentence *> sentenceArray;
     while (alive)
@@ -674,7 +806,7 @@ int main()
     double cosine = cosineSimilarity(vec1, vec2);
     cout << cosine << endl;
 
-    time_t now = time(0);
+   // time_t now = time(0);
 
     // convert now to string form
     //    char *dt = ctime(&now);
@@ -738,7 +870,7 @@ int main()
             //cout << "index i is: " << i << endl;
             sizeOfIncidenceArray = incidenceArray.size();
             //set the index of the last active incidence
-            
+
             //cout<<"size of incidence array is: "<<sizeOfIncidenceArray<<endl;
             sourceIncidenceIndex = generateRandomInteger(0, sizeOfIncidenceArray - 1);
             Incidence sourceIncidence = *(incidenceArray[sourceIncidenceIndex]);
@@ -750,7 +882,7 @@ int main()
                 //sawp the incidence with the last one
                 incidenceArray[sourceIncidenceIndex] = incidenceArray[lastActiveIncidenceIndex];
                 //swap the last active incidenceIndex at the empty spot, then decreas the lastActiveIncidenceIndex.
-                lastActiveIncidenceIndex=lastActiveIncidenceIndex-1;
+                lastActiveIncidenceIndex = lastActiveIncidenceIndex - 1;
                 continue;
             }
             //otherwise choose a sentence to move
@@ -763,27 +895,39 @@ int main()
 
             double originalSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceIndexInSource);
             double newSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceIndexInSource);
-            //make 0.01 as the treshhold here.
+            double originalPairs = getPropertyValueMatch(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceIndexInSource);
+            double newPairs = getPropertyValueMatch(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceIndexInSource);
             //using the metroplis hastings algorithms here
-            double mh_value=min(1.0,newSimilarity/originalSimilarity);
-            //if the new similarity is bigger, then make the link
-            if(mh_value==1)
-            {
-                linkedcount++;
-                linkSentenceToIncidence(incidenceArray, destinationIncidenceIndex, sourceIncidenceIndex, sentenceGlobalIndex, sentenceIndexInSource);
-            }
-            else
-            {
-                //mh_value is the probablity to link the two incidence together.
-                int randomnum=generateRandomInteger(1,100);
-                if((randomnum/100.0)<mh_value)
-                {
-                    //then make the move
-                    linkedcount++;
-                    linkSentenceToIncidence(incidenceArray, destinationIncidenceIndex, sourceIncidenceIndex, sentenceGlobalIndex, sentenceIndexInSource);       
-                }
+            double originalFinalScore=(1.0/13.0)*originalSimilarity+(12.0/13.0)*originalPairs;
+            double newFinalScore=(1.0/13.0)*newSimilarity+(12.0/13.0)*newPairs;
+            double mh_value = min(1.0, originalFinalScore / newFinalScore);
+            //double mh_value = min(1.0, originalSimilarity / newSimilarity);
 
-            }            
+            //not link if 3 pairs not match for the new configureations
+            if(newPairs>=9)
+            {
+
+	            	if(mh_value == 1)
+	            {
+	                linkedcount++;
+	                linkSentenceToIncidence(incidenceArray, destinationIncidenceIndex, sourceIncidenceIndex, sentenceGlobalIndex, sentenceIndexInSource);
+	            }
+	            else
+	            {
+	                //mh_value is the probablity to link the two incidence together.
+	                int randomnum = generateRandomInteger(1, 100);
+	                if((randomnum / 100.0) < mh_value)
+	                {
+	                    //then make the move
+	                    linkedcount++;
+	                    linkSentenceToIncidence(incidenceArray, destinationIncidenceIndex, sourceIncidenceIndex, sentenceGlobalIndex, sentenceIndexInSource);
+	                }
+
+	            }
+
+            }
+            //if the new similarity is bigger, then make the link
+            
         }
         catch (...)
         {
@@ -794,20 +938,27 @@ int main()
     }
     cout << "linked count: " + to_string(linkedcount) << endl;
     cout << "last active later: " + to_string(lastActiveIncidenceIndex) << endl;
-
-    for(int i=0;i<lastActiveIncidenceIndex;i++)
+    int count=0;
+    for(int i = 0; i < lastActiveIncidenceIndex; i++)
     {
-        vector<int> sentencesid=(*(incidenceArray[i])).sentencesid;
-        if(sentencesid.size()>3)
+        vector<int> sentencesid = (*(incidenceArray[i])).sentencesid;
+        if(sentencesid.size() > 2)
         {
-            for(int j=0;j<sentencesid.size();j++)
+        	count++;
+            for(unsigned int j = 0; j < sentencesid.size(); j++)
             {
-               int curr=sentencesid[j];
-               string realid=(*((*(sentenceArray[curr])).featureValue)).id;
-               cout<<realid<<endl;
+                int curr = sentencesid[j];
+                string realid = (*((*(sentenceArray[curr])).featureValue)).id;
+                cout << realid << endl;
 
             }
-            return 0;
+            cout<<" "<<endl;
+            cout<<" "<<endl;
+            //return 0;
+        }
+        if(count>=5)
+        {
+        	return 0;
         }
 
     }
@@ -850,9 +1001,6 @@ int main()
     // else std::cout << "pre-standard C++\n" ;
     return 0;
 }
-
-
-
 
 
 
