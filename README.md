@@ -14,3 +14,7 @@ say we should output something like A->B->C->D...->Z
 so given a pattern what is the qucik way to search out a set of events that have this pattern in a large dataset:
 for example:
 kill-> protest-> kill.
+/home/yan/coincidenceData
+
+>steps to get the tfidf data from the sampleEventData.json
+
