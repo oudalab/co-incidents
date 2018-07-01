@@ -3,7 +3,7 @@ Using PMG to model the relation between events.
 
 ## co-incidence resolution (clustering)
 Using hierarchical MCMC with Metropolis Hastings algorithm to cluster news corpus into appropriate cluster.
-tfidf embedding of the article and also event property that extrated from Petrach2 will be used as the learning feature.
+tfidf embedding of the article and also event properties that are extrated from Petrach2 will be used as learning features.
 We implement SampleRank to learn the weight for each feature in the graph.
 
 ## event tracking resolution (search the causality track)
