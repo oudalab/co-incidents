@@ -12,13 +12,14 @@
 #include <chrono>       // std::chrono::system_clock
 //#include <uuid/uuid.h>
 #include <map>
+#include <cstdlib>
 //load json files of features from disk
 #include <jsoncpp/json/value.h>
 #include <jsoncpp/json/reader.h>
 #include <jsoncpp/json/writer.h>
 //this the dimenstion of the word embedding.
 #define EMBED_SIZE 300
-#define ITERATION 5000000
+//#define ITERATION 10000000
 using namespace std;
 int lastActiveIncidenceIndex = 0;
 // Ctrl+Shift+Alt+Q: Quick Format.
@@ -47,6 +48,8 @@ public:
         featureMap["src_agent"] = "";
         featureMap["tgt_actor"] = "";
         featureMap["tgt_agent"] = "";
+        //featureMap["month"]="";
+        //featureMap["day"]="";
     }
 };
 
@@ -55,37 +58,41 @@ class SentenceFeatureValue
 public:
     //map<string,string> featureValue;
     string code;
-    string country_code;
+    //string country_code;
     string date8;
-    string geoname;
+    //string geoname;
     string id;
     string year;
-    string latitude;
-    string longitude;
+    //string latitude;
+    //string longitude;
     string src_actor;
     string src_agent;
     string tgt_actor;
     string tgt_agent;
+    string month;
+    string day;
     int *embed;
     //this will be the index in the global sentence array
     int index;
     // string doc;
     //string embed;
-    SentenceFeatureValue(string code1, string country_code1, string date81, string geoname1, string id1, string year1, string latitude1, string longitude1, string src_actor1, string src_agent1, string tgt_actor1, string tgt_agent1, int *embed1, int index1)
+    SentenceFeatureValue(string code1, string date81,  string id1, string year1, string src_actor1, string src_agent1, string tgt_actor1, string tgt_agent1, string month1, string day1, int *embed1, int index1)
     {
         code = code1;
-        country_code = country_code1;
+        //country_code = country_code1;
         date8 = date81;
-        geoname = geoname1;
+        //geoname = geoname1;
         id = id1;
         year = year1;
-        latitude = latitude1;
-        longitude = longitude1;
+        //latitude = latitude1;
+        //longitude = longitude1;
         src_actor = src_actor1;
         src_agent = src_agent1;
         tgt_actor = tgt_actor1;
         tgt_agent = tgt_agent1;
         //doc=doc1;
+        month = month1;
+        day = day1;
         embed = embed1;
         index = index1;
         trimall();
@@ -94,13 +101,15 @@ private:
     void trimall()
     {
         rtrim(code );
-        rtrim(country_code );
+        //rtrim(country_code );
         rtrim(date8 );
-        rtrim(geoname );
+        //rtrim(geoname );
         rtrim(id );
         rtrim(year);
-        rtrim(latitude );
-        rtrim(longitude );
+        rtrim(month);
+        rtrim(day);
+        //rtrim(latitude );
+        //rtrim(longitude );
         rtrim(src_actor );
         rtrim(src_agent );
         rtrim(tgt_actor );
@@ -268,6 +277,7 @@ double getSimilarityByMatrixIndex(double *matrix, int row, int col)
 /*****generate a random number within a range,  include min and max value *****/
 int generateRandomInteger(int min, int max)
 {
+    srand(std::chrono::system_clock::now().time_since_epoch().count());
     return min + (rand() % static_cast<int>(max - min + 1));
 }
 
@@ -495,7 +505,7 @@ bool isTrival(string input)
 }
 
 //given two sentence check how many pairs property match
-int getMatchWithinSentences(SentenceFeatureValue &feature1, SentenceFeatureValue &feature2)
+int getMatchWithinSentences(SentenceFeatureValue &feature1, SentenceFeatureValue &feature2, int score_threshold)
 {
     int score = 0;
     int up = 2;
@@ -505,11 +515,22 @@ int getMatchWithinSentences(SentenceFeatureValue &feature1, SentenceFeatureValue
         //cerr<<"(" << feature1.code << ", " << feature2.code<< ") " << score << endl;
         score += up;
     }
-    if(!isTrival(feature1.country_code) && !isTrival(feature2.country_code) && feature1.country_code == feature2.country_code)
+    // if(!isTrival(feature1.country_code) && !isTrival(feature2.country_code) && feature1.country_code == feature2.country_code)
+    // {
+    //     //cerr<<"(" << feature1.country_code << ", " << feature2.country_code<< ") " << score << endl;
+    //     //code += 2;
+    //     score += up;
+    // }
+    if(!isTrival(feature1.year) && !isTrival(feature2.year) && feature1.year == feature2.year)
     {
         //cerr<<"(" << feature1.country_code << ", " << feature2.country_code<< ") " << score << endl;
         //code += 2;
         score += up;
+        //if year are the same and month are the same, the socre up again
+        if(!isTrival(feature1.month) && !isTrival(feature2.month) && feature1.month == feature2.month)
+        {
+            score += up;
+        }
     }
     if(!isTrival(feature1.src_actor) && !isTrival(feature2.src_actor) && feature1.src_actor == feature2.src_actor)
     {
@@ -536,13 +557,14 @@ int getMatchWithinSentences(SentenceFeatureValue &feature1, SentenceFeatureValue
         score += up;
     }
     //6 here is 6 features, and 1.0 is the weight for cosine similarity
-    if(score == 8)
+    if(score == score_threshold)
     {
         cout << "score: " << score << endl;
         cout << feature1.id << "," << feature2.id << endl;
         cout << feature1.code << "," << feature2.code << endl;
-        cout << feature1.country_code << "," << feature2.country_code << endl;
-
+       // cout << feature1.country_code << "," << feature2.country_code << endl;
+        cout << feature1.year<< "," << feature2.year << endl;
+        cout << feature1.month << "," << feature2.month<< endl;
         cout << feature1.src_actor << "," << feature2.src_actor << endl;
         cout << feature1.src_agent << "," << feature2.src_agent << endl;
         cout << feature1.tgt_actor << "," << feature2.tgt_actor << endl;
@@ -554,7 +576,7 @@ int getMatchWithinSentences(SentenceFeatureValue &feature1, SentenceFeatureValue
 }
 
 //this is not for feature weight learning yet, just everybody has the same weight for each property and also the vector similarity
-int getPropertyValueMatch(vector<Sentence *> &sentenceArray, vector<Incidence *> &incidenceArray, int incidenceindex, int sentenceindex,bool fromsource)
+int getPropertyValueMatch(vector<Sentence *> &sentenceArray, vector<Incidence *> &incidenceArray, int incidenceindex, int sentenceindex, bool fromsource, int score_threshold)
 {
     int pairValues = 0;
 
@@ -563,10 +585,10 @@ int getPropertyValueMatch(vector<Sentence *> &sentenceArray, vector<Incidence *>
     SentenceFeatureValue sen = (*((*(sentenceArray[sentenceindex])).featureValue));
 
     //if the original incidence only have 1 sentence which is the sentence to be move, then assign this value to be a random number, I think.
-    if(fromsource&&sentencesid.size() == 1)
+    if(fromsource && sentencesid.size() == 1)
     {
         //I am using 6 features now, this 5 needs to be changed based on how many features you are considering.
-       // pairValues = generateRandomInteger(0, 12);
+        // pairValues = generateRandomInteger(0, 12);
         //return pairValues;
         //pairValues=0;
         return 0;
@@ -578,15 +600,16 @@ int getPropertyValueMatch(vector<Sentence *> &sentenceArray, vector<Incidence *>
             if(id != sentenceindex)
             {
                 SentenceFeatureValue currsen = (*((*(sentenceArray[id])).featureValue));
-                pairValues += getMatchWithinSentences(sen, currsen);
+                pairValues += getMatchWithinSentences(sen, currsen,score_threshold);
             }
         }
     }
-    if(pairValues==8){
-        cout<<"incidence index: "<<incidenceindex<<endl;
-        cout<<"sentence index: "<<sentenceindex<<endl;
-    }
-    return pairValues/(sentencesid.size());
+    // if(pairValues == 8)
+    // {
+    //     cout << "incidence index: " << incidenceindex << endl;
+    //     cout << "sentence index: " << sentenceindex << endl;
+    // }
+    return pairValues / (sentencesid.size());
 
 }
 
@@ -742,18 +765,25 @@ void linkSentenceToIncidence(vector<Incidence *> &incidenceArray, int destincide
 
 
 // }
-int main()
+int main(int argc, char** argv)
 {
     //initialize global feature weight
     GlobalFeatureWeight globalFeatureWeight;
     cout << globalFeatureWeight.featureWeight["code"] << endl;
     bool alive = true;
     vector<Sentence *> sentenceArray;
+    //the score threshhold to make a decision link or not link
+    int score=atoi(argv[1]);
+    //iteration times
+    int iteration=atoi(argv[2]);
+
+    cout<<"score threshold is: "<<score<<endl;
+    cout<<"No of iterations: "<<iteration<<endl;
     while (alive)
     {
         Json::Value root;   // will contains the root value after parsing.
         Json::Reader reader;
-        std::ifstream test("../dataWithAllPropertyWithEmbedding300.data", std::ifstream::binary);
+        std::ifstream test("../dataWithAllPropertyWithEmbedding300-new.data", std::ifstream::binary);
         cout << "start to parse!" << endl;
         bool parsingSuccessful = reader.parse( test, root, false );
         cout << "end parse!" << endl;
@@ -776,9 +806,9 @@ int main()
             {
                 //string doc=fastWriter.write(root[i]["doc"]);
                 string code = fastWriter.write(root[i]["code"]);
-                string country_code = fastWriter.write(root[i]["country_code"]);
+                //string country_code = fastWriter.write(root[i]["country_code"]);
                 string date8 = fastWriter.write(root[i]["date8"]);
-                string geoname = fastWriter.write(root[i]["geoname"]);
+                //string geoname = fastWriter.write(root[i]["geoname"]);
                 string id = fastWriter.write(root[i]["id"]);
                 string year = fastWriter.write(root[i]["year"]);
                 string latitude = fastWriter.write(root[i]["latitude"]);
@@ -787,6 +817,9 @@ int main()
                 string src_agent = fastWriter.write(root[i]["src_agent"]);
                 string tgt_actor = fastWriter.write(root[i]["tgt_actor"]);
                 string tgt_agent = fastWriter.write(root[i]["tgt_agent"]);
+                string month = fastWriter.write(root[i]["month"]);
+                string day = fastWriter.write(root[i]["day"]);
+
                 //string embed=fastWriter.write(root[i]["embed"]);
                 auto embed2 = root[i]["embed"];
                 //this new is very important, otherwise the vector will be deallocated!!!!
@@ -796,7 +829,7 @@ int main()
                     embed3[j] = embed2[j].asInt();
                 }
 
-                SentenceFeatureValue *value = new SentenceFeatureValue(code, country_code, date8, geoname, id, year, latitude, longitude, src_actor, src_agent, tgt_actor, tgt_agent, embed3, i);
+                SentenceFeatureValue *value = new SentenceFeatureValue(code,  date8,  id, year, src_actor, src_agent, tgt_actor, tgt_agent, month, day,embed3, i);
                 sentenceArray.push_back(new Sentence(id, value));
 
 
@@ -865,7 +898,7 @@ int main()
     lastActiveIncidenceIndex = globalSize - 1;
     //cout << "last active: " + to_string(lastActiveIncidenceIndex) << endl;
     int linkedcount = 0;
-    for(int i = 0; i < ITERATION; i++)
+    for(int i = 0; i < iteration; i++)
     {
         try
         {
@@ -899,8 +932,8 @@ int main()
 
             double originalSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceIndexInSource);
             double newSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceIndexInSource);
-            double originalPairs = getPropertyValueMatch(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceGlobalIndex,true);
-            double newPairs = getPropertyValueMatch(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceGlobalIndex,false);
+            double originalPairs = getPropertyValueMatch(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceGlobalIndex, true, score);
+            double newPairs = getPropertyValueMatch(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceGlobalIndex, false,score);
             //using the metroplis hastings algorithms here
             double originalFinalScore = (1.0 / 13.0) * originalSimilarity + (12.0 / 13.0) * originalPairs;
             double newFinalScore = (1.0 / 13.0) * newSimilarity + (12.0 / 13.0) * newPairs;
@@ -908,12 +941,12 @@ int main()
             double mh_value = min(1.0, originalSimilarity / newSimilarity);
 
             //not link if 3 pairs not match for the new configureations
-            if(newPairs == 8)
+            if(newPairs == 10)
             {
-                cout<<"mh value: "<<mh_value<<endl;
+                cout << "mh value: " << mh_value << endl;
                 linkedcount++;
-                cout<<"dest: "<<destinationIncidenceIndex<<endl;
-                cout<<"sen: "<<sentenceGlobalIndex<<endl;
+                //cout << "dest: " << destinationIncidenceIndex << endl;
+                //cout << "sen: " << sentenceGlobalIndex << endl;
                 linkSentenceToIncidence(incidenceArray, destinationIncidenceIndex, sourceIncidenceIndex, sentenceGlobalIndex, sentenceIndexInSource);
 
                 // if(mh_value == 1)
