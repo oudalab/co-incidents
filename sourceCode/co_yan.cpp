@@ -58,6 +58,7 @@ class SentenceFeatureValue
 public:
     //map<string,string> featureValue;
     string code;
+    string rootcode;
     //string country_code;
     string date8;
     //string geoname;
@@ -76,9 +77,10 @@ public:
     int index;
     // string doc;
     //string embed;
-    SentenceFeatureValue(string code1, string date81,  string id1, string year1, string src_actor1, string src_agent1, string tgt_actor1, string tgt_agent1, string month1, string day1, int *embed1, int index1)
+    SentenceFeatureValue(string code1, string rootcode1, string date81,  string id1, string year1, string src_actor1, string src_agent1, string tgt_actor1, string tgt_agent1, string month1, string day1, int *embed1, int index1)
     {
         code = code1;
+        rootcode = rootcode1;
         //country_code = country_code1;
         date8 = date81;
         //geoname = geoname1;
@@ -101,6 +103,7 @@ private:
     void trimall()
     {
         rtrim(code );
+        rtrim(rootcode);
         //rtrim(country_code );
         rtrim(date8 );
         //rtrim(geoname );
@@ -124,6 +127,7 @@ public:
     GlobalFeatureWeight()
     {
         featureWeight["code"] = 1;
+        featureWeight["root_code"] = 1;
         featureWeight["country_code"] = 1;
         featureWeight["date8"] = 1;
         featureWeight["geoname"] = 1;
@@ -467,7 +471,8 @@ double getSentenceSimilarityWithinIncidence(vector<Sentence *> &sentenceArray, v
     //in order for the proces to start do this:
     if(sentencesid.size() == 1)
     {
-        sentenceWithIncidenceSimilarity = generateRandomInteger(0, 100) / 100.0;
+        sentenceWithIncidenceSimilarity = generateRandomInteger(0, 45) / 100.0;
+        return sentenceWithIncidenceSimilarity;
     }
     else
     {
@@ -482,7 +487,8 @@ double getSentenceSimilarityWithinIncidence(vector<Sentence *> &sentenceArray, v
             }
         }
     }
-    return sentenceWithIncidenceSimilarity;
+
+    return sentenceWithIncidenceSimilarity / sentencesid.size();
 
 }
 void rtrim(std::string &s)
@@ -505,15 +511,22 @@ bool isTrival(string input)
 }
 
 //given two sentence check how many pairs property match
-int getMatchWithinSentences(SentenceFeatureValue &feature1, SentenceFeatureValue &feature2, int score_threshold)
+int getMatchWithinSentences(SentenceFeatureValue &feature1, SentenceFeatureValue &feature2, int score_threshold, map<string, int> &weightMap)
 {
     int score = 0;
     int up = 2;
+
     if(!isTrival(feature1.code) && !isTrival(feature2.code) && feature1.code == feature2.code)
     {
         //cout<<"faatyre start"<<endl;
         //cerr<<"(" << feature1.code << ", " << feature2.code<< ") " << score << endl;
-        score += up;
+        score += up * weightMap["code"];
+    }
+    if(!isTrival(feature1.rootcode) && !isTrival(feature2.rootcode) && feature1.rootcode == feature2.rootcode)
+    {
+        //cout<<"faatyre start"<<endl;
+        //cerr<<"(" << feature1.code << ", " << feature2.code<< ") " << score << endl;
+        score += up * weightMap["rootcode"];
     }
     // if(!isTrival(feature1.country_code) && !isTrival(feature2.country_code) && feature1.country_code == feature2.country_code)
     // {
@@ -525,36 +538,36 @@ int getMatchWithinSentences(SentenceFeatureValue &feature1, SentenceFeatureValue
     {
         //cerr<<"(" << feature1.country_code << ", " << feature2.country_code<< ") " << score << endl;
         //code += 2;
-        score += up;
+        score += up * weightMap["year"];
         //if year are the same and month are the same, the socre up again
         if(!isTrival(feature1.month) && !isTrival(feature2.month) && feature1.month == feature2.month)
         {
-            score += up;
+            score += up * weightMap["month"];
         }
     }
     if(!isTrival(feature1.src_actor) && !isTrival(feature2.src_actor) && feature1.src_actor == feature2.src_actor)
     {
         //cerr<<"(" << feature1.src_actor << ", " << feature2.src_actor<< ") " << score << endl;
         //code += 4;
-        score += up;
+        score += up * weightMap["src_actor"];
     }
     if(!isTrival(feature1.src_agent) && !isTrival(feature2.src_agent) && feature1.src_agent == feature2.src_agent)
     {
         //cerr<<"(" << feature1.src_agent << ", " << feature2.src_agent<< ") " << score << endl;
         //code += 8;
-        score += up;
+        score += up * weightMap["src_agent"];
     }
     if(!isTrival(feature1.tgt_actor) && !isTrival(feature2.tgt_actor) && feature1.tgt_actor == feature2.tgt_actor)
     {
         //cerr<<"(" << feature1.tgt_actor << ", " << feature2.tgt_actor<< ") " << score << endl;
         //code += 16;
-        score += up;
+        score += up * weightMap["tgt_actor"];
     }
     if(!isTrival(feature1.tgt_agent) && !isTrival(feature2.tgt_agent) && feature1.tgt_agent == feature2.tgt_agent)
     {
         //cerr<<"(" << feature1.tgt_agent << ", " << feature2.tgt_agent<< ") " << score << endl;
         //code += 32;
-        score += up;
+        score += up * weightMap["tgt_agent"];
     }
     //6 here is 6 features, and 1.0 is the weight for cosine similarity
     if(score == score_threshold)
@@ -562,9 +575,10 @@ int getMatchWithinSentences(SentenceFeatureValue &feature1, SentenceFeatureValue
         cout << "score: " << score << endl;
         cout << feature1.id << "," << feature2.id << endl;
         cout << feature1.code << "," << feature2.code << endl;
-       // cout << feature1.country_code << "," << feature2.country_code << endl;
-        cout << feature1.year<< "," << feature2.year << endl;
-        cout << feature1.month << "," << feature2.month<< endl;
+        cout << feature1.rootcode << "," << feature2.rootcode << endl;
+        // cout << feature1.country_code << "," << feature2.country_code << endl;
+        cout << feature1.year << "," << feature2.year << endl;
+        cout << feature1.month << "," << feature2.month << endl;
         cout << feature1.src_actor << "," << feature2.src_actor << endl;
         cout << feature1.src_agent << "," << feature2.src_agent << endl;
         cout << feature1.tgt_actor << "," << feature2.tgt_actor << endl;
@@ -576,7 +590,7 @@ int getMatchWithinSentences(SentenceFeatureValue &feature1, SentenceFeatureValue
 }
 
 //this is not for feature weight learning yet, just everybody has the same weight for each property and also the vector similarity
-int getPropertyValueMatch(vector<Sentence *> &sentenceArray, vector<Incidence *> &incidenceArray, int incidenceindex, int sentenceindex, bool fromsource, int score_threshold)
+int getPropertyValueMatch(vector<Sentence *> &sentenceArray, vector<Incidence *> &incidenceArray, int incidenceindex, int sentenceindex, bool fromsource, int score_threshold, map<string, int> &weightMap)
 {
     int pairValues = 0;
 
@@ -600,7 +614,7 @@ int getPropertyValueMatch(vector<Sentence *> &sentenceArray, vector<Incidence *>
             if(id != sentenceindex)
             {
                 SentenceFeatureValue currsen = (*((*(sentenceArray[id])).featureValue));
-                pairValues += getMatchWithinSentences(sen, currsen,score_threshold);
+                pairValues += getMatchWithinSentences(sen, currsen, score_threshold, weightMap);
             }
         }
     }
@@ -765,20 +779,26 @@ void linkSentenceToIncidence(vector<Incidence *> &incidenceArray, int destincide
 
 
 // }
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
     //initialize global feature weight
     GlobalFeatureWeight globalFeatureWeight;
-    cout << globalFeatureWeight.featureWeight["code"] << endl;
+    //cout << globalFeatureWeight.featureWeight["code"] << endl;
     bool alive = true;
     vector<Sentence *> sentenceArray;
+    // if you input two paramters the argc will be 3.
+    if (argc < 3)
+    {
+        cout << "input the scorethreshold and also the sample number: " << endl;
+        return 0;
+    }
     //the score threshhold to make a decision link or not link
-    int score=atoi(argv[1]);
+    int score = atoi(argv[1]);
     //iteration times
-    int iteration=atoi(argv[2]);
+    int iteration = atoi(argv[2]);
 
-    cout<<"score threshold is: "<<score<<endl;
-    cout<<"No of iterations: "<<iteration<<endl;
+    cout << "score threshold is: " << score << endl;
+    cout << "No of iterations: " << iteration << endl;
     while (alive)
     {
         Json::Value root;   // will contains the root value after parsing.
@@ -806,6 +826,7 @@ int main(int argc, char** argv)
             {
                 //string doc=fastWriter.write(root[i]["doc"]);
                 string code = fastWriter.write(root[i]["code"]);
+                string rootcode = fastWriter.write(root[i]["root_code"]);
                 //string country_code = fastWriter.write(root[i]["country_code"]);
                 string date8 = fastWriter.write(root[i]["date8"]);
                 //string geoname = fastWriter.write(root[i]["geoname"]);
@@ -829,7 +850,7 @@ int main(int argc, char** argv)
                     embed3[j] = embed2[j].asInt();
                 }
 
-                SentenceFeatureValue *value = new SentenceFeatureValue(code,  date8,  id, year, src_actor, src_agent, tgt_actor, tgt_agent, month, day,embed3, i);
+                SentenceFeatureValue *value = new SentenceFeatureValue(code, rootcode,  date8,  id, year, src_actor, src_agent, tgt_actor, tgt_agent, month, day, embed3, i);
                 sentenceArray.push_back(new Sentence(id, value));
 
 
@@ -929,25 +950,52 @@ int main(int argc, char** argv)
             //cout << to_string(sentenceIndexInSource) + " " + to_string(sentenceGlobalIndex) << endl;
             destinationIncidenceIndex = generateRandomInteger(0, sizeOfIncidenceArray - 1);
             incidenceDestination = (*(incidenceArray[ destinationIncidenceIndex])).inci_id;
+            map<string, int> weightMap;
+
+            weightMap["code"] = 2;
+            weightMap["rootcode"] = 1;
+            weightMap["year"] = 2;
+            weightMap["month"] = 2;
+            weightMap["src_actor"] = 2;
+            weightMap["src_agent"] = 2;
+            weightMap["tgt_actor"] = 2;
+            weightMap["tgt_agent"] = 2;
 
             double originalSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceIndexInSource);
             double newSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceIndexInSource);
-            double originalPairs = getPropertyValueMatch(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceGlobalIndex, true, score);
-            double newPairs = getPropertyValueMatch(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceGlobalIndex, false,score);
+            double originalPairs = getPropertyValueMatch(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceGlobalIndex, true, score, weightMap);
+            double newPairs = getPropertyValueMatch(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceGlobalIndex, false, score, weightMap);
             //using the metroplis hastings algorithms here
             double originalFinalScore = (1.0 / 13.0) * originalSimilarity + (12.0 / 13.0) * originalPairs;
             double newFinalScore = (1.0 / 13.0) * newSimilarity + (12.0 / 13.0) * newPairs;
             //double mh_value = min(1.0, originalFinalScore / newFinalScore);
-            double mh_value = min(1.0, originalSimilarity / newSimilarity);
+            double mh_value = min(1.0, newSimilarity / originalSimilarity );
 
-            //not link if 3 pairs not match for the new configureations
-            if(newPairs == 10)
+            //not link if 3 pairs not match for the new configureation
+            //give a new similairty threshold and asee
+            if(newPairs >= score)
             {
-                cout << "mh value: " << mh_value << endl;
-                linkedcount++;
+                if(newSimilarity > 0.35)
+                {
+                    linkSentenceToIncidence(incidenceArray, destinationIncidenceIndex, sourceIncidenceIndex, sentenceGlobalIndex, sentenceIndexInSource);
+                    linkedcount++;
+                }
+                else
+                {
+                    //only when >0.3 random number less than mn_value will link, give it somechance when the dest result<0.35 to still link them
+                    if(generateRandomInteger(30, 100) / 100.0 < mh_value)
+                    {
+                        linkSentenceToIncidence(incidenceArray, destinationIncidenceIndex, sourceIncidenceIndex, sentenceGlobalIndex, sentenceIndexInSource);
+                        linkedcount++;
+
+                    }
+
+                }
+                //cout << "mh value: " << mh_value << endl;
+
                 //cout << "dest: " << destinationIncidenceIndex << endl;
                 //cout << "sen: " << sentenceGlobalIndex << endl;
-                linkSentenceToIncidence(incidenceArray, destinationIncidenceIndex, sourceIncidenceIndex, sentenceGlobalIndex, sentenceIndexInSource);
+                //linkSentenceToIncidence(incidenceArray, destinationIncidenceIndex, sourceIncidenceIndex, sentenceGlobalIndex, sentenceIndexInSource);
 
                 // if(mh_value == 1)
                 // {
@@ -984,21 +1032,32 @@ int main(int argc, char** argv)
     for(int i = 0; i < lastActiveIncidenceIndex; i++)
     {
         vector<int> sentencesid = (*(incidenceArray[i])).sentencesid;
-        if(sentencesid.size() > 1)
+        if(sentencesid.size() > 2)
         {
             count++;
+            int curr1 = 0;
+            int curr2 = 1;
             for(unsigned int j = 0; j < sentencesid.size(); j++)
             {
                 int curr = sentencesid[j];
+                if(j == 0)
+                {
+                    curr1 = curr;
+                }
+                if(j == 1)
+                {
+                    curr2 = curr;
+                }
                 string realid = (*((*(sentenceArray[curr])).featureValue)).id;
                 cout << realid << endl;
 
             }
+            cout << "cosine similiarty: " << getSimilarityBySentenceId(sentenceArray, curr1, curr2) << endl;
             cout << " " << endl;
             cout << " " << endl;
             //return 0;
         }
-        if(count >= 5)
+        if(count >= linkedcount - 2)
         {
             return 0;
         }
