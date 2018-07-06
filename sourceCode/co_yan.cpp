@@ -493,7 +493,7 @@ double getSimilarityBySentenceId( vector<Sentence *> &sentenceArray, int sen1ind
     return cosine;
 }
 
-double getSentenceSimilarityWithinIncidence(vector<Sentence *> &sentenceArray, vector<Incidence *> &incidenceArray, int incidenceid, int sentenceindex)
+double getSentenceSimilarityWithinIncidence(vector<Sentence *> &sentenceArray, vector<Incidence *> &incidenceArray, int incidenceid, int sentenceindex, bool fromsource)
 {
     double sentenceWithIncidenceSimilarity = 0;
     // double similarityInOldIncidence = 0;
@@ -502,7 +502,7 @@ double getSentenceSimilarityWithinIncidence(vector<Sentence *> &sentenceArray, v
     int sen1 = 0;
     int sen2 = sentenceindex;
     //in order for the proces to start do this:
-    if(sentencesid.size() == 1)
+    if(sentencesid.size() == 1 && fromsource)
     {
         sentenceWithIncidenceSimilarity = generateRandomInteger(0, 45) / 100.0;
         return sentenceWithIncidenceSimilarity;
@@ -735,8 +735,8 @@ void do_work(vector<Incidence *> &incidenceArray, vector<Sentence *> &sentenceAr
             weightMap["tgt_actor"] = 1;
             weightMap["tgt_agent"] = 1;
 
-            double originalSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceIndexInSource);
-            double newSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceIndexInSource);
+            double originalSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceIndexInSource,true);
+            double newSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceIndexInSource,false);
             double originalPairs = getPropertyValueMatch(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceGlobalIndex, true, score, weightMap);
             double newPairs = getPropertyValueMatch(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceGlobalIndex, false, score, weightMap);
             //using the metroplis hastings algorithms here
@@ -917,7 +917,7 @@ int main(int argc, char **argv)
     bool alive = true;
     vector<Sentence *> sentenceArray;
     // if you input two paramters the argc will be 3.
-    if (argc < 3)
+    if (argc < 4)
     {
         cout << "input the scorethreshold and also the sample number: " << endl;
         return 0;
@@ -926,6 +926,8 @@ int main(int argc, char **argv)
     int score = atoi(argv[1]);
     //iteration times
     int iteration = atoi(argv[2]);
+
+    string outputfile=argv[3];
 
     cout << "score threshold is: " << score << endl;
     cout << "No of iterations: " << iteration << endl;
@@ -1114,6 +1116,14 @@ int main(int argc, char **argv)
     //         //cout << exc.what();
     //     }
     // }
+    
+
+  //   for(int i=0;i<32;i++)
+  //   {
+		// thread t(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,i);    	
+		// t.join();
+  //   }
+
 
     thread t1(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,1);
     thread t2(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,2);
@@ -1133,6 +1143,25 @@ int main(int argc, char **argv)
     thread t15(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,15);
     thread t16(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,16);
 
+    thread t17(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,17);
+    thread t18(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,18);
+    thread t19(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,19);
+    thread t20(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,20);
+    thread t21(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,21);
+    thread t22(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,22);
+    thread t23(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,23);
+    thread t24(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,24);
+
+
+    thread t25(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,25);
+    thread t26(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,26);
+    thread t27(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,27);
+    thread t28(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,28);
+    thread t29(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,29);
+    thread t30(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,30);
+    thread t31(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,31);
+    thread t32(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,32);
+
     t1.join();
     t2.join();
     t3.join();
@@ -1150,11 +1179,30 @@ int main(int argc, char **argv)
     t14.join();
     t15.join();
     t16.join();
+
+    t17.join();
+    t18.join();
+    t19.join();
+    t20.join();
+    t21.join();
+    t22.join();
+    t23.join();
+    t24.join();
+
+    t25.join();
+    t26.join();
+    t27.join();
+    t28.join();
+    t29.join();
+    t30.join();
+    t31.join();
+    t32.join();
+    
         //do_work(incidenceArray,sentenceArray,*shared,iteration,score);
    // cout << "linked count: " + to_string(linkedcount) << endl;
     cout << "last active later: " + to_string((*shared).lastActiveIncidenceIndex) << endl;
     //int count = 0;
-    ofstream out("clusters.rst");
+    ofstream out(outputfile);
     if(!out)
     {
     	cout<<"could not open file"<<endl;
