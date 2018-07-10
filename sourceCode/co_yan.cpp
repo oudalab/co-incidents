@@ -179,28 +179,28 @@ public:
 
 class SharedResources
 {
-	
+
 public:
     int lastActiveIncidenceIndex;
     pthread_mutex_t mutex;
     SharedResources(int lastActiveIncidenceIndex1)
     {
-       lastActiveIncidenceIndex = lastActiveIncidenceIndex1;
-       pthread_mutex_init(&mutex, NULL);
+        lastActiveIncidenceIndex = lastActiveIncidenceIndex1;
+        pthread_mutex_init(&mutex, NULL);
     }
     ~SharedResources()
     {
-    	pthread_mutex_destroy(&mutex);
+        pthread_mutex_destroy(&mutex);
     }
 
     void lock()
     {
-    	pthread_mutex_lock(&mutex);
+        pthread_mutex_lock(&mutex);
     }
 
     void unlock()
     {
-    	pthread_mutex_unlock(&mutex);
+        pthread_mutex_unlock(&mutex);
     }
 };
 
@@ -214,20 +214,21 @@ public:
     vector<int> sentencesid;
     vector<string> subincidencesid;
     IncidenceFeature featureMap;
-    Incidence(string incidenceid, vector<int> sentences): inci_id(incidenceid), sentencesid(move(sentences)) {
-    	pthread_mutex_init(&mutex, NULL);	
+    Incidence(string incidenceid, vector<int> sentences): inci_id(incidenceid), sentencesid(move(sentences))
+    {
+        pthread_mutex_init(&mutex, NULL);
     };
     ~Incidence()
     {
-    	pthread_mutex_destroy(&mutex);
+        pthread_mutex_destroy(&mutex);
     }
     void lock()
     {
-    	pthread_mutex_lock(&mutex);
+        pthread_mutex_lock(&mutex);
     }
     void unlock()
     {
-    	pthread_mutex_unlock(&mutex);
+        pthread_mutex_unlock(&mutex);
     }
 
 
@@ -293,31 +294,6 @@ int generateRandomInteger(int min, int max)
     return min + (rand() % static_cast<int>(max - min + 1));
 }
 
-
-double getSimilarityByMatrixIndex(double *matrix, int row, int col)
-{
-    if(row == col)
-        return 1.0;
-    else if(row > col)
-    {
-        //return matrix[row*xlength+col];
-        // row is 0 then add 1
-        // row is 1 add in 1 and 2
-        // row is 2 then add in 1,2 and 3
-        int index = (1 + row) * row / 2 + col;
-        return matrix[index];
-
-    }
-    else
-    {
-        //since it is symmetric
-        return getSimilarityByMatrixIndex(matrix, col, row);
-    }
-
-}
-
-
-
 //give an integer split it into several other integers randomly and will add up to the integer
 vector<int> *splitTheIntegerIntoRandomPart(int sum)
 {
@@ -337,23 +313,6 @@ vector<int> *splitTheIntegerIntoRandomPart(int sum)
     }
     return randomNumberArray;
 }
-
-// void generateGuidString(string guidStr)
-// {
-//      _TUCHAR *guidStr = 0x00;
-
-//      GUID *pguid = 0x00;
-
-//      pguid = new GUID;
-
-//      CoCreateGuid(pguid);
-
-//      // Convert the GUID to a string
-//      UuidToString(pguid, &guidStr);
-
-//      delete pguid;
-
-// }
 
 
 vector<int> &shuffleTheIndexOfVector(int n)
@@ -504,7 +463,7 @@ double getSentenceSimilarityWithinIncidence(vector<Sentence *> &sentenceArray, v
     //in order for the proces to start do this:
     if(sentencesid.size() == 1 && fromsource)
     {
-        sentenceWithIncidenceSimilarity = generateRandomInteger(0, 45) / 100.0;
+        sentenceWithIncidenceSimilarity = generateRandomInteger(0, 55) / 100.0;
         return sentenceWithIncidenceSimilarity;
     }
     else
@@ -517,11 +476,23 @@ double getSentenceSimilarityWithinIncidence(vector<Sentence *> &sentenceArray, v
                 //count=count+1;
                 //pairwisely calculate the similarity of the current add in stuff with the snetence already in the list and compare the similarity with some threshhold.
                 sentenceWithIncidenceSimilarity = sentenceWithIncidenceSimilarity + getSimilarityBySentenceId(sentenceArray, sen1, sen2);
+                // if(sentenceWithIncidenceSimilarity>=0.5)
+                // {
+                // 	cout<<"dest incidence sen:"<<sen1<<endl;
+                // 	cout<<"source incidence sen:"<<sen2<<endl;
+                // }
             }
         }
     }
+    if(!fromsource)
+    {
+        return sentenceWithIncidenceSimilarity / sentencesid.size();
+    }
+    else
+    {
+        return sentenceWithIncidenceSimilarity / (sentencesid.size() - 1);
+    }
 
-    return sentenceWithIncidenceSimilarity / sentencesid.size();
 
 }
 void rtrim(std::string &s)
@@ -666,35 +637,39 @@ int getPropertyValueMatch(vector<Sentence *> &sentenceArray, vector<Incidence *>
 
 // }
 
-void linkSentenceToIncidence(vector<Incidence *> &incidenceArray, int destincidenceindex, int sourceincidenceindex, int sentenceindex, int SenIndexInOriginalSentenceIds,SharedResources& shared)
+void linkSentenceToIncidence(vector<Incidence *> &incidenceArray, int destincidenceindex, int sourceincidenceindex, int sentenceindex, int SenIndexInOriginalSentenceIds, SharedResources &shared)
 {
-    vector<int> sourceSentencesid = (*(incidenceArray[sourceincidenceindex])).sentencesid;
+    Incidence *source = (incidenceArray[sourceincidenceindex]);
+    vector<int> sourceSentencesid = (*source).sentencesid;
     //means there is no sentence to move around at all, so we should swap this incidence with the last "active" incidence.
+    (*source).lock();
     sourceSentencesid.erase(sourceSentencesid.begin() + SenIndexInOriginalSentenceIds);
+    (*source).unlock();
 
     //if the incidence become empty then move it to the end of the vector.
     if(sourceSentencesid.empty())
-    {        // cout<<"here again??"<<endl;
+    {
+        // cout<<"here again??"<<endl;
         shared.lock();
         incidenceArray[sourceincidenceindex] = incidenceArray[lastActiveIncidenceIndex];
         //swap the last active incidenceIndex at the empty spot, then decreas the lastActiveIncidenceIndex.
         shared.lastActiveIncidenceIndex = shared.lastActiveIncidenceIndex - 1;
         shared.unlock();
-       // cout<<"after linked last active: "<<
+        // cout<<"after linked last active: "<<
         //cout<<lastActiveIncidenceIndex<<endl;
     }
     //need to make thsi a pointer otherwise this information add new sentence into it will not get stored!
-    Incidence* dest=(incidenceArray[destincidenceindex]);
+    Incidence *dest = (incidenceArray[destincidenceindex]);
     (*dest).lock();
     (*dest).sentencesid.push_back(sentenceindex);
     (*dest).unlock();
 }
 
-void do_work(vector<Incidence *> &incidenceArray, vector<Sentence *> &sentenceArray, SharedResources& shared,int iteration,int score,int threadid)
+void do_work(vector<Incidence *> &incidenceArray, vector<Sentence *> &sentenceArray, SharedResources &shared, int iteration, int score, int threadid)
 {
 
-    cout<<"thread id: "<<threadid<<" get started!"<<endl;
-    int linkedcount=0;
+    cout << "thread id: " << threadid << " get started!" << endl;
+    int linkedcount = 0;
     for(int i = 0; i < iteration; i++)
     {
         try
@@ -702,6 +677,12 @@ void do_work(vector<Incidence *> &incidenceArray, vector<Sentence *> &sentenceAr
             int sizeOfIncidenceArray = incidenceArray.size();
             //cout<<"size of incidence array is: "<<sizeOfIncidenceArray<<endl;
             int sourceIncidenceIndex = generateRandomInteger(0, sizeOfIncidenceArray - 1);
+            int destinationIncidenceIndex = generateRandomInteger(0, sizeOfIncidenceArray - 1);
+            //if source and destination are the same thing, then do nothing.
+            if(sourceIncidenceIndex == destinationIncidenceIndex)
+            {
+                continue;
+            }
             Incidence sourceIncidence = *(incidenceArray[sourceIncidenceIndex]);
             string sourceIncidenceId = sourceIncidence.inci_id;
             int size = sourceIncidence.sentencesid.size();
@@ -722,7 +703,8 @@ void do_work(vector<Incidence *> &incidenceArray, vector<Sentence *> &sentenceAr
             //in the sentencesid store the index of the global sentence array.
             int sentenceGlobalIndex = sourceIncidence.sentencesid[sentenceIndexInSource];
             //cout << to_string(sentenceIndexInSource) + " " + to_string(sentenceGlobalIndex) << endl;
-            int destinationIncidenceIndex = generateRandomInteger(0, sizeOfIncidenceArray - 1);
+
+
             string incidenceDestination = (*(incidenceArray[ destinationIncidenceIndex])).inci_id;
             map<string, int> weightMap;
 
@@ -735,37 +717,67 @@ void do_work(vector<Incidence *> &incidenceArray, vector<Sentence *> &sentenceAr
             weightMap["tgt_actor"] = 1;
             weightMap["tgt_agent"] = 1;
 
-            double originalSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceIndexInSource,true);
-            double newSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceIndexInSource,false);
+            double originalSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceGlobalIndex, true);
+            double newSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceGlobalIndex, false);
             double originalPairs = getPropertyValueMatch(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceGlobalIndex, true, score, weightMap);
             double newPairs = getPropertyValueMatch(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceGlobalIndex, false, score, weightMap);
             //using the metroplis hastings algorithms here
-            double originalFinalScore = (1.0 / 13.0) * originalSimilarity + (12.0 / 13.0) * originalPairs;
-            double newFinalScore = (1.0 / 13.0) * newSimilarity + (12.0 / 13.0) * newPairs;
+            //double originalFinalScore = (1.0 / 13.0) * originalSimilarity + (12.0 / 13.0) * originalPairs;
+            //double newFinalScore = (1.0 / 13.0) * newSimilarity + (12.0 / 13.0) * newPairs;
             //double mh_value = min(1.0, originalFinalScore / newFinalScore);
-            double mh_value = min(1.0, newSimilarity / originalSimilarity );
+            //double mh_value = min(1.0, newSimilarity / originalSimilarity );
 
             //not link if 3 pairs not match for the new configureation
             //give a new similairty threshold and asee
             if(newPairs >= score)
             {
-                if(originalSimilarity < newSimilarity && newSimilarity >= 0.45)
+                if(originalSimilarity < newSimilarity && newSimilarity >= 0.5)
                 {
-                    linkSentenceToIncidence(incidenceArray, destinationIncidenceIndex, sourceIncidenceIndex, sentenceGlobalIndex, sentenceIndexInSource,ref(shared));
+                    //cout << "new similarity: " << newSimilarity << endl;
+                    linkSentenceToIncidence(incidenceArray, destinationIncidenceIndex, sourceIncidenceIndex, sentenceGlobalIndex, sentenceIndexInSource, ref(shared));
+                   // cout<<"sentence globalindex: "<<sentenceGlobalIndex<<endl;
                     linkedcount++;
+
+                    // vector<int> sentencesid = (*(incidenceArray[destinationIncidenceIndex])).sentencesid;
+                    // int curr1 = -1;
+                    // int curr2 = -1;
+
+
+                    // for(unsigned int j = 0; j < sentencesid.size(); j++)
+                    // {
+                    //     int curr = sentencesid[j];
+                    //     if(j == 0)
+                    //     {
+                    //         curr1 = curr;
+                    //     }
+                    //     if(j == 1)
+                    //     {
+                    //         curr2 = curr;
+                    //     }
+
+                    // }
+                    // cout<<"global1: "<<endl;
+                    // cout<<"global2: "<<endl;
+                    // cout << "cosine similiarty immediate check: " << getSimilarityBySentenceId(sentenceArray, curr1, curr2) << endl;
+                    //out << getSimilarityBySentenceId(sentenceArray, curr1, curr2) << endl;
+
                 }
-              /*  else
-                {
-                    //only when >0.3 random number less than mn_value will link, give it somechance when the dest result<0.35 to still link them
-                    //if(mh_value!=1&&generateRandomInteger(96, 100) / 100.0 < mh_value)
-                    if(generateRandomInteger(0, 1000) / 1000.0 < 0.002)
-                    {
-                        linkSentenceToIncidence(incidenceArray, destinationIncidenceIndex, sourceIncidenceIndex, sentenceGlobalIndex, sentenceIndexInSource,ref(shared));
-                        linkedcount++;
+                // tring realid = (*((*(sentenceArray[sentenceGlobalIndex])).featureValue)).id;
+                //cout <<"id when link" realid << endl;
 
-                    }
 
-                }*/
+                /*  else
+                  {
+                      //only when >0.3 random number less than mn_value will link, give it somechance when the dest result<0.35 to still link them
+                      //if(mh_value!=1&&generateRandomInteger(96, 100) / 100.0 < mh_value)
+                      if(generateRandomInteger(0, 1000) / 1000.0 < 0.002)
+                      {
+                          linkSentenceToIncidence(incidenceArray, destinationIncidenceIndex, sourceIncidenceIndex, sentenceGlobalIndex, sentenceIndexInSource,ref(shared));
+                          linkedcount++;
+
+                      }
+
+                  }*/
 
             }
 
@@ -778,137 +790,11 @@ void do_work(vector<Incidence *> &incidenceArray, vector<Sentence *> &sentenceAr
         }
     }
 
-    cout<<"linked count is: "<<linkedcount<<endl;
+
+    cout << "linked count is: " << linkedcount << endl;
 }
 
 
-
-// int main()
-
-// {
-
-//       time_t now = time(0);
-
-//         // convert now to string form
-//       char* dt = ctime(&now);
-//      // srand(time(0));
-
-//       cout << "The local date and time is: " << dt << endl;
-//       //loadMatrix();
-//      /*load the simulated probability matrxi.*/
-//      double* matrix=loadMatrix();
-
-
-//      int i=0;
-//      //Sentence* sentenceArray[xlength];,
-//      vector<Sentence*> sentenceArray;
-//      vector<Incidence*> incidenceArray;
-//      vector<Subincidence*> subincidenceArray;
-//      //Incidence* incidenceArray[xlength];
-
-//      for(int i=0;i<xlength;i++)
-//      {
-//         sentenceArray.push_back(new Sentence(to_string(i)));
-//      }
-//      //initialize all the incidence.
-//      for(int i=0;i<xlength;i++)
-//      {
-//       //this will allocate on the stack.
-//              vector<string> sentencesid;
-//              sentencesid.push_back(to_string(i));
-//              incidenceArray.push_back(new Incidence(to_string(i),sentencesid));
-//      }
-
-//    //  cout<<"sentenceid in the incidence: "<<(*(incidenceArray[11])).sentencesid[0]<<endl;
-//      int sentenceToMove=0;
-//      int incidenceDestinationIndex=0;
-//      //this will be the incidenceid.
-//      string incidenceDestination="";
-//      int sourceIncidenceIndex=0;
-//      int sizeOfIncidenceArray=0;
-//      string sentenceid="";
-//      string sourceIncidenceId="";
-//      int globalSize=incidenceArray.size();
-//      for(i=0;i<100;i++)
-//      {
-//              try{
-//                      //source Incidence will be where the to be moved sentence belong to
-//                      //sourceIncidence=generateRandomInteger(0,xlength-1);
-//                          cout<<"index i is: "<<i<<endl;
-//             sizeOfIncidenceArray=incidenceArray.size();
-//             //cout<<"size of incidence array is: "<<sizeOfIncidenceArray<<endl;
-//             sourceIncidenceIndex=generateRandomInteger(0,sizeOfIncidenceArray-1);
-//             Incidence sourceIncidence=*(incidenceArray[sourceIncidenceIndex]);
-//             sourceIncidenceId=sourceIncidence.inci_id;
-//                          int size=sourceIncidence.sentencesid.size();
-//             if(size==0)
-// {
-//               continue;
-//             }
-//                      //cout<<"size: "<<size<<endl;
-//                      //cout<<"size: "<<size<<endl;
-//                      // if(size==0)
-//                      // {
-//                      //      continue;
-//                      // }
-//                      sentenceToMove=generateRandomInteger(0,size-1);
-
-//                      sentenceid=sourceIncidence.sentenc:/esid[sentenceToMove];
-//                      cout<<"sentenceid: "<<sentenceid<<endl;
-//              incidenceDestinationIndex=generateRandomInteger(0,sizeOfIncidenceArray-1);
-//              incidenceDestination=(*(incidenceArray[incidenceDestinationIndex])).inci_id;
-
-//              linkSentenceToIncidence(incidenceDestinationIndex,incidenceDestination,sourceIncidenceIndex,sourceIncidenceId,sentenceid,sentenceToMove,matrix,0.5,incidenceArray,subincidenceArray);
-//              }
-//              catch (...)
-//              {
-//                  // catch anything thrown within try block that derives from std::exception
-//                  cout<<"what is the error???"<<i<<endl;
-//                  //cout << exc.what();
-//              }
-//      }
-//      //let see how many incidence left in incidenceArray
-//      cout<<"incidence get left is here: "<<incidenceArray.size()<<endl;
-//      //to see what incidence has the most sentenceId. to see what is the max sentence count in the incidence.
-//      unsigned long maxSentenceCount=0;
-//      Incidence* needToCheck;
-//      for(Incidence* inc:incidenceArray)
-//      {
-//        if(maxSentenceCount<(*inc).sentencesid.size())
-//        {
-//         needToCheck=inc;
-//        }
-
-//                 maxSentenceCount=max(maxSentenceCount,(*inc).sentencesid.size());
-
-//      }
-//      // cout<<"incidenceid looking at is: "<<(*needToCheck).inci_id<<endl;
-//      // cout<<"max sentenceids is this: "<<maxSentenceCount<<endl;
-//      for(string index :(*needToCheck).sentencesid)
-//      {
-//       cout<<"sentenceid to check: "<<index<<endl;
-//      }
-//      // cout<<"similarirty: "<<getSimilarityByMatrixIndex(matrix,stoi((*needToCheck).sentencesid[0]),stoi((*needToCheck).sentencesid[1]))<<endl;
-//      // cout<<"similarirty: "<<getSimilarityByMatrixIndex(matrix,stoi((*needToCheck).sentencesid[1]),stoi((*needToCheck).sentencesid[2]))<<endl;
-//      // cout<<"similarirty: "<<getSimilarityByMatrixIndex(matrix,stoi((*needToCheck).sentencesid[0]),stoi((*needToCheck).sentencesid[2]))<<endl;
-
-//      //test generateRandomInteger,
-//      vector<int> test=*(splitTheIntegerIntoRandomPart(17));
-//      for(int i: test)
-//      {
-//              cout<<"hey number"<<i<<endl;
-//      }
-//      cout<<"test size is: "<<test.size()<<endl;
-// vector<int> ressult=shuffleTheIndexOfVector(10);
-// if( __cplusplus == 201103L ) std::cout << "C++11\n" ;
-// else if( __cplusplus == 19971L ) std::cout << "C++98\n" ;
-// else std::cout << "pre-standard C++\n" ;
-// //  return 0;
-
-// //test guid string generator
-
-
-// }
 int main(int argc, char **argv)
 {
     //initialize global feature weight
@@ -927,7 +813,7 @@ int main(int argc, char **argv)
     //iteration times
     int iteration = atoi(argv[2]);
 
-    string outputfile=argv[3];
+    string outputfile = argv[3];
 
     cout << "score threshold is: " << score << endl;
     cout << "No of iterations: " << iteration << endl;
@@ -998,20 +884,6 @@ int main(int argc, char **argv)
 
     vector<Incidence *> incidenceArray;
     vector<Subincidence *> subincidenceArray;
-    //Incidence* incidenceArray[xlength];
-
-    // for(int i = 0; i < xlength; i++)
-    // {
-    //     sentenceArray.push_back(new Sentence(to_string(i)));
-    // }
-    //initialize all the incidence.
-    // for(int i = 0; i < xlength; i++)
-    // {
-    //     //this will allocate on the stack.
-    //     vector<string> sentencesid;
-    //     sentencesid.push_back(to_string(i));
-    //     incidenceArray.push_back(new Incidence(to_string(i), sentencesid));
-    // }
 
     int sentencesSize = sentenceArray.size();
     //initialize each sentence as an incidence.
@@ -1034,133 +906,82 @@ int main(int argc, char **argv)
     string sourceIncidenceId = "";
     int globalSize = incidenceArray.size();
     lastActiveIncidenceIndex = globalSize - 1;
-    SharedResources* shared=new SharedResources(globalSize-1);
-    //cout << "last active: " + to_string(lastActiveIncidenceIndex) << endl;
-    //int linkedcount = 0;
-    // for(int i = 0; i < iteration; i++)
-    // {
-    //     try
-    //     {
-    //         sizeOfIncidenceArray = incidenceArray.size();
-    //         //cout<<"size of incidence array is: "<<sizeOfIncidenceArray<<endl;
-    //         sourceIncidenceIndex = generateRandomInteger(0, sizeOfIncidenceArray - 1);
-    //         Incidence sourceIncidence = *(incidenceArray[sourceIncidenceIndex]);
-    //         sourceIncidenceId = sourceIncidence.inci_id;
-    //         int size = sourceIncidence.sentencesid.size();
-    //         //ToFo:if there is no sentence in the incidence we need to replace the tail incidence with the current one.
-    //         if(size == 0)
-    //         {
-    //             //sawp the incidence with the last one
-    //             incidenceArray[sourceIncidenceIndex] = incidenceArray[lastActiveIncidenceIndex];
-    //             //swap the last active incidenceIndex at the empty spot, then decreas the lastActiveIncidenceIndex.
-    //             lastActiveIncidenceIndex = lastActiveIncidenceIndex - 1;
-    //             continue;
-    //         }
-    //         //otherwise choose a sentence to move
-    //         int sentenceIndexInSource = generateRandomInteger(0, size - 1);
-    //         //in the sentencesid store the index of the global sentence array.
-    //         int sentenceGlobalIndex = sourceIncidence.sentencesid[sentenceIndexInSource];
-    //         //cout << to_string(sentenceIndexInSource) + " " + to_string(sentenceGlobalIndex) << endl;
-    //         destinationIncidenceIndex = generateRandomInteger(0, sizeOfIncidenceArray - 1);
-    //         incidenceDestination = (*(incidenceArray[ destinationIncidenceIndex])).inci_id;
-    //         map<string, int> weightMap;
+    SharedResources *shared = new SharedResources(globalSize - 1);
 
-    //         weightMap["code"] = 1;
-    //         weightMap["rootcode"] = 0;
-    //         weightMap["year"] = 1;
-    //         weightMap["month"] = 1;
-    //         weightMap["src_actor"] = 1;
-    //         weightMap["src_agent"] = 1;
-    //         weightMap["tgt_actor"] = 1;
-    //         weightMap["tgt_agent"] = 1;
+    clock_t begin = clock();
+    thread t1(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 1);
+    thread t2(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 2);
+    thread t3(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 3);
+    thread t4(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 4);
+    thread t5(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 5);
+    thread t6(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 6);
+    thread t7(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 7);
+    thread t8(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 8);
 
-    //         double originalSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceIndexInSource);
-    //         double newSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceIndexInSource);
-    //         double originalPairs = getPropertyValueMatch(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceGlobalIndex, true, score, weightMap);
-    //         double newPairs = getPropertyValueMatch(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceGlobalIndex, false, score, weightMap);
-    //         //using the metroplis hastings algorithms here
-    //         double originalFinalScore = (1.0 / 13.0) * originalSimilarity + (12.0 / 13.0) * originalPairs;
-    //         double newFinalScore = (1.0 / 13.0) * newSimilarity + (12.0 / 13.0) * newPairs;
-    //         //double mh_value = min(1.0, originalFinalScore / newFinalScore);
-    //         double mh_value = min(1.0, newSimilarity / originalSimilarity );
+    thread t9(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 9);
+    thread t10(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 10);
+    thread t11(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 11);
+    thread t12(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 12);
+    thread t13(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 13);
+    thread t14(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 14);
+    thread t15(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 15);
+    thread t16(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 16);
 
-    //         //not link if 3 pairs not match for the new configureation
-    //         //give a new similairty threshold and asee
-    //         if(newPairs >= score)
-    //         {
-    //             if(originalSimilarity < newSimilarity && newSimilarity > 0.30)
-    //             {
-    //                 linkSentenceToIncidence(incidenceArray, destinationIncidenceIndex, sourceIncidenceIndex, sentenceGlobalIndex, sentenceIndexInSource);
-    //                 linkedcount++;
-    //             }
-    //             else
-    //             {
-    //                 //only when >0.3 random number less than mn_value will link, give it somechance when the dest result<0.35 to still link them
-    //                 //if(mh_value!=1&&generateRandomInteger(96, 100) / 100.0 < mh_value)
-    //                 if(generateRandomInteger(0, 100) / 100.0 < 0.02)
-    //                 {
-    //                     linkSentenceToIncidence(incidenceArray, destinationIncidenceIndex, sourceIncidenceIndex, sentenceGlobalIndex, sentenceIndexInSource);
-    //                     linkedcount++;
-
-    //                 }
-
-    //             }
-
-    //         }
-
-    //     }
-    //     catch (...)
-    //     {
-    //         // catch anything thrown within try block that derives from std::exception
-    //         cout << "what is the error???" << i << endl;
-    //         //cout << exc.what();
-    //     }
-    // }
-    
-
-  //   for(int i=0;i<32;i++)
-  //   {
-		// thread t(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,i);    	
-		// t.join();
-  //   }
+    thread t17(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 17);
+    thread t18(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 18);
+    thread t19(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 19);
+    thread t20(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 20);
+    thread t21(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 21);
+    thread t22(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 22);
+    thread t23(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 23);
+    thread t24(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 24);
 
 
-    thread t1(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,1);
-    thread t2(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,2);
-    thread t3(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,3);
-    thread t4(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,4);
-    thread t5(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,5);
-    thread t6(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,6);
-    thread t7(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,7);
-    thread t8(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,8);
+    thread t25(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 25);
+    thread t26(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 26);
+    thread t27(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 27);
+    thread t28(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 28);
+    thread t29(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 29);
+    thread t30(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 30);
+    thread t31(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 31);
+    thread t32(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 32);
 
-    thread t9(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,9);
-    thread t10(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,10);
-    thread t11(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,11);
-    thread t12(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,12);
-    thread t13(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,13);
-    thread t14(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,14);
-    thread t15(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,15);
-    thread t16(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,16);
+    thread t33(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 33);
+    thread t34(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 34);
+    thread t35(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 35);
+    thread t36(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 36);
+    thread t37(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 37);
+    thread t38(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 38);
+    thread t39(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 39);
+    thread t40(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 40);
 
-    thread t17(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,17);
-    thread t18(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,18);
-    thread t19(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,19);
-    thread t20(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,20);
-    thread t21(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,21);
-    thread t22(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,22);
-    thread t23(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,23);
-    thread t24(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,24);
+    thread t41(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 41);
+    thread t42(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 42);
+    thread t43(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 43);
+    thread t44(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 44);
+    thread t45(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 45);
+    thread t46(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 46);
+    thread t47(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 47);
+    thread t48(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 48);
+
+    thread t49(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 49);
+    thread t50(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 50);
+    thread t51(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 51);
+    thread t52(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 52);
+    thread t53(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 53);
+    thread t54(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 54);
+    thread t55(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 55);
+    thread t56(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 56);
 
 
-    thread t25(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,25);
-    thread t26(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,26);
-    thread t27(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,27);
-    thread t28(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,28);
-    thread t29(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,29);
-    thread t30(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,30);
-    thread t31(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,31);
-    thread t32(do_work,ref(incidenceArray),ref(sentenceArray),ref(*shared),iteration,score,32);
+    thread t57(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 57);
+    thread t58(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 58);
+    thread t59(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 59);
+    thread t60(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 60);
+    thread t61(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 61);
+    thread t62(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 62);
+    thread t63(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 63);
+    thread t64(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 64);
 
     t1.join();
     t2.join();
@@ -1197,26 +1018,69 @@ int main(int argc, char **argv)
     t30.join();
     t31.join();
     t32.join();
-    
-        //do_work(incidenceArray,sentenceArray,*shared,iteration,score);
-   // cout << "linked count: " + to_string(linkedcount) << endl;
+
+    t33.join();
+    t34.join();
+    t35.join();
+    t36.join();
+    t37.join();
+    t38.join();
+    t39.join();
+    t40.join();
+
+    t41.join();
+    t42.join();
+    t43.join();
+    t44.join();
+    t45.join();
+    t46.join();
+    t47.join();
+    t48.join();
+
+    t49.join();
+    t50.join();
+    t51.join();
+    t52.join();
+    t53.join();
+    t54.join();
+    t55.join();
+    t56.join();
+
+    t57.join();
+    t58.join();
+    t59.join();
+    t60.join();
+    t61.join();
+    t62.join();
+    t63.join();
+    t64.join();
+
+    clock_t end = clock();
+
+    double elapsed_secs = double(end - begin)/CLOCKS_PER_SEC;
+
+    //do_work(incidenceArray,sentenceArray,*shared,iteration,score);
+    // cout << "linked count: " + to_string(linkedcount) << endl;
     cout << "last active later: " + to_string((*shared).lastActiveIncidenceIndex) << endl;
     //int count = 0;
     ofstream out(outputfile);
     if(!out)
     {
-    	cout<<"could not open file"<<endl;
+        cout << "could not open file" << endl;
+        return 0;
     }
     //out.close();
-    for(int i = 0; i <(*shared).lastActiveIncidenceIndex; i++)
+    out << "time taken in seconds with " << iteration << " score" << score << " in seconds: " << elapsed_secs << endl;
+    for(int i = 0; i < (*shared).lastActiveIncidenceIndex; i++)
     {
         vector<int> sentencesid = (*(incidenceArray[i])).sentencesid;
         if(sentencesid.size() > 1)
         {
             //count++;
-           // cout<<"you ever get here?"<<endl;
-            int curr1 = 0;
-            int curr2 = 1;
+            // cout<<"you ever get here?"<<endl;
+            int curr1 = -1;
+            int curr2 = -1;
+            int curr3 = -1;
             for(unsigned int j = 0; j < sentencesid.size(); j++)
             {
                 int curr = sentencesid[j];
@@ -1228,14 +1092,24 @@ int main(int argc, char **argv)
                 {
                     curr2 = curr;
                 }
+                if(j == 2)
+                {
+                    curr3 = curr;
+                }
+
                 string realid = (*((*(sentenceArray[curr])).featureValue)).id;
                 cout << realid << endl;
-                out<<realid<<endl;
+                out << realid << endl;
 
             }
             cout << "cosine similiarty: " << getSimilarityBySentenceId(sentenceArray, curr1, curr2) << endl;
-            out<<getSimilarityBySentenceId(sentenceArray, curr1, curr2)<<endl;
-            out<<" "<<endl;
+            out << getSimilarityBySentenceId(sentenceArray, curr1, curr2) << endl;
+            if(curr3 != -1)
+            {
+                out << "more than 2 together!" << endl;
+                out << getSimilarityBySentenceId(sentenceArray, curr2, curr3) << endl;
+            }
+            out << " " << endl;
             cout << " " << endl;
             cout << " " << endl;
             //return 0;
@@ -1247,37 +1121,7 @@ int main(int argc, char **argv)
 
     }
 
-    //let see how many incidence left in incidenceArray
-    // cout << "incidence get left is here: " << incidenceArray.size() << endl;
-    // //to see what incidence has the most sentenceId. to see what is the max sentence count in the incidence.
-    // unsigned long maxSentenceCount = 0;
-    // Incidence *needToCheck;
-    // for(Incidence *inc : incidenceArray)
-    // {
-    //     if(maxSentenceCount < (*inc).sentencesid.size())
-    //     {
-    //         needToCheck = inc;
-    //     }
 
-    //     maxSentenceCount = max(maxSentenceCount, (*inc).sentencesid.size());
-
-    // }
-    // // cout<<"incidenceid looking at is: "<<(*needToCheck).inci_id<<endl;
-    // // cout<<"max sentenceids is this: "<<maxSentenceCount<<endl;
-    // for(string index : (*needToCheck).sentencesid)
-    // {
-    //     cout << "sentenceid to check: " << index << endl;
-    // }
-    // // cout<<"similarirty: "<<getSimilarityByMatrixIndex(matrix,stoi((*needToCheck).sentencesid[0]),stoi((*needToCheck).sentencesid[1]))<<endl;
-    // // cout<<"similarirty: "<<getSimilarityByMatrixIndex(matrix,stoi((*needToCheck).sentencesid[1]),stoi((*needToCheck).sentencesid[2]))<<endl;
-    // // cout<<"similarirty: "<<getSimilarityByMatrixIndex(matrix,stoi((*needToCheck).sentencesid[0]),stoi((*needToCheck).sentencesid[2]))<<endl;
-
-    // //test generateRandomInteger,
-    // vector<int> test = *(splitTheIntegerIntoRandomPart(17));
-    // for(int i : test)
-    // {
-    //     cout << "hey number" << i << endl;
-    // }
     // cout << "test size is: " << test.size() << endl;
     // vector<int> ressult = shuffleTheIndexOfVector(10);
     // if( __cplusplus == 201103L ) std::cout << "C++11\n" ;
