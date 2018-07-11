@@ -1071,6 +1071,7 @@ int main(int argc, char **argv)
     }
     //out.close();
     out << "time taken in seconds with " << iteration << " score" << score << " in seconds: " << elapsed_secs << endl;
+    cout << "last active incidence index: " + to_string((*shared).lastActiveIncidenceIndex) << endl;
     for(int i = 0; i < (*shared).lastActiveIncidenceIndex; i++)
     {
         vector<int> sentencesid = (*(incidenceArray[i])).sentencesid;
@@ -1098,11 +1099,11 @@ int main(int argc, char **argv)
                 }
 
                 string realid = (*((*(sentenceArray[curr])).featureValue)).id;
-                cout << realid << endl;
+              //  cout << realid << endl;
                 out << realid << endl;
 
             }
-            cout << "cosine similiarty: " << getSimilarityBySentenceId(sentenceArray, curr1, curr2) << endl;
+           // cout << "cosine similiarty: " << getSimilarityBySentenceId(sentenceArray, curr1, curr2) << endl;
             out << getSimilarityBySentenceId(sentenceArray, curr1, curr2) << endl;
             if(curr3 != -1)
             {
@@ -1112,12 +1113,7 @@ int main(int argc, char **argv)
             out << " " << endl;
             cout << " " << endl;
             cout << " " << endl;
-            //return 0;
         }
-        // if(count >= linkedcount - 2)
-        // {
-        //     return 0;
-        // }
 
     }
 
