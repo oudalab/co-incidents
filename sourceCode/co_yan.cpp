@@ -801,12 +801,13 @@ void do_work_biased(vector<Incidence *> &incidenceArray, vector<Sentence *> &sen
             // while can those bound be changed each time???
             int explore_range = 30;
             int leftBound = max(0, sentenceGlobalIndex - explore_range);
-            int rightBound = min(sentenceGlobalIndex + explore_range, sizeOfSentences);
+            //sicen it includes the bound so need to -1.
+            int rightBound = min(sentenceGlobalIndex + explore_range, sizeOfSentences-1);
             int nearSentenceId = generateRandomInteger(leftBound, rightBound);
-            cout<<"nearsentenceid: "<<nearSentenceId<<endl;
+           // cout<<"nearsentenceid: "<<nearSentenceId<<endl;
             //then find which incidence this near incidence sentence is belong to
             int destinationIncidenceIndex = (*(sentenceArray[nearSentenceId])).incidence_id;
-            cout<<"destinationidex "<<destinationIncidenceIndex<<endl;
+            //cout<<"destinationidex "<<destinationIncidenceIndex<<endl;
 //            int sourceIncidenceId = sourceIncidence.inci_id;
             if(sourceIncidenceIndex == destinationIncidenceIndex)
             {
@@ -852,7 +853,7 @@ void do_work_biased(vector<Incidence *> &incidenceArray, vector<Sentence *> &sen
 
             //not link if 3 pairs not match for the new configureation
             //give a new similairty threshold and asee
-            cout<<"you ever get here?"<<endl;
+          //  cout<<"you ever get here?"<<endl;
             if(newPairs >= score)
             {
                 if(originalSimilarity < newSimilarity && newSimilarity >= 0.5)
