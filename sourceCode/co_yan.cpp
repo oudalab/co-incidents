@@ -799,7 +799,14 @@ void do_work_biased(vector<Incidence *> &incidenceArray, vector<Sentence *> &sen
 
 
             // while can those bound be changed each time???
+            //will be 70 percent get
+            //10% ith large range 100, 90% with small range which is 80%
             int explore_range = 30;
+            if(generateRandomInteger(0,100)/100.0<0.1)
+            {
+            	explore_range=100;
+            }
+            
             int leftBound = max(0, sentenceGlobalIndex - explore_range);
             //sicen it includes the bound so need to -1.
             int rightBound = min(sentenceGlobalIndex + explore_range, sizeOfSentences-1);
@@ -917,7 +924,7 @@ int main(int argc, char **argv)
         string dir = "../dataWithAllPropertyWithEmbedding300-new.data";
         if(biased)
         {
-            dir = "../sorted-dataWithAllPropertyWithEmbedding300-new.data";
+            dir = "../sorted-unique-dataWithAllPropertyWithEmbedding300-new.data";
         }
         Json::Value root;   // will contains the root value after parsing.
         Json::Reader reader;
@@ -1315,7 +1322,8 @@ int main(int argc, char **argv)
 
     //do_work_biased(incidenceArray,sentenceArray,*shared,iteration,score);
     // cout << "linked count: " + to_string(linkedcount) << endl;
-    cout << "last active later: " + to_string((*shared).lastActiveIncidenceIndex) << endl;
+    cout<< "last active when start:"<<sentenceArray.size()<<endl;
+    cout << "last active when end: " + to_string((*shared).lastActiveIncidenceIndex) << endl;
     //int count = 0;
     ofstream out(outputfile);
     if(!out)
