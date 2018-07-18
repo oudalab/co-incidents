@@ -159,7 +159,7 @@ public:
     Sentence(string sentenceid, SentenceFeatureValue *featureValue1, int incidence_id1)
     {
         sen_id = sentenceid;
-        incidence_id=incidence_id1;
+        incidence_id = incidence_id1;
         featureValue = featureValue1;
         pthread_mutex_init(&mutex, NULL);
     }
@@ -185,6 +185,7 @@ class SharedResources
 
 public:
     int lastActiveIncidenceIndex;
+    bool jumpout = false;
     pthread_mutex_t mutex;
     SharedResources(int lastActiveIncidenceIndex1)
     {
@@ -287,10 +288,10 @@ double vectorLength(int *vect)
 
 double cosineSimilarity(int *vec1, int *vec2)
 {
-	if ((vectorLength(vec1) * vectorLength(vec2))==0)
-	{
-		return 0;
-	}
+    if ((vectorLength(vec1) * vectorLength(vec2)) == 0)
+    {
+        return 0;
+    }
     return (dotProduct(vec1, vec2) * 1.0) / (vectorLength(vec1) * vectorLength(vec2));
 }
 
@@ -646,7 +647,7 @@ int getPropertyValueMatch(vector<Sentence *> &sentenceArray, vector<Incidence *>
 
 void linkSentenceToIncidence(vector<Incidence *> &incidenceArray, vector<Sentence *> &sentenceArray, int destincidenceindex, int sourceincidenceindex, int sentenceindex, int SenIndexInOriginalSentenceIds, SharedResources &shared)
 {
-	
+
     Incidence *source = (incidenceArray[sourceincidenceindex]);
     // int old_incidence_id=(*source).inci_id;
     vector<int> sourceSentencesid = (*source).sentencesid;
@@ -671,7 +672,7 @@ void linkSentenceToIncidence(vector<Incidence *> &incidenceArray, vector<Sentenc
         shared.lastActiveIncidenceIndex = shared.lastActiveIncidenceIndex - 1;
         shared.unlock();
         // cout<<"after linked last active: "<<
-        //cout<<lastActiveIncidenceIndex<<endl;
+        //cout<<lastActiveIncidenceIndex<<endl
     }
 
     //need to make thsi a pointer otherwise this information add new sentence into it will not get stored!
@@ -742,7 +743,7 @@ void do_work(vector<Incidence *> &incidenceArray, vector<Sentence *> &sentenceAr
 
             double originalSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceGlobalIndex, true);
             double newSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceGlobalIndex, false);
-//            double originalPairs = getPropertyValueMatch(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceGlobalIndex, true, score, weightMap);
+            //            double originalPairs = getPropertyValueMatch(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceGlobalIndex, true, score, weightMap);
             double newPairs = getPropertyValueMatch(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceGlobalIndex, false, score, weightMap);
             //using the metroplis hastings algorithms here
             //double originalFinalScore = (1.0 / 13.0) * originalSimilarity + (12.0 / 13.0) * originalPairs;
@@ -782,8 +783,71 @@ void do_work_biased(vector<Incidence *> &incidenceArray, vector<Sentence *> &sen
 
     cout << "thread id: " << threadid << " get started!" << endl;
     int linkedcount = 0;
-    for(int i = 0; i < iteration; i++)
+    std::ofstream *out;
+    if(threadid == 1)
     {
+        out = new ofstream("stats.txt");
+        if(!(*out))
+        {
+            cout << "could not open file" << endl;
+            //return ;
+        }
+    }
+    //std::ofstream  out(statsfile);
+    clock_t start1 = clock();
+    double elapsed_secs = 0.0;
+    int successivenochange = 0; //this is successive 30 seconds no change count
+    bool flag = false;
+    int oldindex = shared.lastActiveIncidenceIndex;
+    /*for(int i = 0; i < iteration; i++)
+    {*/
+    //sicne each seconds will be logged too many times
+    int previousSecond=-1;
+    while(!shared.jumpout)
+    {
+        //make
+        if(threadid == 1)
+        {
+            elapsed_secs = double(clock() - start1) / CLOCKS_PER_SEC; //in seconds
+            //logging the stats every 60 seconds
+            int currSeconds=(int)elapsed_secs;
+            if(currSeconds% 30 == 0&&(currSeconds!=previousSecond))
+            {
+            	previousSecond=currSeconds;
+                int currindex = shared.lastActiveIncidenceIndex;
+                int diff = oldindex - currindex;
+                cout << "diff:" << diff << endl;
+                (*out) << diff << ",";
+               // (*out) << "seconds:" << (int)elapsed_secs << endl;
+                if(diff == 0)
+                {
+                    if(flag == true)
+                    {
+                        successivenochange++;
+                    }
+                    flag = true;
+                }
+                else
+                {
+                    flag = false;
+                    successivenochange = 0;
+                }
+                oldindex = currindex;
+                //10 mins explore if nothing changed the probably we converged!
+                //20*30/60=10 mins
+                if(successivenochange == 30) 
+                {
+
+                    //break;
+                    shared.lock();
+                    shared.jumpout=true;
+                    shared.unlock();
+                }
+                oldindex = currindex;
+
+            }
+        }
+
         try
         {
             int sizeOfIncidenceArray = incidenceArray.size();
@@ -802,20 +866,20 @@ void do_work_biased(vector<Incidence *> &incidenceArray, vector<Sentence *> &sen
             //will be 70 percent get
             //10% ith large range 100, 90% with small range which is 80%
             int explore_range = 30;
-            if(generateRandomInteger(0,100)/100.0<0.1)
+            if(generateRandomInteger(0, 100) / 100.0 < 0.1)
             {
-            	explore_range=100;
+                explore_range = 100;
             }
-            
+
             int leftBound = max(0, sentenceGlobalIndex - explore_range);
             //sicen it includes the bound so need to -1.
-            int rightBound = min(sentenceGlobalIndex + explore_range, sizeOfSentences-1);
+            int rightBound = min(sentenceGlobalIndex + explore_range, sizeOfSentences - 1);
             int nearSentenceId = generateRandomInteger(leftBound, rightBound);
-           // cout<<"nearsentenceid: "<<nearSentenceId<<endl;
+            // cout<<"nearsentenceid: "<<nearSentenceId<<endl;
             //then find which incidence this near incidence sentence is belong to
             int destinationIncidenceIndex = (*(sentenceArray[nearSentenceId])).incidence_id;
             //cout<<"destinationidex "<<destinationIncidenceIndex<<endl;
-//            int sourceIncidenceId = sourceIncidence.inci_id;
+            //            int sourceIncidenceId = sourceIncidence.inci_id;
             if(sourceIncidenceIndex == destinationIncidenceIndex)
             {
                 continue;
@@ -850,7 +914,7 @@ void do_work_biased(vector<Incidence *> &incidenceArray, vector<Sentence *> &sen
 
             double originalSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceGlobalIndex, true);
             double newSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceGlobalIndex, false);
-//            double originalPairs = getPropertyValueMatch(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceGlobalIndex, true, score, weightMap);
+            //            double originalPairs = getPropertyValueMatch(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceGlobalIndex, true, score, weightMap);
             double newPairs = getPropertyValueMatch(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceGlobalIndex, false, score, weightMap);
             //using the metroplis hastings algorithms here
             //double originalFinalScore = (1.0 / 13.0) * originalSimilarity + (12.0 / 13.0) * originalPairs;
@@ -860,7 +924,7 @@ void do_work_biased(vector<Incidence *> &incidenceArray, vector<Sentence *> &sen
 
             //not link if 3 pairs not match for the new configureation
             //give a new similairty threshold and asee
-          //  cout<<"you ever get here?"<<endl;
+            //  cout<<"you ever get here?"<<endl;
             if(newPairs >= score)
             {
                 if(originalSimilarity < newSimilarity && newSimilarity >= 0.5)
@@ -870,6 +934,7 @@ void do_work_biased(vector<Incidence *> &incidenceArray, vector<Sentence *> &sen
                     linkSentenceToIncidence(incidenceArray, sentenceArray, destinationIncidenceIndex, sourceIncidenceIndex, sentenceGlobalIndex, sentenceIndexInSource, ref(shared));
                     // cout<<"sentence globalindex: "<<sentenceGlobalIndex<<endl;
                     linkedcount++;
+                   // cout << "linked count: " << linkedcount << endl;
 
                 }
             }
@@ -878,13 +943,20 @@ void do_work_biased(vector<Incidence *> &incidenceArray, vector<Sentence *> &sen
         catch (...)
         {
             // catch anything thrown within try block that derives from std::exception
-            cout << "what is the error???" << i << endl;
+            cout << "what is the error???" << endl;
             //cout << exc.what();
         }
     }
 
 
     cout << "linked count is: " << linkedcount << endl;
+    if(threadid == 1)
+    {
+        (*out).close();
+        (*out).clear(); // clear flags
+
+    }
+
 }
 
 
@@ -906,9 +978,11 @@ int main(int argc, char **argv)
     //iteration times
     int iteration = atoi(argv[2]);
 
-    string outputfile = argv[3];
+    string outputfile = std::string(argv[3]) + ".rst";
+
 
     bool biased = false;
+    string statsfile = std::string(argv[3]) + ".stas";
 
     string clibias = argv[4];
     if(clibias == "1")
@@ -1005,12 +1079,12 @@ int main(int argc, char **argv)
     }
     cout << "size of the incidence array is " << to_string(incidenceArray.size()) << endl;
 
-//    int  destinationIncidenceIndex = 0;
+    //    int  destinationIncidenceIndex = 0;
     //this will be the incidenceid.
     string incidenceDestination = "";
-  //  int sourceIncidenceIndex = 0;
+    //  int sourceIncidenceIndex = 0;
     //:wq
-//     int sizeOfIncidenceArray = 0;
+    //     int sizeOfIncidenceArray = 0;
     string sentenceid = "";
     string sourceIncidenceId = "";
     int globalSize = incidenceArray.size();
@@ -1020,8 +1094,6 @@ int main(int argc, char **argv)
     clock_t begin = clock();
     if(!biased)
     {
-
-
         thread t1(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 1);
         thread t2(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 2);
         thread t3(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 3);
@@ -1095,6 +1167,8 @@ int main(int argc, char **argv)
         thread t62(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 62);
         thread t63(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 63);
         thread t64(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 64);
+
+
 
         t1.join();
         t2.join();
@@ -1244,6 +1318,7 @@ int main(int argc, char **argv)
         thread t63(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 63);
         thread t64(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 64);
 
+
         t1.join();
         t2.join();
         t3.join();
@@ -1315,6 +1390,8 @@ int main(int argc, char **argv)
         t62.join();
         t63.join();
         t64.join();
+
+
     }
     clock_t end = clock();
 
@@ -1322,10 +1399,10 @@ int main(int argc, char **argv)
 
     //do_work_biased(incidenceArray,sentenceArray,*shared,iteration,score);
     // cout << "linked count: " + to_string(linkedcount) << endl;
-    cout<< "last active when start:"<<sentenceArray.size()<<endl;
-    cout << "last active when end: " + to_string((*shared).lastActiveIncidenceIndex) << endl;
+  
     //int count = 0;
     ofstream out(outputfile);
+    // out.open(outputfile);
     if(!out)
     {
         cout << "could not open file" << endl;
@@ -1337,6 +1414,13 @@ int main(int argc, char **argv)
     {
         out << "I am doing biased sampling" << endl;
     }
+    cout << "last active when start:" << sentenceArray.size() << endl;
+    cout << "last active when end: " + to_string((*shared).lastActiveIncidenceIndex) << endl;
+    out << "last active when start:" << sentenceArray.size() << endl;
+    out << "last active when end: " <<(*shared).lastActiveIncidenceIndex << endl;
+    int totallinked=sentenceArray.size()-(*shared).lastActiveIncidenceIndex;
+    cout<<"total linked:"<<totallinked<<endl;
+    out<<"total linked:"<<totallinked<<endl;
     for(int i = 0; i < (*shared).lastActiveIncidenceIndex; i++)
     {
         vector<int> sentencesid = (*(incidenceArray[i])).sentencesid;
