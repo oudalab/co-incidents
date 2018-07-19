@@ -1,0 +1,1 @@
+using the the sampling data and stop the process if nothing get linked within 50 mins, the training result and also how many records get linked in each 30 seconds in stored in this folder.
