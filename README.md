@@ -17,6 +17,8 @@ for example:
 kill-> protest-> kill.
 /home/yan/coincidenceData
 
+## event visualization and user interaction with the visulization.
+
 # steps to get the tfidf data from the sampleEventData.json
  >run tfidf.py first which will generate the bow_features model and bow_vectors model
  >run generateEmbeddingData.py will add the sentence vector to the output file, the output file is the one we are going to use
