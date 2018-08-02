@@ -30,8 +30,8 @@ def create_event(conn, event):
     :return: project id
     """
     try:
-	    sql = ''' INSERT INTO events(embed,tgt_actor,root_code,src_actor,mediasource2,target,goldstein,tgt_other_agent,code,day,month,quad_class,mediasource1,src_other_agent,id,tgt_agent,date8,year)
-	              VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) '''
+	    sql = ''' INSERT INTO events(embed,tgt_actor,root_code,src_actor,mediasource2,target,goldstein,tgt_other_agent,code,day,month,quad_class,mediasource1,src_other_agent,id,tgt_agent,date8,year,src_agent)
+	              VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) '''
 	    cur = conn.cursor()
 	    cur.execute(sql, event)
     except Exception as e:
