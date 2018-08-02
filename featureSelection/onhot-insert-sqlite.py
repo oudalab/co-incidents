@@ -84,7 +84,7 @@ def main():
                      # data['tgt_agent']=doc['tgt_agent']
                      # data['tgt_other_agent']=doc['tgt_other_agent']
                      #dataWithVec.append(data)
-                    event=(str(hotembedding.todense().tolist()[0]).strip('[]'),doc['tgt_actor'],doc['root_code'],doc['src_actor'],doc["source"],doc['target'],doc['goldstein'],doc['tgt_other_agent'],doc["code"],doc['day'],doc['month'],doc['quad_class'],doc["from"],doc['src_othere_agent'],doc["mongoid"],doc['tgt_agent'],doc['date8'],doc['year'])	       
+                    event=(str(hotembedding.todense().tolist()[0]).strip('[]'),doc['tgt_actor'],doc['root_code'],doc['src_actor'],doc["source"],doc['target'],doc['goldstein'],doc['tgt_other_agent'],doc["code"],doc['day'],doc['month'],doc['quad_class'],doc["from"],doc['src_othere_agent'],doc["mongoid"],doc['tgt_agent'],doc['date8'],doc['year'],doc['src_agent'])	       
                     create_event(conn,event)                 
                 except Exception as e:
                   	count=count+1;
