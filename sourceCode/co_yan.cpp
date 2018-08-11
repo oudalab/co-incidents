@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <array>
 #include <math.h>
+#include <sqlite3.h>
 #include <random>       // std::default_random_engine
 #include <chrono>       // std::chrono::system_clock
 //#include <uuid/uuid.h>
@@ -22,7 +23,8 @@
 #include <thread>
 #include <pthread.h>
 //this the dimenstion of the word embedding.
-#define EMBED_SIZE 300
+#define EMBED_SIZE 150
+#define BOUND 30
 //#define ITERATION 10000000
 using namespace std;
 int lastActiveIncidenceIndex = 0;
@@ -778,7 +780,7 @@ void do_work(vector<Incidence *> &incidenceArray, vector<Sentence *> &sentenceAr
     cout << "linked count is: " << linkedcount << endl;
 }
 
-void do_work_biased(vector<Incidence *> &incidenceArray, vector<Sentence *> &sentenceArray, SharedResources &shared, int iteration, int score, int threadid)
+void do_work_biased(vector<Incidence *> &incidenceArray, vector<Sentence *> &sentenceArray, SharedResources &shared, int iteration, int score, int threadid,string stasfilename)
 {
 
     cout << "thread id: " << threadid << " get started!" << endl;
@@ -786,7 +788,7 @@ void do_work_biased(vector<Incidence *> &incidenceArray, vector<Sentence *> &sen
     std::ofstream *out;
     if(threadid == 1)
     {
-        out = new ofstream("stats.txt");
+        out = new ofstream(stasfilename);
         if(!(*out))
         {
             cout << "could not open file" << endl;
@@ -835,7 +837,7 @@ void do_work_biased(vector<Incidence *> &incidenceArray, vector<Sentence *> &sen
                 oldindex = currindex;
                 //10 mins explore if nothing changed the probably we converged!
                 //20*30/60=10 mins
-                if(successivenochange == 30) 
+                if(successivenochange == BOUND) 
                 {
 
                     //break;
@@ -968,9 +970,9 @@ int main(int argc, char **argv)
     bool alive = true;
     vector<Sentence *> sentenceArray;
     // if you input two paramters the argc will be 3.
-    if (argc < 5)
+    if (argc < 7)
     {
-        cout << "input the scorethreshold and also the sample number: " << endl;
+        cout << "input the scorethreshold and also the sample number, filename, biased or not, and startdate, and enddate: " << endl;
         return 0;
     }
     //the score threshhold to make a decision link or not link
@@ -985,6 +987,9 @@ int main(int argc, char **argv)
     string statsfile = std::string(argv[3]) + ".stas";
 
     string clibias = argv[4];
+    string startdate=argv[5];
+    string enddate=argv[6];
+
     if(clibias == "1")
     {
         biased = true;
@@ -993,77 +998,130 @@ int main(int argc, char **argv)
 
     cout << "score threshold is: " << score << endl;
     cout << "No of iterations: " << iteration << endl;
-    while (alive)
-    {
-        string dir = "../dataWithAllPropertyWithEmbedding300-new.data";
-        if(biased)
+
+    /******start to connect to database********/
+
+    char                 q[999];
+    sqlite3*             db;
+    sqlite3_stmt*        stmt;
+    int                  row = 0;
+    int                  bytes;
+
+    string embed="";
+    string tgt_actor;
+    string src_actor;
+    string mediasource2;
+    string target;
+    string goldstein;
+    string tgt_other_agent;
+    string code;
+    string day;
+    string month;
+    string quad_class;
+    string mediasource1;
+    string src_other_agent;
+    string id;
+    string tgt_agent;
+    string date8;
+    string year;
+    string root_code;
+    string src_agent;
+
+    /*******start to connect to database *******/
+    //pair<int, int> adjs[4] = {make_pair(, current_node.second), ...};
+
+    q[sizeof q - 1] = '\0';
+    snprintf(
+        q,
+        sizeof q - 1,
+        ("SELECT * FROM events WHERE date8 >='"+startdate+"' and date8<='"+enddate+"'").c_str()
+        // ,
+        // ""
+    );
+
+    if (sqlite3_open ("../../coincidenceData/events.db", &db) != SQLITE_OK) {
+        fprintf(stderr, "Error opening database.\n");
+        return 2;
+    }
+    printf("Query: %s\n", q);
+
+    sqlite3_prepare(db, q, sizeof q, &stmt, NULL);
+
+    bool done = false;
+    //int i=-1;
+    while (!done) {
+        //printf("In select while\n");
+        switch (sqlite3_step (stmt)) {
+        case SQLITE_ROW:
         {
-            dir = "../sorted-unique-dataWithAllPropertyWithEmbedding300-new.data";
-        }
-        Json::Value root;   // will contains the root value after parsing.
-        Json::Reader reader;
-        std::ifstream test(dir, std::ifstream::binary);
-        cout << "start to parse!" << endl;
-        bool parsingSuccessful = reader.parse( test, root, false );
-        cout << "end parse!" << endl;
+        	 // i=i+1;
+            bytes = sqlite3_column_bytes(stmt, 0);
+            //this can be column 1,2 , 3 ....
+            embed  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0)); //embed
+            tgt_actor  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1)); //tgt_actor
+            root_code  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2)); //root_code           
+            src_actor  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3)); //src_actor
+            mediasource2  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4)); //mediasource2
+            target  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5)); //target
+            goldstein  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6)); //goldstein
+            tgt_other_agent  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7)); //tgt_other_agent
+            code = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 8)); //code
+            day = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 9)); //day
+            month = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 10)); //month
+            quad_class = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 11)); //quad_class
+            mediasource1 = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 12)); //mediasource1
+            src_other_agent= reinterpret_cast<const char*>(sqlite3_column_text(stmt, 13)); //src_other_agent
+            id = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 14)); //id
+            tgt_agent = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 15)); //tgt_agent
+            date8 = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 16)); //date8
+            year = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 17)); //year
+            src_agent=reinterpret_cast<const char*>(sqlite3_column_text(stmt, 18)); //source agent
 
-        if ( !parsingSuccessful )
+                 //int embedsize=150; //since the last position does not have the ,so the length that has the number will be (x+1)/2                 
+                 int *embed3 = new int[EMBED_SIZE];
+                 for(int j = 0; j < EMBED_SIZE; j++)
+                 {
+                     embed3[j] = (int)embed.at(j*2+1);
+                 }
+
+                 //SentenceFeatureValue *value = new SentenceFeatureValue(str(code), str(root_code), str(date8), str(id), str(year), str(src_actor), str(src_other_agent), str(tgt_actor), str(tgt_agent), str(month), str(day), str(embed3), i);
+                 SentenceFeatureValue *value = new SentenceFeatureValue(code, root_code, date8, id, year, src_actor, src_other_agent,tgt_actor,tgt_agent, month, day, embed3, row);
+                 //i will be the incidence id for this sentence
+                 sentenceArray.push_back(new Sentence(id, value, row));
+
+           if(row>0&&row<10)
+           {
+           	printf ("count %d:,(%d bytes)\n", row,bytes);
+           }  
+            
+            row++;
+            break;
+
+        }
+          
+
+        case SQLITE_DONE:
         {
-            // report to the user the failure and their locations in the document.
-            // std::cout  << reader.getFormatedErrorMessages()
-            //      << "\n";
-            std::cout << "failed to parse" << endl;
+        	done = true;
+            break;
         }
-        else
+            
+        default:
         {
-            //root is json array! here
-            //u can call root[0], root[1], root.size(); we have 546022 events here.
-            //for each event create a documents
-            std::cout << "successfully parsed" << endl;
-            Json::FastWriter fastWriter;
-            for(unsigned i = 0; i < root.size(); i++)
-            {
-                //string doc=fastWriter.write(root[i]["doc"]);
-                string code = fastWriter.write(root[i]["code"]);
-                string rootcode = fastWriter.write(root[i]["root_code"]);
-                //string country_code = fastWriter.write(root[i]["country_code"]);
-                string date8 = fastWriter.write(root[i]["date8"]);
-                //string geoname = fastWriter.write(root[i]["geoname"]);
-                string id = fastWriter.write(root[i]["id"]);
-                string year = fastWriter.write(root[i]["year"]);
-                string latitude = fastWriter.write(root[i]["latitude"]);
-                string longitude = fastWriter.write(root[i]["longitude"]);
-                string src_actor = fastWriter.write(root[i]["src_actor"]);
-                string src_agent = fastWriter.write(root[i]["src_agent"]);
-                string tgt_actor = fastWriter.write(root[i]["tgt_actor"]);
-                string tgt_agent = fastWriter.write(root[i]["tgt_agent"]);
-                string month = fastWriter.write(root[i]["month"]);
-                string day = fastWriter.write(root[i]["day"]);
-
-                //string embed=fastWriter.write(root[i]["embed"]);
-                auto embed2 = root[i]["embed"];
-                //this new is very important, otherwise the vector will be deallocated!!!!
-                int *embed3 = new int[EMBED_SIZE];
-                for(int j = 0; j < EMBED_SIZE; j++)
-                {
-                    embed3[j] = embed2[j].asInt();
-                }
-
-                SentenceFeatureValue *value = new SentenceFeatureValue(code, rootcode,  date8,  id, year, src_actor, src_agent, tgt_actor, tgt_agent, month, day, embed3, i);
-                //i will be the incidence id for this sentence
-                sentenceArray.push_back(new Sentence(id, value, i));
-
-
-            }
+        	fprintf(stderr, "Failed.\n");
+            return 1;
         }
-        alive = false;
+            
+        }
     }
 
-    int *vec1 = (*((*(sentenceArray[10000])).featureValue)).embed;
-    int *vec2 = (*((*(sentenceArray[9999])).featureValue)).embed;
+    sqlite3_finalize(stmt); 
+    cout<<"finished loading data from sqlite database!"<<endl;
+
+    int *vec1 = (*((*(sentenceArray[10])).featureValue)).embed;
+    int *vec2 = (*((*(sentenceArray[9])).featureValue)).embed;
     double cosine = cosineSimilarity(vec1, vec2);
     cout << cosine << endl;
-
     vector<Incidence *> incidenceArray;
     vector<Subincidence *> subincidenceArray;
 
@@ -1244,79 +1302,79 @@ int main(int argc, char **argv)
     }
     else
     {
-        thread t1(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 1);
-        thread t2(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 2);
-        thread t3(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 3);
-        thread t4(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 4);
-        thread t5(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 5);
-        thread t6(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 6);
-        thread t7(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 7);
-        thread t8(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 8);
+        thread t1(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 1,statsfile);
+        thread t2(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 2,statsfile);
+        thread t3(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 3,statsfile);
+        thread t4(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 4,statsfile);
+        thread t5(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 5,statsfile);
+        thread t6(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 6,statsfile);
+        thread t7(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 7,statsfile);
+        thread t8(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 8,statsfile);
 
-        thread t9(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 9);
-        thread t10(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 10);
-        thread t11(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 11);
-        thread t12(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 12);
-        thread t13(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 13);
-        thread t14(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 14);
-        thread t15(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 15);
-        thread t16(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 16);
+        thread t9(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 9,statsfile);
+        thread t10(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 10,statsfile);
+        thread t11(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 11,statsfile);
+        thread t12(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 12,statsfile);
+        thread t13(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 13,statsfile);
+        thread t14(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 14,statsfile);
+        thread t15(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 15,statsfile);
+        thread t16(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 16,statsfile);
 
-        thread t17(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 17);
-        thread t18(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 18);
-        thread t19(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 19);
-        thread t20(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 20);
-        thread t21(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 21);
-        thread t22(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 22);
-        thread t23(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 23);
-        thread t24(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 24);
-
-
-        thread t25(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 25);
-        thread t26(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 26);
-        thread t27(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 27);
-        thread t28(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 28);
-        thread t29(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 29);
-        thread t30(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 30);
-        thread t31(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 31);
-        thread t32(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 32);
-
-        thread t33(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 33);
-        thread t34(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 34);
-        thread t35(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 35);
-        thread t36(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 36);
-        thread t37(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 37);
-        thread t38(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 38);
-        thread t39(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 39);
-        thread t40(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 40);
-
-        thread t41(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 41);
-        thread t42(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 42);
-        thread t43(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 43);
-        thread t44(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 44);
-        thread t45(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 45);
-        thread t46(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 46);
-        thread t47(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 47);
-        thread t48(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 48);
-
-        thread t49(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 49);
-        thread t50(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 50);
-        thread t51(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 51);
-        thread t52(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 52);
-        thread t53(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 53);
-        thread t54(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 54);
-        thread t55(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 55);
-        thread t56(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 56);
+        thread t17(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 17,statsfile);
+        thread t18(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 18,statsfile);
+        thread t19(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 19,statsfile);
+        thread t20(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 20,statsfile);
+        thread t21(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 21,statsfile);
+        thread t22(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 22,statsfile);
+        thread t23(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 23,statsfile);
+        thread t24(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 24,statsfile);
 
 
-        thread t57(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 57);
-        thread t58(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 58);
-        thread t59(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 59);
-        thread t60(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 60);
-        thread t61(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 61);
-        thread t62(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 62);
-        thread t63(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 63);
-        thread t64(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 64);
+        thread t25(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 25,statsfile);
+        thread t26(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 26,statsfile);
+        thread t27(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 27,statsfile);
+        thread t28(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 28,statsfile);
+        thread t29(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 29,statsfile);
+        thread t30(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 30,statsfile);
+        thread t31(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 31,statsfile);
+        thread t32(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 32,statsfile);
+
+        thread t33(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 33,statsfile);
+        thread t34(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 34,statsfile);
+        thread t35(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 35,statsfile);
+        thread t36(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 36,statsfile);
+        thread t37(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 37,statsfile);
+        thread t38(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 38,statsfile);
+        thread t39(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 39,statsfile);
+        thread t40(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 40,statsfile);
+
+        thread t41(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 41,statsfile);
+        thread t42(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 42,statsfile);
+        thread t43(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 43,statsfile);
+        thread t44(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 44,statsfile);
+        thread t45(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 45,statsfile);
+        thread t46(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 46,statsfile);
+        thread t47(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 47,statsfile);
+        thread t48(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 48,statsfile);
+
+        thread t49(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 49,statsfile);
+        thread t50(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 50,statsfile);
+        thread t51(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 51,statsfile);
+        thread t52(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 52,statsfile);
+        thread t53(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 53,statsfile);
+        thread t54(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 54,statsfile);
+        thread t55(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 55,statsfile);
+        thread t56(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 56,statsfile);
+
+
+        thread t57(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 57,statsfile);
+        thread t58(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 58,statsfile);
+        thread t59(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 59,statsfile);
+        thread t60(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 60,statsfile);
+        thread t61(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 61,statsfile);
+        thread t62(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 62,statsfile);
+        thread t63(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 63,statsfile);
+        thread t64(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 64,statsfile);
 
 
         t1.join();
@@ -1431,6 +1489,7 @@ int main(int argc, char **argv)
             int curr1 = -1;
             int curr2 = -1;
             int curr3 = -1;
+            int prev=sentencesid[0];
             for(unsigned int j = 0; j < sentencesid.size(); j++)
             {
                 int curr = sentencesid[j];
@@ -1448,27 +1507,28 @@ int main(int argc, char **argv)
                 }
 
                 string realid = (*((*(sentenceArray[curr])).featureValue)).id;
-                cout << realid << endl;
+                //cout << realid << endl;
                 out << realid << endl;
-
+                if(j!=0)
+                {
+                //current sentence similarity with the previous one
+                 out << getSimilarityBySentenceId(sentenceArray, prev, curr) << endl;
+                }
+                //set the prev value
+                prev=curr;
             }
-            cout << "cosine similiarty: " << getSimilarityBySentenceId(sentenceArray, curr1, curr2) << endl;
-            out << getSimilarityBySentenceId(sentenceArray, curr1, curr2) << endl;
-            if(curr3 != -1)
-            {
-                out << "more than 2 together!" << endl;
-                out << getSimilarityBySentenceId(sentenceArray, curr2, curr3) << endl;
-            }
+            //cout << "cosine similiarty: " << getSimilarityBySentenceId(sentenceArray, curr1, curr2) << endl;
+            //out << getSimilarityBySentenceId(sentenceArray, curr1, curr2) << endl;
+            // if(curr3 != -1)
+            // {
+            //     out << "more than 2 together!" << endl;
+            //     out << getSimilarityBySentenceId(sentenceArray, curr2, curr3) << endl;
+            // }
             out << " " << endl;
-            cout << " " << endl;
-            cout << " " << endl;
+           // cout << " " << endl;
+            //cout << " " << endl;
             //return 0;
         }
-        // if(count >= linkedcount - 2)
-        // {
-        //     return 0;
-        // }
-
     }
 
 
