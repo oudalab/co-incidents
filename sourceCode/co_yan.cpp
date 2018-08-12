@@ -998,7 +998,7 @@ int main(int argc, char **argv)
 
     cout << "score threshold is: " << score << endl;
     cout << "No of iterations: " << iteration << endl;
-
+    int sqlitecount=0;
     /******start to connect to database********/
 
     char                 q[999];
@@ -1088,7 +1088,7 @@ int main(int argc, char **argv)
                  SentenceFeatureValue *value = new SentenceFeatureValue(code, root_code, date8, id, year, src_actor, src_other_agent,tgt_actor,tgt_agent, month, day, embed3, row);
                  //i will be the incidence id for this sentence
                  sentenceArray.push_back(new Sentence(id, value, row));
-
+           sqlitecount=row;
            if(row>0&&row<10)
            {
            	printf ("count %d:,(%d bytes)\n", row,bytes);
@@ -1472,10 +1472,18 @@ int main(int argc, char **argv)
     {
         out << "I am doing biased sampling" << endl;
     }
-    cout << "last active when start:" << sentenceArray.size() << endl;
+    cout << "last active when start: " << sentenceArray.size() << endl;
     cout << "last active when end: " + to_string((*shared).lastActiveIncidenceIndex) << endl;
-    out << "last active when start:" << sentenceArray.size() << endl;
+    cout << "sqlite count is: "<<sqlitecount<<endl;
+    cout<< "startdate: "<<startdate<<endl;
+    cout<< "enddate: "<<enddate<<endl;
+    
+    out << "last active when start: " << sentenceArray.size() << endl;
     out << "last active when end: " <<(*shared).lastActiveIncidenceIndex << endl;
+    out << "sqlite count is: "<<sqlitecount<<endl;
+    out<< "startdate: "<<startdate<<endl;
+    out<< "enddate: "<<enddate<<endl;
+    
     int totallinked=sentenceArray.size()-(*shared).lastActiveIncidenceIndex;
     cout<<"total linked:"<<totallinked<<endl;
     out<<"total linked:"<<totallinked<<endl;
