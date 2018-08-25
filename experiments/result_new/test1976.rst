@@ -1,0 +1,8 @@
+time taken in seconds with 1000 score12 in seconds: 900.547
+I am doing biased sampling
+last active when start: 1381
+last active when end: 1380
+sqlite count is: 1380
+startdate: 19760102
+enddate: 19770101
+total linked:1
