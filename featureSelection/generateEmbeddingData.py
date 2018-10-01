@@ -63,7 +63,3 @@ with open('./nodup-1001.json','r') as infile:
                         print("count:"+str(count)+" "+"totalcount: "+str(totalcount));
 with open('data-150VOC-1001.json','w') as outfile:
         json.dump(dataWithVec,outfile);
-                                       
-
-                                data['src_other_agent']=doc['src_other_agent']
-                                data['target']=doc['target']
