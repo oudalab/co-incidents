@@ -18,54 +18,52 @@ def tfidf_transformer(bow_matrix):
     return transformer,tfidf_matrix
 
 #only take the first 10000 to train the doc2vec model.
-bow_vectorizer=pickle.load(open("bow_vectorizer_10000.model","rb"));
-bow_features=pickle.load(open("bow_features_10000.model","rb"));
+bow_vectorizer=pickle.load(open("bow_vectorizer_150_new.model","rb"));
+#bow_features=pickle.load(open("bow_features_300_new.model","rb"));
 #tfidf_trans,tfidf_features=tfidf_transformer(bow_features)
 
-dataWithVec=[];
-with open('datawithdoc.txt','r') as infile:
-    docs=json.load(infile)
-#this is not tfidf just bow model using count.
 count=0;
 totalcount=0;
-for doc in docs[0:10]:
-        #totalcount=totalcount+1
-        try:
-                doctemp=[]
-                doctemp.append(doc["doc"])
-                hotembedding=bow_vectorizer.transform(doctemp)
-                #nd_tfidf=tfidf_trans.transform(new_doc_features)
-                #nd_features=np.round(nd_tfidf.todense(),2)
-                data={};
-                data["id"]=doc["id"]
-                data["embed"]=hotembedding.todense().tolist();
-                data['code']=doc['code']
-                data['country_code']=doc['country_code']
-                data['date8']=doc['date8']
-                data['day']=doc['day']
-                data['geoname']=doc['geoname']
-                data['goldstein']=doc['goldstein']
-                data['latitude']=doc['latitude']
-                data['longitude']=doc['longitude']
-                data['month']=doc['month']
-                data['quad_class']=doc['quad_class']
-                data['root_code']=doc['root_code']
-                data['source']=doc['source']
-                data['src_actor']=doc['src_actor']
-                data['src_agent']=doc['src_agent']
-                data['src_other_agent']=doc['src_other_agent']
-                data['target']=doc['target']
-                data['tgt_actor']=doc['tgt_actor']
-                data['tgt_agent']=doc['tgt_agent']
-                data['tgt_other_agent']=doc['tgt_other_agent']
-                data['url']=doc['url']
-                data['year']=doc['year']
-                dataWithVec.append(data)
-        except:
-                #print(str(e))
-                count=count+1;
-                print("count:"+count+" "+"totalcount: "+totalcount);
-with open('dataWithAllPropertyWithEmbedding.data','w') as outfile:
+dataWithVec=[];
+with open('./nodup-1001.json','r') as infile:
+        for line in infile:
+                if(totalcount%20000==0):
+                        print("{} processed".format(totalcount))
+                        totalcount=totalcount+1
+                        doc=json.loads(line)
+                try:
+                        doctemp=[]
+                        doctemp.append(doc["doc"])
+                        hotembedding=bow_vectorizer.transform(doctemp)
+                        data={};
+                        data["id"]=doc["mongoid"]
+                        data["mediasource1"]=doc["from"]
+                        data["mediasource2"]=doc["sorce"]
+                        data["embed"]=hotembedding.todense().tolist()[0]
+                        data["code"]=doc["code"]
+                        data['date8']=doc['date8']
+                        data['day']=doc['day']
+                        data['year']=doc['year']
+                        data['month']=doc['month']
+                        data['goldstein']=doc['goldstein']
+                        data['quad_class']=doc['quad_class']
+                        data['root_code']=doc['root_code']
+                        data['src_actor']=doc['src_actor']
+                        data['src_agent']=doc['src_agent']
+                        data['tgt_actor']=doc['tgt_actor']
+                        data['tgt_agent']=doc['tgt_agent']
+                        data['tgt_other_agent']=doc['tgt_other_agent']
+                        data['latitude']=doc['latitude']
+                        data["longitude"]=doc["longitude"]
+                        data["geoname"]=doc["geoname"]
+                        dataWithVec.append(data)
+                except Exception as e:
+                        count=count+1;
+                        print(e)
+                        print("count:"+str(count)+" "+"totalcount: "+str(totalcount));
+with open('data-150VOC-1001.json','w') as outfile:
         json.dump(dataWithVec,outfile);
+                                       
 
-
+                                data['src_other_agent']=doc['src_other_agent']
+                                data['target']=doc['target']
