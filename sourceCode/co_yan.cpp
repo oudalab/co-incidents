@@ -14,10 +14,11 @@
 //#include <uuid/uuid.h>
 #include <map>
 #include <cstdlib>
+#include <cmath> 
 //load json files of features from disk
-#include <jsoncpp/json/value.h>
-#include <jsoncpp/json/reader.h>
-#include <jsoncpp/json/writer.h>
+//#include <jsoncpp/json/value.h>
+//#include <jsoncpp/json/reader.h>
+//#include <jsoncpp/json/writer.h>
 
 #include <mutex>
 #include <thread>
@@ -67,6 +68,9 @@ public:
     //map<string,string> featureValue;
     string code;
     string rootcode;
+    double latitude;
+    double longitude;
+    string geoname;
     //string country_code;
     string date8;
     //string geoname;
@@ -85,7 +89,7 @@ public:
     int index;
     // string doc;
     //string embed;
-    SentenceFeatureValue(string code1, string rootcode1, string date81,  string id1, string year1, string src_actor1, string src_agent1, string tgt_actor1, string tgt_agent1, string month1, string day1, int *embed1, int index1)
+    SentenceFeatureValue(string code1, string rootcode1, string date81,  string id1, string year1, string src_actor1, string src_agent1, string tgt_actor1, string tgt_agent1, string month1, string day1, int *embed1, int index1,double latitude,double longitude, string geoname)
     {
         code = code1;
         rootcode = rootcode1;
@@ -105,6 +109,9 @@ public:
         day = day1;
         embed = embed1;
         index = index1;
+        latitude=latitude;
+        longitude=longitude;
+        geoname=geoname;
         trimall();
     };
 private:
@@ -125,6 +132,9 @@ private:
         rtrim(src_agent );
         rtrim(tgt_actor );
         rtrim(tgt_agent );
+        //rtrim(latitude);
+        //rtrim(longitude);
+        rtrim(geoname);
     }
 };
 
@@ -517,7 +527,7 @@ bool isTrival(string input)
 {
     // iinput.erase(std::remove(input.begin(), input.end(), '\n'), input.end());
     rtrim(input);
-    if(input == "\"\"" || input == "" || input == " " || input.empty() || input.length() == 0)
+    if(input == "\"\"" || input == "" || input == " "||input=="00000" || input.empty() || input.length() == 0)
     {
         return true;
     }
@@ -582,6 +592,23 @@ int getMatchWithinSentences(SentenceFeatureValue &feature1, SentenceFeatureValue
         //cerr<<"(" << feature1.tgt_agent << ", " << feature2.tgt_agent<< ") " << score << endl;
         //code += 32;
         score += up * weightMap["tgt_agent"];
+    }
+    //added for geolocation
+    if(!isTrival(feature1.geoname) && !isTrival(feature2.geoname) && feature1.geoname == feature2.geoname)
+    {
+        score += up * weightMap["geoname"];
+    }
+    //latitude and longitude
+    if(feature1.latitude!=0 && feature2.latitude!=0 && feature1.longitude!=0 &&feature2.longitude!=0)
+    {
+        double lat1=feature1.latitude;
+        double lat2=feature2.latitude;
+        double lon1=feature1.longitude;
+        double lon2=feature2.longitude;
+        if(abs(lat1-lat2)<=1 && abs(lon1-lon2)<1)
+        {
+             score += up * weightMap["latitude"];
+        }
     }
     //6 here is 6 features, and 1.0 is the weight for cosine similarity
     // if(score == score_threshold)
@@ -913,6 +940,8 @@ void do_work_biased(vector<Incidence *> &incidenceArray, vector<Sentence *> &sen
             weightMap["src_agent"] = 1;
             weightMap["tgt_actor"] = 1;
             weightMap["tgt_agent"] = 1;
+            weightMap["geoname"]=1;
+            weightMap["latitude"]=1;
 
             double originalSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceGlobalIndex, true);
             double newSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceGlobalIndex, false);
@@ -971,22 +1000,28 @@ int main(int argc, char **argv)
     vector<Sentence *> sentenceArray;
     // if you input two paramters the argc will be 3.
     if (argc < 7)
-    {
-        cout << "input the scorethreshold and also the sample number, filename, biased or not, and startdate, and enddate: " << endl;
-        return 0;
-    }
+     {
+         cout << "input the scorethreshold and also the sample number, filename, biased or not, and startdate, and enddate: " << endl;
+         return 0;
+     }
     //the score threshhold to make a decision link or not link
     int score = atoi(argv[1]);
+    //int score=12;
     //iteration times
     int iteration = atoi(argv[2]);
+    //int iteration=1000;
 
     string outputfile = std::string(argv[3]) + ".rst";
-
+    //string outputfile = "debug.rst";
 
     bool biased = false;
     string statsfile = std::string(argv[3]) + ".stas";
-
+    //string statsfile = "debug.stas";
     string clibias = argv[4];
+    //string clibias="1";
+    //string startdate="20040102";
+    //string enddate="20050606";
+    //
     string startdate=argv[5];
     string enddate=argv[6];
 
@@ -1008,24 +1043,27 @@ int main(int argc, char **argv)
     int                  bytes;
 
     string embed="";
-    string tgt_actor;
-    string src_actor;
-    string mediasource2;
-    string target;
-    string goldstein;
-    string tgt_other_agent;
-    string code;
-    string day;
-    string month;
-    string quad_class;
-    string mediasource1;
-    string src_other_agent;
-    string id;
-    string tgt_agent;
-    string date8;
-    string year;
-    string root_code;
-    string src_agent;
+    double latitude;
+    double longitude;
+    string geoname="";
+    string tgt_actor="";
+    string src_actor="";
+    string mediasource2="";
+    string target="";
+    string goldstein="";
+    string tgt_other_agent="";
+    string code="";
+    string day="";
+    string month="";
+    string quad_class="";
+    string mediasource1="";
+    string src_other_agent="";
+    string id="";
+    string tgt_agent="";
+    string date8="";
+    string year="";
+    string root_code="";
+    string src_agent="";
 
     /*******start to connect to database *******/
     //pair<int, int> adjs[4] = {make_pair(, current_node.second), ...};
@@ -1039,7 +1077,7 @@ int main(int argc, char **argv)
         // ""
     );
 
-    if (sqlite3_open ("../../coincidenceData/events.db", &db) != SQLITE_OK) {
+    if (sqlite3_open ("../../coincidenceData/events-1004.db", &db) != SQLITE_OK) {
         fprintf(stderr, "Error opening database.\n");
         return 2;
     }
@@ -1055,47 +1093,125 @@ int main(int argc, char **argv)
         case SQLITE_ROW:
         {
         	 // i=i+1;
-            bytes = sqlite3_column_bytes(stmt, 0);
+            try
+            {
+                 bytes = sqlite3_column_bytes(stmt, 0);
+            //printf ("count %d:,(%d bytes)\n", row,bytes);
             //this can be column 1,2 , 3 ....
             embed  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0)); //embed
-            tgt_actor  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1)); //tgt_actor
-            root_code  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2)); //root_code           
-            src_actor  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3)); //src_actor
-            mediasource2  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4)); //mediasource2
-            target  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5)); //target
-            goldstein  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6)); //goldstein
-            tgt_other_agent  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7)); //tgt_other_agent
-            code = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 8)); //code
-            day = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 9)); //day
-            month = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 10)); //month
-            quad_class = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 11)); //quad_class
-            mediasource1 = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 12)); //mediasource1
-            src_other_agent= reinterpret_cast<const char*>(sqlite3_column_text(stmt, 13)); //src_other_agent
-            id = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 14)); //id
-            tgt_agent = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 15)); //tgt_agent
-            date8 = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 16)); //date8
-            year = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 17)); //year
-            src_agent=reinterpret_cast<const char*>(sqlite3_column_text(stmt, 18)); //source agent
+            latitude  = sqlite3_column_double(stmt, 1); //embed
+            longitude = sqlite3_column_double(stmt, 2); //embed
 
-                 //int embedsize=150; //since the last position does not have the ,so the length that has the number will be (x+1)/2                 
-                 int *embed3 = new int[EMBED_SIZE];
-                 for(int j = 0; j < EMBED_SIZE; j++)
-                 {
-                     embed3[j] = (int)embed.at(j*2+1);
-                 }
+            // printf ("%f \n", latitude);
+            // printf ("%f \n", longitude);
+             // if(row==85)
+             //     {
+             //        printf("I am at row 84 and ready to fail!");
+             //     }
+            //this is to check if the field is null or not.
+            if(sqlite3_column_text(stmt, 3))
+            {
+                geoname  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3)); //embed
+            }
+            if(sqlite3_column_text(stmt, 4))
+            {
+                tgt_actor  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4)); //tgt_actor
+            }
+            if(sqlite3_column_text(stmt, 5))
+            {
+                root_code  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5)); //root_code   
+            }
+            if(sqlite3_column_text(stmt, 6))
+            {
+                src_actor  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6)); //src_actor
+            }
+             if(sqlite3_column_text(stmt, 7))
+            { 
+                mediasource2  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7)); //mediasource2       
+            }
+            if(sqlite3_column_text(stmt, 8))
+            {
+                target  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 8)); 
+            }
+             if(sqlite3_column_text(stmt, 9))
+            {
+                goldstein  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 9)); //goldstein
+            }
+            if(sqlite3_column_text(stmt, 10))
+            {
+                tgt_other_agent  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 10)); //tgt_other_agent
+            }
+            if(sqlite3_column_text(stmt, 11))
+            {
+                code = reinterpret_cast<const char*>(sqlite3_column_text(stmt,11)); //code
+            }
+            if(sqlite3_column_text(stmt, 12))
+            {
+                day = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 12)); //day
+            }
+             if(sqlite3_column_text(stmt, 13))
+            {
+                month = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 13)); //month
+            }
+            if(sqlite3_column_text(stmt, 14))
+            {
+                quad_class = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 14)); //quad_class
+            }
+            if(sqlite3_column_text(stmt, 15))
+            {
+                mediasource1 = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 15)); //mediasource1
+            }
+            if(sqlite3_column_text(stmt, 16))
+            {
+             src_other_agent= reinterpret_cast<const char*>(sqlite3_column_text(stmt, 16)); //src_other_agent   
+            }
+             if(sqlite3_column_text(stmt, 17))
+            {
+             id = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 17)); //id
+            }
+            if(sqlite3_column_text(stmt, 18))
+            {
+                tgt_agent = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 18)); //tgt_agent
+            }
+             if(sqlite3_column_text(stmt, 19))
+            {
+                date8 = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 19)); //date8
+            }
+            if(sqlite3_column_text(stmt, 20))
+            {
+                year = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 20)); //year
+            }
+            if(sqlite3_column_text(stmt, 21))
+            {
+               src_agent=reinterpret_cast<const char*>(sqlite3_column_text(stmt, 21)); //source agent
+            }
+         //int embedsize=150; //since the last position does not have the ,so the length that has the number will be (x+1)/2                 
+         int *embed3 = new int[EMBED_SIZE];
+         for(int j = 0; j < EMBED_SIZE; j++)
+         {
+             embed3[j] = (int)embed.at(j*2+1);
+         }
 
-                 //SentenceFeatureValue *value = new SentenceFeatureValue(str(code), str(root_code), str(date8), str(id), str(year), str(src_actor), str(src_other_agent), str(tgt_actor), str(tgt_agent), str(month), str(day), str(embed3), i);
-                 SentenceFeatureValue *value = new SentenceFeatureValue(code, root_code, date8, id, year, src_actor, src_other_agent,tgt_actor,tgt_agent, month, day, embed3, row);
-                 //i will be the incidence id for this sentence
-                 sentenceArray.push_back(new Sentence(id, value, row));
+        
+         SentenceFeatureValue *value = new SentenceFeatureValue(code, root_code, date8, id, year, src_actor, src_other_agent,tgt_actor,tgt_agent, month, day, embed3, row,latitude,longitude,geoname);
+         //printf("did you ever get here?");
+        
+         //i will be the incidence id for this sentence
+         sentenceArray.push_back(new Sentence(id, value, row));
            sqlitecount=row;
-           if(row>0&&row<10)
+           if(row>0&&row<100)
            {
-           	printf ("count %d:,(%d bytes)\n", row,bytes);
+            printf ("count %d:,(%d bytes)\n", row,bytes);
            }  
             
             row++;
             break;
+
+            }
+            catch (exception& e)
+          {
+            cout <<"my own message"<< e.what() << '\n';
+          }
 
         }
           
@@ -1547,6 +1663,7 @@ int main(int argc, char **argv)
     // else std::cout << "pre-standard C++\n" ;
     return 0;
 }
+
 
 
 
