@@ -22,6 +22,87 @@
 #include <pthread.h>
 using namespace std;
 
+#define EMBED_SIZE 150
+
+void rtrim(std::string &);
+
+class SentenceFeatureValue
+{
+public:
+    //map<string,string> featureValue;
+    string code;
+    string rootcode;
+    double latitude;
+    double longitude;
+    string geoname;
+    //string country_code;
+    string date8;
+    //string geoname;
+    string id;
+    string year;
+    //string latitude;
+    //string longitude;
+    string src_actor;
+    string src_agent;
+    string tgt_actor;
+    string tgt_agent;
+    string month;
+    string day;
+    int *embed;
+    //this will be the index in the global sentence array
+    int index;
+    // string doc;
+    //string embed;
+    SentenceFeatureValue(string code1, string rootcode1, string date81,  string id1, string year1, string src_actor1, string src_agent1, string tgt_actor1, string tgt_agent1, string month1, string day1, int *embed1, int index1,double latitude,double longitude, string geoname)
+    {
+        code = code1;
+        rootcode = rootcode1;
+        //country_code = country_code1;
+        date8 = date81;
+        //geoname = geoname1;
+        id = id1;
+        year = year1;
+        //latitude = latitude1;
+        //longitude = longitude1;
+        src_actor = src_actor1;
+        src_agent = src_agent1;
+        tgt_actor = tgt_actor1;
+        tgt_agent = tgt_agent1;
+        //doc=doc1;
+        month = month1;
+        day = day1;
+        embed = embed1;
+        index = index1;
+        latitude=latitude;
+        longitude=longitude;
+        geoname=geoname;
+        trimall();
+    };
+private:
+    void trimall()
+    {
+        rtrim(code );
+        rtrim(rootcode);
+        //rtrim(country_code );
+        rtrim(date8 );
+        //rtrim(geoname );
+        rtrim(id );
+        rtrim(year);
+        rtrim(month);
+        rtrim(day);
+        //rtrim(latitude );
+        //rtrim(longitude );
+        rtrim(src_actor );
+        rtrim(src_agent );
+        rtrim(tgt_actor );
+        rtrim(tgt_agent );
+        //rtrim(latitude);
+        //rtrim(longitude);
+        rtrim(geoname);
+    }
+};
+
+
 class Incidence
 {
 public:
@@ -47,9 +128,90 @@ public:
     {
         pthread_mutex_unlock(&mutex);
     }
-
-
 };
+class Sentence
+{
+public:
+    string sen_id;
+    //thsi is to keep track which incidence this sentence is from in order to do the time based sampling
+    int incidence_id;
+    SentenceFeatureValue *featureValue;
+    pthread_mutex_t mutex;
+    Sentence(string sentenceid, SentenceFeatureValue *featureValue1, int incidence_id1)
+    {
+        sen_id = sentenceid;
+        incidence_id = incidence_id1;
+        featureValue = featureValue1;
+        pthread_mutex_init(&mutex, NULL);
+    }
+
+    ~Sentence()
+    {
+        pthread_mutex_destroy(&mutex);
+    }
+
+    void lock()
+    {
+        pthread_mutex_lock(&mutex);
+    }
+
+    void unlock()
+    {
+        pthread_mutex_unlock(&mutex);
+    }
+};
+
+
+
+void deserializeIncidence(string str,Incidence& incidence,Vector<Incidence*> &incidenceArray, Vector<Sentence*> &sentenceArray)
+{
+
+    stringstream stream(str);
+    int parsedindex=0;
+    int sentenceIndex=senteceArray.size();
+    vector<int> sentencesid=incidence.sentencesid;
+    int incidenceIndex=incidenceArray.size();
+    SentenceFeatureValue* v=new SentenceFeatureValue();
+    Sentence* sentence=new Sentence(sentenceIndex,v,incidenceIndex);
+    string word;
+    string inword;
+    while( getline(stream, word, ',') )
+    {
+      parsedindex++;
+      switch(parsedindex) {
+      case 1 : (*v).code=word;
+      case 2 : (*v).rootcode=word;
+      case 3 : (*v).latitude=word;
+      case 4 : (*v).longitude=word;
+      case 5 : (*v).geoname=word;
+      case 6 : (*v).date8=word;
+      case 7 : (*v).id=word;
+      case 8 : (*v).year=word;
+      case 9 : (*v).src_actor=word;
+      case 10: (*v).src_agent=word;
+      case 11: (*v).tgt_actor=word;
+      case 12: (*v).tgt_agent=word;
+      case 13: (*v).month=word;
+      case 14: (*v).day=word;
+      }
+    }
+    (*v).index=sentenceIndex;
+
+    (*v).embed=new int[EMBED_SIZE];
+
+    int innerindex=0;
+    while(getline(word,inword,'|'))
+    {
+       (*v).embed[innerindex]=stoi(inword);
+       innerindex++;
+    }
+    
+    //each incidence has a sentences array.
+    incidence.sentencesid.push_back(sentenceIndex);
+    //sentenceArray.push_back(sentence);
+
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -59,32 +221,42 @@ int main(int argc, char *argv[])
     cout << "Cannot open input file.\n";
     return 1;
   }
-  vector<Incidence*>* incidenceArray=new vector<Incidence*>();
+  vector<Incidence*> incidenceArray;//=new vector<Incidence*>();
+  vector<Sentence*> sentenceArray;//=new vector<Sentence*>();
   //char str[255];
-  string newid="";
+  string data="";
   int incidenceIndex=0;
   vector<string>* sentencesid=new vector<string>();
+  Incidence* incidence=new Incidence();
+
   while(in) {
-    getline(in, newid);  // delim defaults to '\n'
+    getline(in, data);  // delim defaults to '\n'
     //' ' is the character that I wrote to the file.
    
-     if (newid==" ")
+     if (data==" ")
         {
+            //when there is a newline with " ", we need to create a new incidence
+            //incidence=new Incidence();
+            incidenceArray.push_back(new Incidence());
+            incidence=incidenceArray[(incidenceArray).size()-1];
             cout << "Empty line." << endl;
-            Incidence* inc=new Incidence(incidenceIndex,*sentencesid);
+            //Incidence* inc=new Incidence(incidenceIndex,*sentencesid);
             incidenceIndex++;
-            (*incidenceArray).push_back(inc);
+            //(*incidenceArray).push_back(inc);
             sentencesid=new vector<string>();
+            (*incidence).sentencesid=sentencesid;
+            cout<<"here shoukd generate a new incidence!"<<endl;
             continue;
         }
         else
         {
-           (*sentencesid).push_back(newid);
+          // (*sentencesid).push_back(newid);
+          deserializeIncidence(data,ref(*incidence), ref(incidenceArray),ref(sentenceArray));
         }
-    //if(in) cout << newid << endl;
   }
 
   in.close();
-  cout<<incidenceIndex<<endl;
+  cout<<(incidenceArray).size()<<endl;
+  cout<<(sentenceArray).size()<<endl;
   return 0;
 }
