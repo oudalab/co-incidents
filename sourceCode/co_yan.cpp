@@ -1603,6 +1603,7 @@ int main(int argc, char **argv)
     int totallinked=sentenceArray.size()-(*shared).lastActiveIncidenceIndex;
     cout<<"total linked:"<<totallinked<<endl;
     out<<"total linked:"<<totallinked<<endl;
+    out<<" "<<endl;
     for(int i = 0; i < (*shared).lastActiveIncidenceIndex; i++)
     {
         vector<int> sentencesid = (*(incidenceArray[i])).sentencesid;
@@ -1614,32 +1615,34 @@ int main(int argc, char **argv)
             int curr2 = -1;
             int curr3 = -1;
             int prev=sentencesid[0];
+
             for(unsigned int j = 0; j < sentencesid.size(); j++)
             {
                 int curr = sentencesid[j];
-                if(j == 0)
+                SentenceFeatureValue v=(*((*(sentenceArray[curr])).featureValue));
+                out<<v.code<<","<<v.latitude<<","<<v.longitude<<","<<v.geoname<<","
+                <<v.date8<<","<<v.geoname<<","<<v.id<<","<<v.year<<","<<v.latitude<<","<<v.longitude<<","<<
+                v.src_actor<<","<<v.src_agent<<","<<v.tgt_actor<<","<<v.tgt_agent<<","<<v.month<<","<<v.day<<v.index<<",";
+                for(int k=0;k<EMBED_SIZE;k++)
                 {
-                    curr1 = curr;
+                    out<<(v.embed)[k];
+                    if(k!=EMBED_SIZE-1)
+                    {
+                        out<<"|";
+                    }
                 }
-                if(j == 1)
-                {
-                    curr2 = curr;
-                }
-                if(j == 2)
-                {
-                    curr3 = curr;
-                }
+                out<<endl;
 
-                string realid = (*((*(sentenceArray[curr])).featureValue)).id;
+                //string realid = (*((*(sentenceArray[curr])).featureValue)).id;
                 //cout << realid << endl;
-                out << realid << endl;
-                if(j!=0)
-                {
-                //current sentence similarity with the previous one
-                 out << getSimilarityBySentenceId(sentenceArray, prev, curr) << endl;
-                }
+                //out << realid << endl;
+                // if(j!=0)
+                // {
+                // //current sentence similarity with the previous one
+                //  out << getSimilarityBySentenceId(sentenceArray, prev, curr) << endl;
+                // }
                 //set the prev value
-                prev=curr;
+               // prev=curr;
             }
             //cout << "cosine similiarty: " << getSimilarityBySentenceId(sentenceArray, curr1, curr2) << endl;
             //out << getSimilarityBySentenceId(sentenceArray, curr1, curr2) << endl;
