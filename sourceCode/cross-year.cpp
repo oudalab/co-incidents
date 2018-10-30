@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <pthread.h>
 #include <string>
 #include <ctime>
@@ -53,6 +54,10 @@ public:
     int index;
     // string doc;
     //string embed;
+    SentenceFeatureValue()
+    {
+
+    }
     SentenceFeatureValue(string code1, string rootcode1, string date81,  string id1, string year1, string src_actor1, string src_agent1, string tgt_actor1, string tgt_agent1, string month1, string day1, int *embed1, int index1,double latitude,double longitude, string geoname)
     {
         code = code1;
@@ -102,17 +107,44 @@ private:
     }
 };
 
+class IncidenceFeature
+{
+public:
+    map<string, string> featureMap;
+    IncidenceFeature()
+    {
+        //all the feature should be turned on at the beginning
+        //all the names here are the same as the json file, if it has value means it is turned on, if it is "" string, means this feature is turned off
+        featureMap["code"] = "";
+        featureMap["country_code"] = "";
+        featureMap["date8"] = "";
+        featureMap["geoname"] = "";
+        featureMap["id"] = "";
+        featureMap["year"] = "";
+        featureMap["latitude"] = "";
+        featureMap["longitude"] = "";
+        featureMap["src_actor"] = "";
+        featureMap["src_agent"] = "";
+        featureMap["tgt_actor"] = "";
+        featureMap["tgt_agent"] = "";
+        //featureMap["month"]="";
+        //featureMap["day"]="";
+    }
+};
+
+
 
 class Incidence
 {
 public:
     int inci_id; //should be the index in the incidence array so each time need to update it when something changed.
+    string sup_id;
     pthread_mutex_t mutex;
     /*will be a list of snetence id that is in the incidence*/
-    vector<string> sentencesid;
+    vector<int> sentencesid;
     vector<string> subincidencesid;
-    //IncidenceFeature featureMap;
-    Incidence(int incidenceid, vector<string> sentences)
+    IncidenceFeature featureMap;
+    Incidence(int incidenceid, vector<int> sentences): inci_id(incidenceid), sentencesid(move(sentences))
     {
         pthread_mutex_init(&mutex, NULL);
     };
@@ -128,7 +160,9 @@ public:
     {
         pthread_mutex_unlock(&mutex);
     }
+
 };
+
 class Sentence
 {
 public:
@@ -163,26 +197,27 @@ public:
 
 
 
-void deserializeIncidence(string str,Incidence& incidence,Vector<Incidence*> &incidenceArray, Vector<Sentence*> &sentenceArray)
+void deserializeIncidence(string str,Incidence& incidence,vector<Incidence*> &incidenceArray, vector<Sentence*> &sentenceArray)
 {
 
     stringstream stream(str);
     int parsedindex=0;
-    int sentenceIndex=senteceArray.size();
+    int sentenceIndex=sentenceArray.size();
     vector<int> sentencesid=incidence.sentencesid;
     int incidenceIndex=incidenceArray.size();
     SentenceFeatureValue* v=new SentenceFeatureValue();
     Sentence* sentence=new Sentence(sentenceIndex,v,incidenceIndex);
     string word;
     string inword;
+    string embedstring;
     while( getline(stream, word, ',') )
     {
       parsedindex++;
       switch(parsedindex) {
       case 1 : (*v).code=word;
       case 2 : (*v).rootcode=word;
-      case 3 : (*v).latitude=word;
-      case 4 : (*v).longitude=word;
+      case 3 : (*v).latitude=stod(word);
+      case 4 : (*v).longitude=stod(word);
       case 5 : (*v).geoname=word;
       case 6 : (*v).date8=word;
       case 7 : (*v).id=word;
@@ -193,6 +228,8 @@ void deserializeIncidence(string str,Incidence& incidence,Vector<Incidence*> &in
       case 12: (*v).tgt_agent=word;
       case 13: (*v).month=word;
       case 14: (*v).day=word;
+      case 15: (*v).index=stoi(word);
+      case 16: embedstring=word;
       }
     }
     (*v).index=sentenceIndex;
@@ -200,7 +237,8 @@ void deserializeIncidence(string str,Incidence& incidence,Vector<Incidence*> &in
     (*v).embed=new int[EMBED_SIZE];
 
     int innerindex=0;
-    while(getline(word,inword,'|'))
+    stringstream ss(embedstring);
+    while(getline(ss,inword,'|'))
     {
        (*v).embed[innerindex]=stoi(inword);
        innerindex++;
@@ -226,9 +264,9 @@ int main(int argc, char *argv[])
   //char str[255];
   string data="";
   int incidenceIndex=0;
-  vector<string>* sentencesid=new vector<string>();
-  Incidence* incidence=new Incidence();
-
+  vector<int>* sentencesid=new vector<int>();
+  //Incidence incidence;
+  Incidence* incidence_pointer;
   while(in) {
     getline(in, data);  // delim defaults to '\n'
     //' ' is the character that I wrote to the file.
@@ -237,21 +275,19 @@ int main(int argc, char *argv[])
         {
             //when there is a newline with " ", we need to create a new incidence
             //incidence=new Incidence();
-            incidenceArray.push_back(new Incidence());
-            incidence=incidenceArray[(incidenceArray).size()-1];
-            cout << "Empty line." << endl;
-            //Incidence* inc=new Incidence(incidenceIndex,*sentencesid);
             incidenceIndex++;
-            //(*incidenceArray).push_back(inc);
-            sentencesid=new vector<string>();
-            (*incidence).sentencesid=sentencesid;
+            incidenceArray.push_back(new Incidence(incidenceIndex,(*sentencesid)));
+            incidence_pointer=incidenceArray[(incidenceArray).size()-1];
+            //incidence=*(incidence_pointer);
+            cout << "Empty line." << endl;
+            sentencesid=new vector<int>();
+            (*incidence_pointer).sentencesid=(*sentencesid);
             cout<<"here shoukd generate a new incidence!"<<endl;
             continue;
         }
         else
         {
-          // (*sentencesid).push_back(newid);
-          deserializeIncidence(data,ref(*incidence), ref(incidenceArray),ref(sentenceArray));
+          deserializeIncidence(data,*incidence_pointer, ref(incidenceArray),ref(sentenceArray));
         }
   }
 
