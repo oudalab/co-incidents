@@ -206,7 +206,7 @@ void deserializeIncidence(string str,Incidence& incidence,vector<Incidence*> &in
     vector<int> sentencesid=incidence.sentencesid;
     int incidenceIndex=incidenceArray.size();
     SentenceFeatureValue* v=new SentenceFeatureValue();
-    Sentence* sentence=new Sentence(sentenceIndex,v,incidenceIndex);
+    
     string word;
     string inword;
     string embedstring;
@@ -214,26 +214,58 @@ void deserializeIncidence(string str,Incidence& incidence,vector<Incidence*> &in
     {
       parsedindex++;
       switch(parsedindex) {
-      case 1 : (*v).code=word;
-      case 2 : (*v).rootcode=word;
-      case 3 : (*v).latitude=stod(word);
-      case 4 : (*v).longitude=stod(word);
-      case 5 : (*v).geoname=word;
-      case 6 : (*v).date8=word;
-      case 7 : (*v).id=word;
-      case 8 : (*v).year=word;
-      case 9 : (*v).src_actor=word;
-      case 10: (*v).src_agent=word;
-      case 11: (*v).tgt_actor=word;
-      case 12: (*v).tgt_agent=word;
-      case 13: (*v).month=word;
-      case 14: (*v).day=word;
-      case 15: (*v).index=stoi(word);
-      case 16: embedstring=word;
+      case 1 : (*v).code=word;break;
+      case 2 : (*v).rootcode=word;break;
+      case 3 : 
+        if(word!=" "&&word!="")
+        {
+          try
+          {
+             (*v).latitude=stod(word);
+          }
+          catch(exception& e)
+          {
+            cout<<"exception encountered!"<<endl;
+          }
+         
+        }
+        break;
+      case 4 : 
+        if(word!=" "&&word!="")
+        {
+          try
+          {
+            (*v).longitude=stod(word);
+          }
+          catch(exception& e)
+          {
+            cout<<"exception encountered!"<<endl;
+          }
+        }
+        break;
+      case 5 : (*v).geoname=word;break;
+      case 6 : (*v).date8=word;break;
+      case 7 : (*v).id=word;break;
+      case 8 : (*v).year=word;break;
+      case 9 : (*v).src_actor=word;break;
+      case 10: (*v).src_agent=word;break;
+      case 11: (*v).tgt_actor=word;break;
+      case 12: (*v).tgt_agent=word;break;
+      case 13: (*v).month=word;break;
+      case 14: (*v).day=word;break;
+      case 15: 
+        if(word!=" "&&word!="")
+        {
+         cout<<parsedindex<<word<<endl;
+         (*v).index=stoi(word); 
+        }
+        break;
+      case 16: embedstring=word;break;
       }
     }
+    Sentence* sentence=new Sentence((*v).id,v,incidenceIndex);
+    sentenceArray.push_back(sentence);
     (*v).index=sentenceIndex;
-
     (*v).embed=new int[EMBED_SIZE];
 
     int innerindex=0;
@@ -253,7 +285,7 @@ void deserializeIncidence(string str,Incidence& incidence,vector<Incidence*> &in
 
 int main(int argc, char *argv[])
 {
-  ifstream in("test1990.rst");
+  ifstream in("test1977.rst");
 
   if(!in) {
     cout << "Cannot open input file.\n";
@@ -264,7 +296,7 @@ int main(int argc, char *argv[])
   //char str[255];
   string data="";
   int incidenceIndex=0;
-  vector<int>* sentencesid=new vector<int>();
+  
   //Incidence incidence;
   Incidence* incidence_pointer;
   while(in) {
@@ -276,12 +308,13 @@ int main(int argc, char *argv[])
             //when there is a newline with " ", we need to create a new incidence
             //incidence=new Incidence();
             incidenceIndex++;
+            vector<int>* sentencesid=new vector<int>();
             incidenceArray.push_back(new Incidence(incidenceIndex,(*sentencesid)));
             incidence_pointer=incidenceArray[(incidenceArray).size()-1];
             //incidence=*(incidence_pointer);
             cout << "Empty line." << endl;
-            sentencesid=new vector<int>();
-            (*incidence_pointer).sentencesid=(*sentencesid);
+            //sentencesid=new vector<int>();
+            //(*incidence_pointer).sentencesid=(*sentencesid);
             cout<<"here shoukd generate a new incidence!"<<endl;
             continue;
         }
