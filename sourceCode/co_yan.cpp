@@ -1620,8 +1620,9 @@ int main(int argc, char **argv)
             {
                 int curr = sentencesid[j];
                 SentenceFeatureValue v=(*((*(sentenceArray[curr])).featureValue));
-                out<<v.code<<","<<v.latitude<<","<<v.longitude<<","<<v.geoname<<","
-                <<v.date8<<","<<v.geoname<<","<<v.id<<","<<v.year<<","<<v.latitude<<","<<v.longitude<<","<<
+
+                out<<v.code<<","<<v.rootcode<<","<<v.latitude<<","<<v.longitude<<","<<v.geoname<<","
+                <<v.date8<<","<<v.id<<","<<v.year<<","<<
                 v.src_actor<<","<<v.src_agent<<","<<v.tgt_actor<<","<<v.tgt_agent<<","<<v.month<<","<<v.day<<v.index<<",";
                 for(int k=0;k<EMBED_SIZE;k++)
                 {
