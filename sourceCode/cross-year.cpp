@@ -256,7 +256,7 @@ void deserializeIncidence(string str,Incidence& incidence,vector<Incidence*> &in
       case 15: 
         if(word!=" "&&word!="")
         {
-         cout<<parsedindex<<word<<endl;
+         //cout<<parsedindex<<word<<endl;
          (*v).index=stoi(word); 
         }
         break;
@@ -272,6 +272,7 @@ void deserializeIncidence(string str,Incidence& incidence,vector<Incidence*> &in
     stringstream ss(embedstring);
     while(getline(ss,inword,'|'))
     {
+      //cout<<inword<<",";
        (*v).embed[innerindex]=stoi(inword);
        innerindex++;
     }
@@ -299,10 +300,18 @@ int main(int argc, char *argv[])
   
   //Incidence incidence;
   Incidence* incidence_pointer;
+  int linenumber=0;
   while(in) {
-    getline(in, data);  // delim defaults to '\n'
+    
+    if(linenumber<=7)
+    {
+      getline(in, data);
+      linenumber++;
+      continue;
+    }
+      // delim defaults to '\n'
     //' ' is the character that I wrote to the file.
-   
+    getline(in, data);
      if (data==" ")
         {
             //when there is a newline with " ", we need to create a new incidence
@@ -311,11 +320,9 @@ int main(int argc, char *argv[])
             vector<int>* sentencesid=new vector<int>();
             incidenceArray.push_back(new Incidence(incidenceIndex,(*sentencesid)));
             incidence_pointer=incidenceArray[(incidenceArray).size()-1];
-            //incidence=*(incidence_pointer);
-            cout << "Empty line." << endl;
-            //sentencesid=new vector<int>();
-            //(*incidence_pointer).sentencesid=(*sentencesid);
-            cout<<"here shoukd generate a new incidence!"<<endl;
+
+            //cout << "Empty line." << endl;
+            //cout<<"here shoukd generate a new incidence!"<<endl;
             continue;
         }
         else
@@ -326,6 +333,19 @@ int main(int argc, char *argv[])
 
   in.close();
   cout<<(incidenceArray).size()<<endl;
-  cout<<(sentenceArray).size()<<endl;
+  cout<<((sentenceArray)[10]->featureValue)->id<<endl;
+  cout<<((sentenceArray)[11]->featureValue)->id<<endl;
+  cout<<((sentenceArray)[12]->featureValue)->id<<endl;
+  for(int j=0;j<50;j++)
+  {
+    for(int i=0;i<150;i++)
+  {
+    cout<<((sentenceArray)[j]->featureValue)->embed[i]<<",";
+  }
+
+  }
+  
+ 
+
   return 0;
 }
