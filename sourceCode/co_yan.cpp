@@ -689,14 +689,14 @@ void linkSentenceToIncidence(vector<Incidence *> &incidenceArray, vector<Sentenc
     if(sourceSentencesid.empty())
     {
         ///update the swapped incidence id
-        Incidence *swappedIncidence = incidenceArray[lastActiveIncidenceIndex];
+        Incidence *swappedIncidence = incidenceArray[shared.lastActiveIncidenceIndex];
         (*swappedIncidence).lock();
         (*swappedIncidence).inci_id = sourceincidenceindex;
         (*swappedIncidence).unlock();
 
         shared.lock();
         //incidenceArray[lastActiveIncidenceIndex]
-        incidenceArray[sourceincidenceindex] = incidenceArray[lastActiveIncidenceIndex];
+        incidenceArray[sourceincidenceindex] = incidenceArray[shared.lastActiveIncidenceIndex];
         //swap the last active incidenceIndex at the empty spot, then decreas the lastActiveIncidenceIndex.
         shared.lastActiveIncidenceIndex = shared.lastActiveIncidenceIndex - 1;
         shared.unlock();
@@ -879,7 +879,9 @@ void do_work_biased(vector<Incidence *> &incidenceArray, vector<Sentence *> &sen
 
         try
         {
-            int sizeOfIncidenceArray = incidenceArray.size();
+            //this is wrong
+            //int sizeOfIncidenceArray = incidenceArray.size();
+            int sizeOfIncidenceArray=(shared).lastActiveIncidenceIndex;
             int sizeOfSentences = sentenceArray.size();
 
 
@@ -941,9 +943,18 @@ void do_work_biased(vector<Incidence *> &incidenceArray, vector<Sentence *> &sen
             weightMap["tgt_actor"] = 1;
             weightMap["tgt_agent"] = 1;
             weightMap["geoname"]=1;
+            //thsi weight consider both of the longiture and latitude.
             weightMap["latitude"]=1;
 
+            if(sourceIncidenceIndex>=shared.lastActiveIncidenceIndex)
+            {
+                continue;
+            }
             double originalSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceGlobalIndex, true);
+            if(destinationIncidenceIndex>=shared.lastActiveIncidenceIndex)
+            {
+                continue;
+            }
             double newSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceGlobalIndex, false);
             //            double originalPairs = getPropertyValueMatch(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceGlobalIndex, true, score, weightMap);
             double newPairs = getPropertyValueMatch(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceGlobalIndex, false, score, weightMap);
@@ -1189,7 +1200,9 @@ int main(int argc, char **argv)
          int *embed3 = new int[EMBED_SIZE];
          for(int j = 0; j < EMBED_SIZE; j++)
          {
+             //out<<embed.at(j*2+1)<<"*";
              embed3[j] = (int)embed.at(j*2+1);
+            // cout<<embed3[j]<<"|";
          }
 
         
@@ -1253,12 +1266,8 @@ int main(int argc, char **argv)
     }
     cout << "size of the incidence array is " << to_string(incidenceArray.size()) << endl;
 
-    //    int  destinationIncidenceIndex = 0;
-    //this will be the incidenceid.
+
     string incidenceDestination = "";
-    //  int sourceIncidenceIndex = 0;
-    //:wq
-    //     int sizeOfIncidenceArray = 0;
     string sentenceid = "";
     string sourceIncidenceId = "";
     int globalSize = incidenceArray.size();
@@ -1623,7 +1632,7 @@ int main(int argc, char **argv)
 
                 out<<v.code<<","<<v.rootcode<<","<<v.latitude<<","<<v.longitude<<","<<v.geoname<<","
                 <<v.date8<<","<<v.id<<","<<v.year<<","<<
-                v.src_actor<<","<<v.src_agent<<","<<v.tgt_actor<<","<<v.tgt_agent<<","<<v.month<<","<<v.day<<v.index<<",";
+                v.src_actor<<","<<v.src_agent<<","<<v.tgt_actor<<","<<v.tgt_agent<<","<<v.month<<","<<v.day<<","<<v.index<<",";
                 for(int k=0;k<EMBED_SIZE;k++)
                 {
                     out<<(v.embed)[k];
@@ -1652,6 +1661,8 @@ int main(int argc, char **argv)
             //     out << "more than 2 together!" << endl;
             //     out << getSimilarityBySentenceId(sentenceArray, curr2, curr3) << endl;
             // }
+
+            //this means we jump to another incidence.
             out << " " << endl;
            // cout << " " << endl;
             //cout << " " << endl;
