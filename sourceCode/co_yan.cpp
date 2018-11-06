@@ -1073,7 +1073,9 @@ int main(int argc, char *argv[])
     for(int i = 0; i < (*shared).lastActiveIncidenceIndex; i++)
     {
         vector<int> sentencesid = (*(incidenceArray[i])).sentencesid;
-        if(sentencesid.size() > 1)
+        //well in this way all the coincidence will get used, including the one with single sentence in it.
+        int sentencesidsize=sentencesid.size();
+        if(sentencesidsize >= 1)
         {
             //count++;
             // cout<<"you ever get here?"<<endl;
@@ -1098,7 +1100,10 @@ int main(int argc, char *argv[])
                         out<<"|";
                     }
                 }
-                out<<endl;
+                //the last column will be the size of the incidence in the crossyear scripting parsing we don't need to 
+                //update anything since it is the 17th column and we don't parse that when we do aggregation later, 
+                //we can order by this column and see what is the largest incidence.
+                out<<","<<sentencesid.size()<<endl;
             }
             out << " " << endl;
         }
