@@ -1617,7 +1617,7 @@ int main(int argc, char **argv)
     {
         vector<int> sentencesid = (*(incidenceArray[i])).sentencesid;
         int sentencesidsize=sentencesid.size();
-        if(sentencesidsize > =1)
+        if(sentencesidsize>=1)
         {
             //count++;
             // cout<<"you ever get here?"<<endl;
