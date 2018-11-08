@@ -24,7 +24,7 @@
 using namespace std;
 
 #define EMBED_SIZE 150
-#define BOUND 30
+#define BOUND 100
 int lastActiveIncidenceIndex = 0;
 void rtrim(std::string &);
 
@@ -124,6 +124,7 @@ class SharedResources
 
 public:
     int lastActiveIncidenceIndex;
+    int totallinked=0;
     bool jumpout = false;
     pthread_mutex_t mutex;
     SharedResources(int lastActiveIncidenceIndex1)
@@ -759,9 +760,11 @@ void do_work_biased(vector<Incidence *> &incidenceArray, vector<Sentence *> &sen
 
                     linkSentenceToIncidence(incidenceArray, sentenceArray, destinationIncidenceIndex, sourceIncidenceIndex, sentenceGlobalIndex, sentenceIndexInSource, ref(shared));
                     // cout<<"sentence globalindex: "<<sentenceGlobalIndex<<endl;
-                    linkedcount++;
-                    cout << "new incidence get linked linked count: " << linkedcount << endl;
-
+                    shared.lock();
+                    shared.totallinked=shared.totallinked+1;
+                    shared.unlock();
+                    cout << "new incidence get linked linked count: " << shared.totallinked << endl;
+                    
                 }
             }
 
@@ -788,8 +791,10 @@ void do_work_biased(vector<Incidence *> &incidenceArray, vector<Sentence *> &sen
 
 int main(int argc, char *argv[])
 {
-  ifstream in("test1977.rst");
-  ifstream in2("test1978.rst");
+  string firstyear=std::string(argv[3]);
+  string secondyear=std::string(argv[4]);
+  ifstream in(firstyear+".rst");
+  ifstream in2(secondyear+".rst");
 
   if(!in) {
     cout << "Cannot open input file.\n";
@@ -883,8 +888,8 @@ int main(int argc, char *argv[])
     int score = atoi(argv[1]);
     //well this not get used in link code or here just as a place holder here in that way I don't need to update the code
     int iteration = atoi(argv[2]);
-    string statsfile = std::string(argv[3])+"-"+std::string(argv[4]) + ".stas";
-    string outputfile = std::string(argv[3])+"-"+std::string(argv[4]) + ".rst";
+    string statsfile = firstyear+"-"+secondyear + ".stas";
+    string outputfile = firstyear+"-"+secondyear + ".rst";
 
         thread t1(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 1,statsfile);
         thread t2(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 2,statsfile);
@@ -1054,27 +1059,26 @@ int main(int argc, char *argv[])
     // {
     //     out << "I am doing biased sampling" << endl;
     // }
-    cout << "last active when start: " << incidenceArray.size() << endl;
+    cout << "last active when start: " << oldIncidenceArraySize-1<< endl;
     cout << "last active when end: " + to_string((*shared).lastActiveIncidenceIndex) << endl;
     //cout << "sqlite count is: "<<sqlitecount<<endl;
     //cout<< "startdate: "<<startdate<<endl;
     //cout<< "enddate: "<<enddate<<endl;
     
-    out << "last active when start: " <<incidenceArray.size() << endl;
-    out << "last active when end: " <<(*shared).lastActiveIncidenceIndex << endl;
+    out << "last active when start: " <<oldIncidenceArraySize-1<< endl;
+    out << "last active when end: " <<to_string((*shared).lastActiveIncidenceIndex) << endl;
     //out << "sqlite count is: "<<sqlitecount<<endl;
     //out<< "startdate: "<<startdate<<endl;
     //out<< "enddate: "<<enddate<<endl;
     
-    int totallinked=oldIncidenceArraySize-(*shared).lastActiveIncidenceIndex;
-    cout<<"total linked:"<<totallinked<<endl;
-    out<<"total linked:"<<totallinked<<endl;
+    //int totallinked=oldIncidenceArraySize-(*shared).lastActiveIncidenceIndex-1;
+    cout<<"total linked:"<<shared->totallinked<<endl;
+    out<<"total linked:"<<shared->totallinked<<endl;
     out<<" "<<endl;
     for(int i = 0; i < (*shared).lastActiveIncidenceIndex; i++)
     {
         vector<int> sentencesid = (*(incidenceArray[i])).sentencesid;
-        int sentencesidsize=sentencesid.size();
-        if(sentencesidsize >1)
+        if(sentencesid.size() > 1)
         {
             //count++;
             // cout<<"you ever get here?"<<endl;
@@ -1099,7 +1103,7 @@ int main(int argc, char *argv[])
                         out<<"|";
                     }
                 }
-                out<<","<<sentencesidsize<<endl;
+                out<<","<<sentencesid.size()<<endl;
             }
             out << " " << endl;
         }
