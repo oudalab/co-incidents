@@ -1073,7 +1073,8 @@ int main(int argc, char *argv[])
     for(int i = 0; i < (*shared).lastActiveIncidenceIndex; i++)
     {
         vector<int> sentencesid = (*(incidenceArray[i])).sentencesid;
-        if(sentencesid.size() > 1)
+        int sentencesidsize=sentencesid.size();
+        if(sentencesidsize >1)
         {
             //count++;
             // cout<<"you ever get here?"<<endl;
@@ -1098,7 +1099,7 @@ int main(int argc, char *argv[])
                         out<<"|";
                     }
                 }
-                out<<endl;
+                out<<","<<sentencesidsize<<endl;
             }
             out << " " << endl;
         }
