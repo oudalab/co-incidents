@@ -3,15 +3,12 @@ import gzip
 data = []
 count=0
 with open('newcsv.csv','a') as output:
-    with gzip.open('/Users/yanliang/eventData/yan-virtualenv/document_cluster/terrier-location-text-source-part1.json.gz','rt') as f:
+    with gzip.open('terrier-location-text-source-part1.json.gz','rt') as f:
         for line in f:
               #print(line)
-            count=count+1;
+            #count=count+1;
             if(len(line.strip()) == 0 or line in ['\n', '\r\n']):
-                print("get here???")
                 continue;
-            if(count>20):
-                break;
             try:
                 jsonobj=json.loads(line)
                 #print(jsonobj)
