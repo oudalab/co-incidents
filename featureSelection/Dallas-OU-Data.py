@@ -1,9 +1,11 @@
 import json
 import gzip
-data = []
+import sys
+
 count=0
-with open('newcsv.csv','a') as output:
-    with gzip.open('terrier-location-text-source-part1.json.gz','rt') as f:
+index=str(sys.argv[1]);
+with open('newcsv-part'+index+'.csv','a') as output:
+    with gzip.open('terrier-location-text-source-part'+index+'.json.gz','rt') as f:
         for line in f:
               #print(line)
             #count=count+1;
