@@ -4,7 +4,7 @@ import sys
 
 count=0
 index=str(sys.argv[1]);
-with open('newcsv-part'+index+'.csv','a') as output:
+with open('newtsv-part'+index+'.tsv','a') as output:
     with gzip.open('terrier-location-text-source-part'+index+'.json.gz','rt') as f:
         for line in f:
               #print(line)
@@ -83,13 +83,13 @@ with open('newcsv-part'+index+'.csv','a') as output:
                     goldstein=str(jsonobj["goldstein"])
                 if "url" in jsonobj:
                     url=str(jsonobj["url"])
-                csvobj=mongo_id+","+doc_id+","+" "+","+text+","+code+","\
-                +src_actor+","+month+","+tgt_agent+","+countryCode+\
-                ","+year+","+source+","+date8+","+ src_agent+","+tgt_actor+\
-                ","+lat+","+src_other_agent+","+quad_class+","+root_code+\
-                ","+tgt_other_agent+","+day+","+target+","+goldstein+\
-                ","+location_name+","+lon+","+url
-                output.write(csvobj+"\n")
-                #print(csvobj.split(",")[0])
+                tsvobj=mongo_id+"\t"+doc_id+"\t"+" "+"\t"+code+"\t"\
+                +src_actor+"\t"+month+"\t"+tgt_agent+"\t"+countryCode+\
+                "\t"+year+"\t"+source+"\t"+date8+"\t"+ src_agent+"\t"+tgt_actor+\
+                "\t"+lat+"\t"+src_other_agent+"\t"+quad_class+"\t"+root_code+\
+                "\t"+tgt_other_agent+"\t"+day+"\t"+target+"\t"+goldstein+\
+                "\t"+location_name+"\t"+lon+"\t"+url+"\t"+text
+                output.write(tsvobj+"\n")
+                #print(tsvobj.split(",")[0])
             except Exception as e:
                 print(e);
