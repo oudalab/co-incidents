@@ -21,7 +21,7 @@ print("start loading")
 CORPUS=[]
 count=0
 #it has 26G data--1/4 data of the original dataset that I have.
-with open('./merged6.json','r') as infile:
+with open('/home/yan/hanover_backup/coincidenceData/DallasData/merged6.json','r') as infile:
     #docs=json.load(infile)
     ##huge file iteratively load it not all load it once
     for line in infile:
