@@ -2,6 +2,7 @@ import json
 import pickle
 import os
 import re
+import gzip
 #import gensim
 import gensim
 from nltk.tokenize import RegexpTokenizer
@@ -21,15 +22,17 @@ print("start loading")
 CORPUS=[]
 count=0
 #it has 26G data--1/4 data of the original dataset that I have.
-with open('/home/yan/hanover_backup/coincidenceData/DallasData/merged6.json','r') as infile:
+with gzip.open('/home/yan/hanover_backup/coincidenceData/DallasData/merge6json.tar.gz','rt') as infile:
     #docs=json.load(infile)
     ##huge file iteratively load it not all load it once
     for line in infile:
+        if(count%10000==0):
+            print("start processing: "+str(count))
         if(count<1000000):
             data=json.loads(line);
             CORPUS.append(data["doc"])
             count=count+1
-#print("end loading");
+print("end loading");
 
 
 #for doc in docs:
