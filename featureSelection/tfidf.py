@@ -2,7 +2,7 @@ import json
 import pickle
 import os
 import re
-import gzip
+#import gzip
 #import gensim
 import gensim
 from nltk.tokenize import RegexpTokenizer
@@ -13,7 +13,7 @@ from gensim.models.doc2vec import TaggedDocument
 
 from sklearn.feature_extraction.text import CountVectorizer
 def bow_extractor(corpus,ngram_range=(1,1)):
-    vectorizer=CountVectorizer(min_df=0.01,max_df=0.95,stop_words="english",ngram_range=ngram_range,max_features=100)
+    vectorizer=CountVectorizer(min_df=0.01,max_df=0.95,stop_words="english",ngram_range=ngram_range,max_features=150)
     vectorizer.fit_transform(corpus)
     return vectorizer
 
@@ -22,16 +22,18 @@ print("start loading")
 CORPUS=[]
 count=0
 #it has 26G data--1/4 data of the original dataset that I have.
-with gzip.open('/home/yan/hanover_backup/coincidenceData/DallasData/merge6json.tar.gz','rt') as infile:
+with open('/home/yan/hanover_backup/coincidenceData/DallasData/merged6.json','rt') as infile:
     #docs=json.load(infile)
     ##huge file iteratively load it not all load it once
     for line in infile:
         if(count%10000==0):
             print("start processing: "+str(count))
-        if(count<1000000):
+        if(count<20000000):
             data=json.loads(line);
             CORPUS.append(data["doc"])
             count=count+1
+        else:
+            break
 print("end loading");
 
 
@@ -47,7 +49,7 @@ bow_vectorizer=bow_extractor(CORPUS)
 #dic={}
 #dic["bow_vectorizer"]=bow_vectorizer
 #dic["bow_features"]=bow_features
-filename = 'bow_vectorizer_100_new.model'
+filename = 'bow_vectorizer_150_new_1112.model'
 pickle.dump(bow_vectorizer, open(filename, 'wb'))
 #filename1 = 'bow_features_75_new.model'
 #pickle.dump(bow_features, open(filename1, 'wb'))
