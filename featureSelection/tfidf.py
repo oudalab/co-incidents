@@ -25,7 +25,7 @@ with open('./merged6.json','r') as infile:
     #docs=json.load(infile)
     ##huge file iteratively load it not all load it once
     for line in infile:
-        if(count<15489981):
+        if(count<1000000):
             data=json.loads(line);
             CORPUS.append(data["doc"])
             count=count+1
@@ -40,14 +40,14 @@ with open('./merged6.json','r') as infile:
 #           print(doc["doc"])
 print("done loading the docs and now startt to train")
 bow_vectorizer=bow_extractor(CORPUS)
-features=bow_features.todense()
+#features=bow_features.todense()
 #dic={}
 #dic["bow_vectorizer"]=bow_vectorizer
 #dic["bow_features"]=bow_features
 filename = 'bow_vectorizer_100_new.model'
 pickle.dump(bow_vectorizer, open(filename, 'wb'))
-filename1 = 'bow_features_75_new.model'
-pickle.dump(bow_features, open(filename1, 'wb'))
+#filename1 = 'bow_features_75_new.model'
+#pickle.dump(bow_features, open(filename1, 'wb'))
 
 
 
