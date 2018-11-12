@@ -12,7 +12,7 @@ from gensim.models.doc2vec import TaggedDocument
 
 from sklearn.feature_extraction.text import CountVectorizer
 def bow_extractor(corpus,ngram_range=(1,1)):
-    vectorizer=CountVectorizer(min_df=0.01,max_df=0.95,stop_words="english",ngram_range=ngram_range,max_features=75)
+    vectorizer=CountVectorizer(min_df=0.01,max_df=0.95,stop_words="english",ngram_range=ngram_range,max_features=100)
     vectorizer.fit_transform(corpus)
     return vectorizer
 
@@ -21,7 +21,7 @@ print("start loading")
 CORPUS=[]
 count=0
 #it has 26G data--1/4 data of the original dataset that I have.
-with open('./nodup-half.json','r') as infile:
+with open('./merged6.json','r') as infile:
     #docs=json.load(infile)
     ##huge file iteratively load it not all load it once
     for line in infile:
@@ -40,14 +40,14 @@ with open('./nodup-half.json','r') as infile:
 #           print(doc["doc"])
 print("done loading the docs and now startt to train")
 bow_vectorizer=bow_extractor(CORPUS)
-#features=bow_features.todense()
+features=bow_features.todense()
 #dic={}
 #dic["bow_vectorizer"]=bow_vectorizer
 #dic["bow_features"]=bow_features
-filename = 'bow_vectorizer_75_new.model'
+filename = 'bow_vectorizer_100_new.model'
 pickle.dump(bow_vectorizer, open(filename, 'wb'))
-#filename1 = 'bow_features_75_new.model'
-#pickle.dump(bow_features, open(filename1, 'wb'))
+filename1 = 'bow_features_75_new.model'
+pickle.dump(bow_features, open(filename1, 'wb'))
 
 
 
