@@ -893,7 +893,7 @@ int main(int argc, char *argv[])
 
     std::vector<std::thread> threads;
     for (int i = 0; i < 64; ++i) {
-        threads.push_back(thead(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, i+1, statsfile));
+        threads.push_back(thread(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, i+1, statsfile));
         
     }
 

@@ -23,3 +23,11 @@ cc_binary(
 		":all-files",
 	],
 )
+
+cc_binary(
+    name = "cross-year",
+    srcs = ["cross-year.cpp"],
+    deps = [
+        ":all-files",
+    ],
+)
