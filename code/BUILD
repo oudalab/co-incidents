@@ -4,9 +4,15 @@ cc_library(
         "*.h",
         "*.hpp",
     ]),
+    copts = [
+        "-march=native",
+        "-mtune=native",
+        "-O3",
+        "-Wall",
+    ],
     linkopts = [
         "-pthread",
-        "-lsqlite3"
+        "-lsqlite3",
     ],
 )
 
