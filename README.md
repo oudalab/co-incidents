@@ -1,5 +1,6 @@
 # Computational Political Science
-Using PMG to model the relation between events.
+Using PMG to model the relation between events. 
+
 
 ## co-incidence resolution (clustering)
 Using hierarchical MCMC with Metropolis Hastings algorithm to cluster news corpus into appropriate cluster.
