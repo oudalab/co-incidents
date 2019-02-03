@@ -8,13 +8,13 @@ The code is cleaned up and uses the bazel build system.
 The code should be compiled from a directory that contains a `WORKSPACE` file.
 The code can be compiled using the following commend
 
-```
+```awk
 bazel build co_yan --verbose_failures --sandbox_debug
 ```
 
 the compiled binary can then be compiled using
 
-```
+```awk
 bazel-bin/code/co_yan
 ```
 
