@@ -6,18 +6,16 @@ The code is cleaned up and uses the bazel build system.
 
 
 The code should be compiled from a directory that contains a `WORKSPACE` file.
-The code can be compiled using the following commend
 
-```awk
+This code needs to run under the directory that has the BUILD config in it.
+The code can be compiled using the following commend
+```
 bazel build co_yan --verbose_failures --sandbox_debug
 ```
-
 the compiled binary can then be compiled using
-
-```awk
+```
 bazel-bin/code/co_yan
 ```
-
 There are still more todos. A binary for `cross-year` still needs to be created.
 We need to centralize some of the duplicate code.
 Many of the functions created are member functions and should be added as part of a class.
