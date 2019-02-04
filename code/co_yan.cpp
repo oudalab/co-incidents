@@ -9,28 +9,25 @@
 #include <array>
 #include <math.h>
 #include <sqlite3.h>
-#include <random>       // std::default_random_engine
+#include <random>    
 #include <chrono>       // std::chrono::system_clock
-//#include <uuid/uuid.h>
 #include <map>
 #include <cstdlib>
 #include <cmath> 
-//load json files of features from disk
-//#include <jsoncpp/json/value.h>
-//#include <jsoncpp/json/reader.h>
-//#include <jsoncpp/json/writer.h>
-
 #include <mutex>
 #include <thread>
 #include <pthread.h>
-//this the dimenstion of the word embedding.
-#define EMBED_SIZE 150
-#define BOUND 30
-//#define ITERATION 10000000
 using namespace std;
-int lastActiveIncidenceIndex = 0;
+
 // Ctrl+Shift+Alt+Q: Quick Format.
 // Ctrl+Shift+Alt+S: Selected Format.
+
+//this the dimenstion of the word embedding.
+#define EMBED_SIZE 150
+//defines the successive no link number that makes the linking process stopped.
+#define BOUND 30
+
+int lastActiveIncidenceIndex = 0;
 
 void rtrim(std::string &);
 
@@ -93,18 +90,13 @@ public:
     {
         code = code1;
         rootcode = rootcode1;
-        //country_code = country_code1;
         date8 = date81;
-        //geoname = geoname1;
         id = id1;
         year = year1;
-        //latitude = latitude1;
-        //longitude = longitude1;
         src_actor = src_actor1;
         src_agent = src_agent1;
         tgt_actor = tgt_actor1;
         tgt_agent = tgt_agent1;
-        //doc=doc1;
         month = month1;
         day = day1;
         embed = embed1;
@@ -119,21 +111,15 @@ private:
     {
         rtrim(code );
         rtrim(rootcode);
-        //rtrim(country_code );
         rtrim(date8 );
-        //rtrim(geoname );
         rtrim(id );
         rtrim(year);
         rtrim(month);
         rtrim(day);
-        //rtrim(latitude );
-        //rtrim(longitude );
         rtrim(src_actor );
         rtrim(src_agent );
         rtrim(tgt_actor );
         rtrim(tgt_agent );
-        //rtrim(latitude);
-        //rtrim(longitude);
         rtrim(geoname);
     }
 };
