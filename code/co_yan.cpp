@@ -32,19 +32,243 @@ int lastActiveIncidenceIndex = 0;
 // Ctrl+Shift+Alt+Q: Quick Format.
 // Ctrl+Shift+Alt+S: Selected Format.
 
+void rtrim(std::string &);
 
-/////////////////////
-#include "IncidenceFeature.h"
-#include "SentenceFeatureValue.h"
-#include "GlobalFeatureWeight.h"
-#include "Sentence.h"
-#include "SharedResources.h"
-#include "Incidence.h"
-#include "Subincidence.h"
-#include "SuperIncidence.h"
+//to track if the feature turned on or off on each incidence, if incidence feature has a value it means it is turned on, otherwise it means it is turned off.
+class IncidenceFeature
+{
+public:
+    map<string, string> featureMap;
+    IncidenceFeature()
+    {
+        //all the feature should be turned on at the beginning
+        //all the names here are the same as the json file, if it has value means it is turned on, if it is "" string, means this feature is turned off
+        featureMap["code"] = "";
+        featureMap["country_code"] = "";
+        featureMap["date8"] = "";
+        featureMap["geoname"] = "";
+        featureMap["id"] = "";
+        featureMap["year"] = "";
+        featureMap["latitude"] = "";
+        featureMap["longitude"] = "";
+        featureMap["src_actor"] = "";
+        featureMap["src_agent"] = "";
+        featureMap["tgt_actor"] = "";
+        featureMap["tgt_agent"] = "";
+        //featureMap["month"]="";
+        //featureMap["day"]="";
+    }
+};
 
-//////////
 
+
+class SentenceFeatureValue
+{
+public:
+    //map<string,string> featureValue;
+    string code;
+    string rootcode;
+    double latitude;
+    double longitude;
+    string geoname;
+    //string country_code;
+    string date8;
+    //string geoname;
+    string id;
+    string year;
+    //string latitude;
+    //string longitude;
+    string src_actor;
+    string src_agent;
+    string tgt_actor;
+    string tgt_agent;
+    string month;
+    string day;
+    int *embed;
+    //this will be the index in the global sentence array
+    int index;
+    // string doc;
+    //string embed;
+    SentenceFeatureValue(string code1, string rootcode1, string date81,  string id1, string year1, string src_actor1, string src_agent1, string tgt_actor1, string tgt_agent1, string month1, string day1, int *embed1, int index1,double latitude,double longitude, string geoname)
+    {
+        code = code1;
+        rootcode = rootcode1;
+        //country_code = country_code1;
+        date8 = date81;
+        //geoname = geoname1;
+        id = id1;
+        year = year1;
+        //latitude = latitude1;
+        //longitude = longitude1;
+        src_actor = src_actor1;
+        src_agent = src_agent1;
+        tgt_actor = tgt_actor1;
+        tgt_agent = tgt_agent1;
+        //doc=doc1;
+        month = month1;
+        day = day1;
+        embed = embed1;
+        index = index1;
+        latitude=latitude;
+        longitude=longitude;
+        geoname=geoname;
+        trimall();
+    };
+private:
+    void trimall()
+    {
+        rtrim(code );
+        rtrim(rootcode);
+        //rtrim(country_code );
+        rtrim(date8 );
+        //rtrim(geoname );
+        rtrim(id );
+        rtrim(year);
+        rtrim(month);
+        rtrim(day);
+        //rtrim(latitude );
+        //rtrim(longitude );
+        rtrim(src_actor );
+        rtrim(src_agent );
+        rtrim(tgt_actor );
+        rtrim(tgt_agent );
+        //rtrim(latitude);
+        //rtrim(longitude);
+        rtrim(geoname);
+    }
+};
+
+class GlobalFeatureWeight
+{
+public:
+    map<string, int> featureWeight;
+    GlobalFeatureWeight()
+    {
+        featureWeight["code"] = 1;
+        featureWeight["root_code"] = 1;
+        featureWeight["country_code"] = 1;
+        featureWeight["date8"] = 1;
+        featureWeight["geoname"] = 1;
+        featureWeight["id"] = 1;
+        featureWeight["year"] = 1;
+        featureWeight["latitude"] = 1;
+        featureWeight["longitude"] = 1;
+        featureWeight["src_actor"] = 1;
+        featureWeight["src_agent"] = 1;
+        featureWeight["tgt_actor"] = 1;
+        featureWeight["tgt_agent"] = 1;
+        featureWeight["tgt_year"] = 1;
+    }
+};
+class Sentence
+{
+public:
+    string sen_id;
+    //thsi is to keep track which incidence this sentence is from in order to do the time based sampling
+    int incidence_id;
+    SentenceFeatureValue *featureValue;
+    pthread_mutex_t mutex;
+    Sentence(string sentenceid, SentenceFeatureValue *featureValue1, int incidence_id1)
+    {
+        sen_id = sentenceid;
+        incidence_id = incidence_id1;
+        featureValue = featureValue1;
+        pthread_mutex_init(&mutex, NULL);
+    }
+
+    ~Sentence()
+    {
+        pthread_mutex_destroy(&mutex);
+    }
+
+    void lock()
+    {
+        pthread_mutex_lock(&mutex);
+    }
+
+    void unlock()
+    {
+        pthread_mutex_unlock(&mutex);
+    }
+};
+
+class SharedResources
+{
+
+public:
+    int lastActiveIncidenceIndex;
+    bool jumpout = false;
+    pthread_mutex_t mutex;
+    SharedResources(int lastActiveIncidenceIndex1)
+    {
+        lastActiveIncidenceIndex = lastActiveIncidenceIndex1;
+        pthread_mutex_init(&mutex, NULL);
+    }
+    ~SharedResources()
+    {
+        pthread_mutex_destroy(&mutex);
+    }
+
+    void lock()
+    {
+        pthread_mutex_lock(&mutex);
+    }
+
+    void unlock()
+    {
+        pthread_mutex_unlock(&mutex);
+    }
+};
+
+class Incidence
+{
+public:
+    int inci_id; //should be the index in the incidence array so each time need to update it when something changed.
+    string sup_id;
+    pthread_mutex_t mutex;
+    /*will be a list of snetence id that is in the incidence*/
+    vector<int> sentencesid;
+    vector<string> subincidencesid;
+    IncidenceFeature featureMap;
+    Incidence(int incidenceid, vector<int> sentences): inci_id(incidenceid), sentencesid(move(sentences))
+    {
+        pthread_mutex_init(&mutex, NULL);
+    };
+    ~Incidence()
+    {
+        pthread_mutex_destroy(&mutex);
+    }
+    void lock()
+    {
+        pthread_mutex_lock(&mutex);
+    }
+    void unlock()
+    {
+        pthread_mutex_unlock(&mutex);
+    }
+
+
+};
+
+class Subincidence
+{
+public:
+    //it hard to generate guid in c++, so maybe Subincidence don't need a guid
+    string sub_id;
+    string inci_id;
+    vector<string> sentencesid;
+    /*****list of features that subincidence care about*/;
+    Subincidence(string subid, string inciid): sub_id(subid), inci_id(inciid) {}
+};
+
+class SuperIncidence
+{
+public:
+    string sup_id;
+    /* nodeid when distributed which node this superincidence is on*/
+    string nodeid;
+    /****list of freatures that super incidence care about***/
+};
 
 //global variables
 int xlength = 1000;
@@ -130,7 +354,116 @@ vector<int> &shuffleTheIndexOfVector(int n)
     return (*random);
 }
 
+//split the target incidence if new stuff get added in ,
+//the current thought might need to change later.
+// void splitIncidenceIntoSubincidence(int incidenceIndex, string incidenceId, vector<Subincidence *> &subincidenceArray, vector<Incidence *> &incidenceArray)
+// {
 
+//     //randomly split the sn
+//     vector<int> sentences = (*incidenceArray[incidenceIndex]).sentencesid;
+//     int sentencesCount = sentences.size();
+//     vector<int> randomArray = *splitTheIntegerIntoRandomPart(sentencesCount);
+//     //might give it an probablity to split or not.
+//     //first shuffle the list then, make them in to subgroup, shuffle is provided by c++ native lib.
+//     vector<int> shuffledIndex = shuffleTheIndexOfVector(sentencesCount);
+//     int sizeid = 0;
+//     int accumulateIndex = 0;
+//     int sentenceIndex = 0;
+//     string subid = "";
+//     for(int num : randomArray)
+//     {
+//         sizeid = subincidenceArray.size();
+//         subid = to_string(sizeid);
+//         Subincidence *sub = new Subincidence(subid, incidenceId);
+//         subincidenceArray.push_back(sub);
+//         for(int i = 0; i < num; i++)
+//         {
+
+//             sentenceIndex = shuffledIndex[accumulateIndex];
+//             (*sub).sentencesid.push_back(sentences[sentenceIndex]);
+//             //be careful this needs to be called at last, otherwise it will get a segmentation fault
+//             accumulateIndex = accumulateIndex + 1;
+//         }
+//         (*incidenceArray[incidenceIndex]).subincidencesid.push_back(subid);
+
+//     }
+//     cout << "subcount: " << (*incidenceArray[incidenceIndex]).subincidencesid.size() << endl;
+
+
+// }
+
+
+/**link a sentence to a coincidence*, when bigger than the threshold the stuff should be moved*/
+/***array is by default pass by reference**/
+// void linkSentenceToIncidence(int desincidenceindex, string incidenceid, int sourceincidenceindex, string sourceincidenceid, string sentenceid, int indexOfSentenceId, double threshold, vector<Incidence *> &incidenceArray, vector<Subincidence *> &subincidenceArray)
+// {
+//     //let say when the sentece similarity within the average similarity for the coincidence is above some value then move.
+//     double sentenceWithIncidenceSimilarity = 0;
+//     double similarityInOldIncidence = 0;
+//     vector<string> sentencesid = (*(incidenceArray[stoi(incidenceid)])).sentencesid;
+//     //int count=0;
+//     int sen1 = 0;
+//     int sen2 = stoi(sentenceid);
+//     //in order for the proces to start do this:
+//     if(sentencesid.size() == 1)
+//     {
+//         sentenceWithIncidenceSimilarity = generateRandomInteger(0, 100) / 100.0;
+//     }
+//     else
+//     {
+//         sentenceWithIncidenceSimilarity = 0;
+//         for(string id : sentencesid)
+//         {
+//             sen1 = stoi(id);
+//             //count=count+1;
+//             //pairwisely calculate the similarity of the current add in stuff with the snetence already in the list and compare the similarity with some threshhold.
+//             sentenceWithIncidenceSimilarity = sentenceWithIncidenceSimilarity + getSimilarityByMatrixIndex(matrix, sen1, sen2);
+//         }
+
+//     }
+//     //now need to calculat sen2 affinity within its old icnidence
+//     vector<string> sourceSentencesid = (*(incidenceArray[stoi(sourceincidenceid)])).sentencesid;
+//     if(sourceSentencesid.size() == 0)
+//     {
+//         similarityInOldIncidence = generateRandomInteger(0, 100) / 100.0;
+//     }
+//     else
+//     {
+//         similarityInOldIncidence = 0;
+//         for(string id : sourceSentencesid)
+//         {
+//             sen1 = stod(id);
+//             similarityInOldIncidence = similarityInOldIncidence + getSimilarityByMatrixIndex(matrix, sen1, sen2);
+//         }
+
+//     }
+
+//     //if(sentenceWithIncidenceSimilarity/count>=threshold)
+//     if(sentenceWithIncidenceSimilarity >= similarityInOldIncidence)
+//     {
+//         //if bigger than threshhold, then link it
+//         cout << "linked!!" << endl;
+//         //remove from the old incidence and add into the new incidence.
+
+//         vector<string> &sentenceids = (*(incidenceArray[sourceincidenceindex])).sentencesid;
+//         sentenceids.erase(sentenceids.begin() + indexOfSentenceId);
+//         //if there is no sentence inside of the incidence any more, remove the incidence from the incidence list
+//         if(sentenceids.size() == 0)
+//             incidenceArray.erase(incidenceArray.begin() + sourceincidenceindex);
+
+//         //add the sentence to the destination incidence
+
+//         (*(incidenceArray[desincidenceindex])).sentencesid.push_back(sentenceid);
+//         splitIncidenceIntoSubincidence(desincidenceindex, incidenceid, subincidenceArray, incidenceArray);
+
+//     }
+//     else
+//     {
+//         cout << "not linked!!" << endl;
+//     }
+//     //now need to make the linked sentecnes into the incidence list, and need to get rid of the incidence if there is nothing belong to it any more,
+
+// }
 double getSimilarityBySentenceId( vector<Sentence *> &sentenceArray, int sen1index, int sen2index)
 {
     int *vec1 = (*((*(sentenceArray[sen1index])).featureValue)).embed;
@@ -138,7 +471,6 @@ double getSimilarityBySentenceId( vector<Sentence *> &sentenceArray, int sen1ind
     double cosine = cosineSimilarity(vec1, vec2);
     return cosine;
 }
-
 
 double getSentenceSimilarityWithinIncidence(vector<Sentence *> &sentenceArray, vector<Incidence *> &incidenceArray, int incidenceid, int sentenceindex, bool fromsource)
 {
@@ -182,6 +514,13 @@ double getSentenceSimilarityWithinIncidence(vector<Sentence *> &sentenceArray, v
     }
 
 
+}
+void rtrim(std::string &s)
+{
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch)
+    {
+        return !std::isspace(ch);
+    }).base(), s.end());
 }
 
 bool isTrival(string input)
@@ -329,7 +668,11 @@ int getPropertyValueMatch(vector<Sentence *> &sentenceArray, vector<Incidence *>
 
 }
 
+//get pairwise feature match value
+// public map<string, int>& getPairwiseFeatureMap(int sentenceindex, int destinationincidenceindex)
+// {
 
+// }
 
 void linkSentenceToIncidence(vector<Incidence *> &incidenceArray, vector<Sentence *> &sentenceArray, int destincidenceindex, int sourceincidenceindex, int sentenceindex, int SenIndexInOriginalSentenceIds, SharedResources &shared)
 {
@@ -745,7 +1088,7 @@ int main(int argc, char **argv)
         // ""
     );
 
-    if (sqlite3_open ("../../coincidenceData/events-1004.db", &db) != SQLITE_OK) {
+    if (sqlite3_open ("../../coincidenceData/events1114.db", &db) != SQLITE_OK) {
         fprintf(stderr, "Error opening database.\n");
         return 2;
     }
@@ -932,30 +1275,306 @@ int main(int argc, char **argv)
     SharedResources *shared = new SharedResources(globalSize - 1);
 
     clock_t begin = clock();
-
-    std::vector<std::thread> threads;
     if(!biased)
     {
-        // Start threads
-        for (int i = 0; i < 64; ++i) {
-            threads.push_back(thread(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, i+1));
-        }
-        
-        // Join threads
-        for (int i = 0; i < 64; ++i) {
-            threads[i].join();
-        }
+        thread t1(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 1);
+        thread t2(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 2);
+        thread t3(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 3);
+        thread t4(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 4);
+        thread t5(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 5);
+        thread t6(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 6);
+        thread t7(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 7);
+        thread t8(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 8);
+
+        thread t9(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 9);
+        thread t10(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 10);
+        thread t11(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 11);
+        thread t12(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 12);
+        thread t13(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 13);
+        thread t14(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 14);
+        thread t15(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 15);
+        thread t16(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 16);
+
+        thread t17(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 17);
+        thread t18(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 18);
+        thread t19(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 19);
+        thread t20(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 20);
+        thread t21(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 21);
+        thread t22(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 22);
+        thread t23(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 23);
+        thread t24(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 24);
+
+
+        thread t25(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 25);
+        thread t26(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 26);
+        thread t27(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 27);
+        thread t28(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 28);
+        thread t29(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 29);
+        thread t30(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 30);
+        thread t31(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 31);
+        thread t32(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 32);
+
+        thread t33(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 33);
+        thread t34(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 34);
+        thread t35(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 35);
+        thread t36(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 36);
+        thread t37(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 37);
+        thread t38(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 38);
+        thread t39(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 39);
+        thread t40(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 40);
+
+        thread t41(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 41);
+        thread t42(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 42);
+        thread t43(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 43);
+        thread t44(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 44);
+        thread t45(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 45);
+        thread t46(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 46);
+        thread t47(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 47);
+        thread t48(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 48);
+
+        thread t49(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 49);
+        thread t50(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 50);
+        thread t51(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 51);
+        thread t52(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 52);
+        thread t53(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 53);
+        thread t54(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 54);
+        thread t55(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 55);
+        thread t56(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 56);
+
+
+        thread t57(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 57);
+        thread t58(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 58);
+        thread t59(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 59);
+        thread t60(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 60);
+        thread t61(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 61);
+        thread t62(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 62);
+        thread t63(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 63);
+        thread t64(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 64);
+
+
+
+        t1.join();
+        t2.join();
+        t3.join();
+        t4.join();
+        t5.join();
+        t6.join();
+        t7.join();
+        t8.join();
+
+        t9.join();
+        t10.join();
+        t11.join();
+        t12.join();
+        t13.join();
+        t14.join();
+        t15.join();
+        t16.join();
+
+        t17.join();
+        t18.join();
+        t19.join();
+        t20.join();
+        t21.join();
+        t22.join();
+        t23.join();
+        t24.join();
+
+        t25.join();
+        t26.join();
+        t27.join();
+        t28.join();
+        t29.join();
+        t30.join();
+        t31.join();
+        t32.join();
+
+        t33.join();
+        t34.join();
+        t35.join();
+        t36.join();
+        t37.join();
+        t38.join();
+        t39.join();
+        t40.join();
+
+        t41.join();
+        t42.join();
+        t43.join();
+        t44.join();
+        t45.join();
+        t46.join();
+        t47.join();
+        t48.join();
+
+        t49.join();
+        t50.join();
+        t51.join();
+        t52.join();
+        t53.join();
+        t54.join();
+        t55.join();
+        t56.join();
+
+        t57.join();
+        t58.join();
+        t59.join();
+        t60.join();
+        t61.join();
+        t62.join();
+        t63.join();
+        t64.join();
     }
     else
     {
-        for (int i = 0; i < 64; ++i) {
-            threads.push_back(thread(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, i+1,statsfile));
-        }
-        
-        // Join threads
-        for (int i = 0; i < 64; ++i) {
-            threads[i].join();
-        }
+        thread t1(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 1,statsfile);
+        thread t2(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 2,statsfile);
+        thread t3(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 3,statsfile);
+        thread t4(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 4,statsfile);
+        thread t5(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 5,statsfile);
+        thread t6(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 6,statsfile);
+        thread t7(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 7,statsfile);
+        thread t8(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 8,statsfile);
+
+        thread t9(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 9,statsfile);
+        thread t10(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 10,statsfile);
+        thread t11(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 11,statsfile);
+        thread t12(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 12,statsfile);
+        thread t13(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 13,statsfile);
+        thread t14(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 14,statsfile);
+        thread t15(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 15,statsfile);
+        thread t16(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 16,statsfile);
+
+        thread t17(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 17,statsfile);
+        thread t18(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 18,statsfile);
+        thread t19(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 19,statsfile);
+        thread t20(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 20,statsfile);
+        thread t21(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 21,statsfile);
+        thread t22(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 22,statsfile);
+        thread t23(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 23,statsfile);
+        thread t24(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 24,statsfile);
+
+
+        thread t25(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 25,statsfile);
+        thread t26(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 26,statsfile);
+        thread t27(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 27,statsfile);
+        thread t28(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 28,statsfile);
+        thread t29(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 29,statsfile);
+        thread t30(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 30,statsfile);
+        thread t31(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 31,statsfile);
+        thread t32(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 32,statsfile);
+
+        thread t33(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 33,statsfile);
+        thread t34(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 34,statsfile);
+        thread t35(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 35,statsfile);
+        thread t36(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 36,statsfile);
+        thread t37(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 37,statsfile);
+        thread t38(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 38,statsfile);
+        thread t39(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 39,statsfile);
+        thread t40(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 40,statsfile);
+
+        thread t41(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 41,statsfile);
+        thread t42(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 42,statsfile);
+        thread t43(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 43,statsfile);
+        thread t44(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 44,statsfile);
+        thread t45(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 45,statsfile);
+        thread t46(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 46,statsfile);
+        thread t47(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 47,statsfile);
+        thread t48(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 48,statsfile);
+
+        thread t49(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 49,statsfile);
+        thread t50(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 50,statsfile);
+        thread t51(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 51,statsfile);
+        thread t52(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 52,statsfile);
+        thread t53(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 53,statsfile);
+        thread t54(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 54,statsfile);
+        thread t55(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 55,statsfile);
+        thread t56(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 56,statsfile);
+
+
+        thread t57(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 57,statsfile);
+        thread t58(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 58,statsfile);
+        thread t59(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 59,statsfile);
+        thread t60(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 60,statsfile);
+        thread t61(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 61,statsfile);
+        thread t62(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 62,statsfile);
+        thread t63(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 63,statsfile);
+        thread t64(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 64,statsfile);
+
+
+        t1.join();
+        t2.join();
+        t3.join();
+        t4.join();
+        t5.join();
+        t6.join();
+        t7.join();
+        t8.join();
+
+        t9.join();
+        t10.join();
+        t11.join();
+        t12.join();
+        t13.join();
+        t14.join();
+        t15.join();
+        t16.join();
+
+        t17.join();
+        t18.join();
+        t19.join();
+        t20.join();
+        t21.join();
+        t22.join();
+        t23.join();
+        t24.join();
+
+        t25.join();
+        t26.join();
+        t27.join();
+        t28.join();
+        t29.join();
+        t30.join();
+        t31.join();
+        t32.join();
+
+        t33.join();
+        t34.join();
+        t35.join();
+        t36.join();
+        t37.join();
+        t38.join();
+        t39.join();
+        t40.join();
+
+        t41.join();
+        t42.join();
+        t43.join();
+        t44.join();
+        t45.join();
+        t46.join();
+        t47.join();
+        t48.join();
+
+        t49.join();
+        t50.join();
+        t51.join();
+        t52.join();
+        t53.join();
+        t54.join();
+        t55.join();
+        t56.join();
+
+        t57.join();
+        t58.join();
+        t59.join();
+        t60.join();
+        t61.join();
+        t62.join();
+        t63.join();
+        t64.join();
+
+
     }
     clock_t end = clock();
 
@@ -1060,5 +1679,11 @@ int main(int argc, char **argv)
     // else std::cout << "pre-standard C++\n" ;
     return 0;
 }
+
+
+
+
+
+
 
 
