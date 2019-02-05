@@ -3,6 +3,7 @@
 
 #include <string.h>
 #include <pthread.h>
+#include "SentenceFeatureValue.h"
 
 class Sentence
 {
