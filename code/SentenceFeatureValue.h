@@ -3,6 +3,7 @@
 
 #include <string>
 #include "Util.hpp"
+using namespace std
 
 class SentenceFeatureValue
 {
