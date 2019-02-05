@@ -31,8 +31,6 @@ using namespace std;
 
 int lastActiveIncidenceIndex = 0;
 
-void rtrim(std::string &);
-
 //to track if the feature turned on or off on each incidence, if incidence feature has a value it means it is turned on, otherwise it means it is turned off.
 class IncidenceFeature
 {
@@ -256,14 +254,6 @@ double getSentenceSimilarityWithinIncidence(vector<Sentence *> &sentenceArray, v
     {
         return sentenceWithIncidenceSimilarity / (sentencesid.size() - 1);
     }
-}
-
-void rtrim(std::string &s)
-{
-    s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch)
-    {
-        return !std::isspace(ch);
-    }).base(), s.end());
 }
 
 bool isTrival(string input)
