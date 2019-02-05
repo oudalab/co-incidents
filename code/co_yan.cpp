@@ -57,66 +57,6 @@ public:
     }
 };
 
-
-
-class SentenceFeatureValue
-{
-public:
-    string code;
-    string rootcode;
-    double latitude;
-    double longitude;
-    string geoname;
-    string date8;
-    string id;
-    string year;
-    string src_actor;
-    string src_agent;
-    string tgt_actor;
-    string tgt_agent;
-    string month;
-    string day;
-    int *embed;
-    //this will be the index in the global sentence array
-    int index;
-    SentenceFeatureValue(string code1, string rootcode1, string date81,  string id1, string year1, string src_actor1, string src_agent1, string tgt_actor1, string tgt_agent1, string month1, string day1, int *embed1, int index1,double latitude,double longitude, string geoname)
-    {
-        code = code1;
-        rootcode = rootcode1;
-        date8 = date81;
-        id = id1;
-        year = year1;
-        src_actor = src_actor1;
-        src_agent = src_agent1;
-        tgt_actor = tgt_actor1;
-        tgt_agent = tgt_agent1;
-        month = month1;
-        day = day1;
-        embed = embed1;
-        index = index1;
-        latitude=latitude;
-        longitude=longitude;
-        geoname=geoname;
-        trimall();
-    };
-private:
-    void trimall()
-    {
-        rtrim(code );
-        rtrim(rootcode);
-        rtrim(date8 );
-        rtrim(id );
-        rtrim(year);
-        rtrim(month);
-        rtrim(day);
-        rtrim(src_actor );
-        rtrim(src_agent );
-        rtrim(tgt_actor );
-        rtrim(tgt_agent );
-        rtrim(geoname);
-    }
-};
-
 class SharedResources
 {
 
