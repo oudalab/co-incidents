@@ -17,6 +17,8 @@
 #include <mutex>
 #include <thread>
 #include <pthread.h>
+#include "Sentence.h"
+#include "GlobalFeatureWeight.h"
 using namespace std;
 
 // Ctrl+Shift+Alt+Q: Quick Format.
@@ -112,60 +114,6 @@ private:
         rtrim(tgt_actor );
         rtrim(tgt_agent );
         rtrim(geoname);
-    }
-};
-
-class GlobalFeatureWeight
-{
-public:
-    map<string, int> featureWeight;
-    GlobalFeatureWeight()
-    {
-        featureWeight["code"] = 1;
-        featureWeight["root_code"] = 1;
-        featureWeight["country_code"] = 1;
-        featureWeight["date8"] = 1;
-        featureWeight["geoname"] = 1;
-        featureWeight["id"] = 1;
-        featureWeight["year"] = 1;
-        featureWeight["latitude"] = 1;
-        featureWeight["longitude"] = 1;
-        featureWeight["src_actor"] = 1;
-        featureWeight["src_agent"] = 1;
-        featureWeight["tgt_actor"] = 1;
-        featureWeight["tgt_agent"] = 1;
-        featureWeight["tgt_year"] = 1;
-    }
-};
-class Sentence
-{
-public:
-    string sen_id;
-    //thsi is to keep track which incidence this sentence is from in order to do the time based sampling
-    int incidence_id;
-    SentenceFeatureValue *featureValue;
-    pthread_mutex_t mutex;
-    Sentence(string sentenceid, SentenceFeatureValue *featureValue1, int incidence_id1)
-    {
-        sen_id = sentenceid;
-        incidence_id = incidence_id1;
-        featureValue = featureValue1;
-        pthread_mutex_init(&mutex, NULL);
-    }
-
-    ~Sentence()
-    {
-        pthread_mutex_destroy(&mutex);
-    }
-
-    void lock()
-    {
-        pthread_mutex_lock(&mutex);
-    }
-
-    void unlock()
-    {
-        pthread_mutex_unlock(&mutex);
     }
 };
 
