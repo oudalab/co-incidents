@@ -2,25 +2,19 @@
 #define SENVENCEFEATUREVALUE_H_
 
 #include <string>
-
 #include "Util.hpp"
 
 class SentenceFeatureValue
 {
 public:
-    //map<string,string> featureValue;
     std::string code;
     std::string rootcode;
     double latitude;
     double longitude;
     std::string geoname;
-    //string country_code;
     std::string date8;
-    //string geoname;
     std::string id;
     std::string year;
-    //string latitude;
-    //string longitude;
     std::string src_actor;
     std::string src_agent;
     std::string tgt_actor;
@@ -30,8 +24,7 @@ public:
     int *embed;
     //this will be the index in the global sentence array
     int index;
-    // string doc;
-//string embed;
+    
     SentenceFeatureValue(string code1, std::string rootcode1, std::string date81,  std::string id1, std::string year1, std::string src_actor1, std::string src_agent1, std::string tgt_actor1, std::string tgt_agent1, std::string month1, std::string day1, int *embed1, int index1, double latitude, double longitude, std::string geoname)
     {
         code = code1;
@@ -62,21 +55,15 @@ private:
     {
         rtrim(code );
         rtrim(rootcode);
-        //rtrim(country_code );
         rtrim(date8 );
-        //rtrim(geoname );
         rtrim(id );
         rtrim(year);
         rtrim(month);
         rtrim(day);
-        //rtrim(latitude );
-        //rtrim(longitude );
         rtrim(src_actor );
         rtrim(src_agent );
         rtrim(tgt_actor );
         rtrim(tgt_agent );
-        //rtrim(latitude);
-        //rtrim(longitude);
         rtrim(geoname);
     }
 };
