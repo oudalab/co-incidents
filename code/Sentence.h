@@ -2,15 +2,13 @@
 #define SENTENCE_H_
 
 #include <string.h>
-
 #include <pthread.h>
-
 
 class Sentence
 {
     public:
         std::string sen_id;
-        //thsi is to keep track which incidence this sentence is from in order to do the time based sampling
+        //this is to keep track which incidence this sentence is from in order to do the time based sampling
         int incidence_id;
         SentenceFeatureValue *featureValue;
         pthread_mutex_t mutex;
@@ -37,6 +35,5 @@ class Sentence
             pthread_mutex_unlock(&mutex);
         }
 };
-
 
 #endif // SENTENCE_H_
