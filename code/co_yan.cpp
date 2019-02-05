@@ -52,8 +52,6 @@ public:
         featureMap["src_agent"] = "";
         featureMap["tgt_actor"] = "";
         featureMap["tgt_agent"] = "";
-        //featureMap["month"]="";
-        //featureMap["day"]="";
     }
 };
 
@@ -62,19 +60,14 @@ public:
 class SentenceFeatureValue
 {
 public:
-    //map<string,string> featureValue;
     string code;
     string rootcode;
     double latitude;
     double longitude;
     string geoname;
-    //string country_code;
     string date8;
-    //string geoname;
     string id;
     string year;
-    //string latitude;
-    //string longitude;
     string src_actor;
     string src_agent;
     string tgt_actor;
@@ -84,8 +77,6 @@ public:
     int *embed;
     //this will be the index in the global sentence array
     int index;
-    // string doc;
-    //string embed;
     SentenceFeatureValue(string code1, string rootcode1, string date81,  string id1, string year1, string src_actor1, string src_agent1, string tgt_actor1, string tgt_agent1, string month1, string day1, int *embed1, int index1,double latitude,double longitude, string geoname)
     {
         code = code1;
@@ -232,8 +223,6 @@ public:
     {
         pthread_mutex_unlock(&mutex);
     }
-
-
 };
 
 class Subincidence
@@ -282,7 +271,6 @@ double vectorLength(int *vect)
     }
     return sqrt(length);
 }
-
 
 double cosineSimilarity(int *vec1, int *vec2)
 {
@@ -340,116 +328,6 @@ vector<int> &shuffleTheIndexOfVector(int n)
     return (*random);
 }
 
-//split the target incidence if new stuff get added in ,
-//the current thought might need to change later.
-// void splitIncidenceIntoSubincidence(int incidenceIndex, string incidenceId, vector<Subincidence *> &subincidenceArray, vector<Incidence *> &incidenceArray)
-// {
-
-//     //randomly split the sn
-//     vector<int> sentences = (*incidenceArray[incidenceIndex]).sentencesid;
-//     int sentencesCount = sentences.size();
-//     vector<int> randomArray = *splitTheIntegerIntoRandomPart(sentencesCount);
-//     //might give it an probablity to split or not.
-//     //first shuffle the list then, make them in to subgroup, shuffle is provided by c++ native lib.
-//     vector<int> shuffledIndex = shuffleTheIndexOfVector(sentencesCount);
-//     int sizeid = 0;
-//     int accumulateIndex = 0;
-//     int sentenceIndex = 0;
-//     string subid = "";
-//     for(int num : randomArray)
-//     {
-//         sizeid = subincidenceArray.size();
-//         subid = to_string(sizeid);
-//         Subincidence *sub = new Subincidence(subid, incidenceId);
-//         subincidenceArray.push_back(sub);
-//         for(int i = 0; i < num; i++)
-//         {
-
-//             sentenceIndex = shuffledIndex[accumulateIndex];
-//             (*sub).sentencesid.push_back(sentences[sentenceIndex]);
-//             //be careful this needs to be called at last, otherwise it will get a segmentation fault
-//             accumulateIndex = accumulateIndex + 1;
-//         }
-//         (*incidenceArray[incidenceIndex]).subincidencesid.push_back(subid);
-
-//     }
-//     cout << "subcount: " << (*incidenceArray[incidenceIndex]).subincidencesid.size() << endl;
-
-
-// }
-
-
-/**link a sentence to a coincidence*, when bigger than the threshold the stuff should be moved*/
-/***array is by default pass by reference**/
-// void linkSentenceToIncidence(int desincidenceindex, string incidenceid, int sourceincidenceindex, string sourceincidenceid, string sentenceid, int indexOfSentenceId, double threshold, vector<Incidence *> &incidenceArray, vector<Subincidence *> &subincidenceArray)
-// {
-//     //let say when the sentece similarity within the average similarity for the coincidence is above some value then move.
-//     double sentenceWithIncidenceSimilarity = 0;
-//     double similarityInOldIncidence = 0;
-//     vector<string> sentencesid = (*(incidenceArray[stoi(incidenceid)])).sentencesid;
-//     //int count=0;
-//     int sen1 = 0;
-//     int sen2 = stoi(sentenceid);
-//     //in order for the proces to start do this:
-//     if(sentencesid.size() == 1)
-//     {
-//         sentenceWithIncidenceSimilarity = generateRandomInteger(0, 100) / 100.0;
-//     }
-//     else
-//     {
-//         sentenceWithIncidenceSimilarity = 0;
-//         for(string id : sentencesid)
-//         {
-//             sen1 = stoi(id);
-//             //count=count+1;
-//             //pairwisely calculate the similarity of the current add in stuff with the snetence already in the list and compare the similarity with some threshhold.
-//             sentenceWithIncidenceSimilarity = sentenceWithIncidenceSimilarity + getSimilarityByMatrixIndex(matrix, sen1, sen2);
-//         }
-
-//     }
-//     //now need to calculat sen2 affinity within its old icnidence
-//     vector<string> sourceSentencesid = (*(incidenceArray[stoi(sourceincidenceid)])).sentencesid;
-//     if(sourceSentencesid.size() == 0)
-//     {
-//         similarityInOldIncidence = generateRandomInteger(0, 100) / 100.0;
-//     }
-//     else
-//     {
-//         similarityInOldIncidence = 0;
-//         for(string id : sourceSentencesid)
-//         {
-//             sen1 = stod(id);
-//             similarityInOldIncidence = similarityInOldIncidence + getSimilarityByMatrixIndex(matrix, sen1, sen2);
-//         }
-
-//     }
-
-//     //if(sentenceWithIncidenceSimilarity/count>=threshold)
-//     if(sentenceWithIncidenceSimilarity >= similarityInOldIncidence)
-//     {
-//         //if bigger than threshhold, then link it
-//         cout << "linked!!" << endl;
-//         //remove from the old incidence and add into the new incidence.
-
-//         vector<string> &sentenceids = (*(incidenceArray[sourceincidenceindex])).sentencesid;
-//         sentenceids.erase(sentenceids.begin() + indexOfSentenceId);
-//         //if there is no sentence inside of the incidence any more, remove the incidence from the incidence list
-//         if(sentenceids.size() == 0)
-//             incidenceArray.erase(incidenceArray.begin() + sourceincidenceindex);
-
-//         //add the sentence to the destination incidence
-
-//         (*(incidenceArray[desincidenceindex])).sentencesid.push_back(sentenceid);
-//         splitIncidenceIntoSubincidence(desincidenceindex, incidenceid, subincidenceArray, incidenceArray);
-
-//     }
-//     else
-//     {
-//         cout << "not linked!!" << endl;
-//     }
-//     //now need to make the linked sentecnes into the incidence list, and need to get rid of the incidence if there is nothing belong to it any more,
-
-// }
 double getSimilarityBySentenceId( vector<Sentence *> &sentenceArray, int sen1index, int sen2index)
 {
     int *vec1 = (*((*(sentenceArray[sen1index])).featureValue)).embed;
@@ -461,12 +339,10 @@ double getSimilarityBySentenceId( vector<Sentence *> &sentenceArray, int sen1ind
 double getSentenceSimilarityWithinIncidence(vector<Sentence *> &sentenceArray, vector<Incidence *> &incidenceArray, int incidenceid, int sentenceindex, bool fromsource)
 {
     double sentenceWithIncidenceSimilarity = 0;
-    // double similarityInOldIncidence = 0;
     vector<int> sentencesid = (*(incidenceArray[incidenceid])).sentencesid;
-    //int count=0;
     int sen1 = 0;
     int sen2 = sentenceindex;
-    //in order for the proces to start do this:
+    //in order for the process to start do this:
     if(sentencesid.size() == 1 && fromsource)
     {
         sentenceWithIncidenceSimilarity = generateRandomInteger(0, 55) / 100.0;
@@ -479,14 +355,8 @@ double getSentenceSimilarityWithinIncidence(vector<Sentence *> &sentenceArray, v
             if(id != sentenceindex)
             {
                 sen1 = id;
-                //count=count+1;
                 //pairwisely calculate the similarity of the current add in stuff with the snetence already in the list and compare the similarity with some threshhold.
                 sentenceWithIncidenceSimilarity = sentenceWithIncidenceSimilarity + getSimilarityBySentenceId(sentenceArray, sen1, sen2);
-                // if(sentenceWithIncidenceSimilarity>=0.5)
-                // {
-                // 	cout<<"dest incidence sen:"<<sen1<<endl;
-                // 	cout<<"source incidence sen:"<<sen2<<endl;
-                // }
             }
         }
     }
@@ -498,9 +368,8 @@ double getSentenceSimilarityWithinIncidence(vector<Sentence *> &sentenceArray, v
     {
         return sentenceWithIncidenceSimilarity / (sentencesid.size() - 1);
     }
-
-
 }
+
 void rtrim(std::string &s)
 {
     s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch)
@@ -511,7 +380,6 @@ void rtrim(std::string &s)
 
 bool isTrival(string input)
 {
-    // iinput.erase(std::remove(input.begin(), input.end(), '\n'), input.end());
     rtrim(input);
     if(input == "\"\"" || input == "" || input == " "||input=="00000" || input.empty() || input.length() == 0)
     {
@@ -528,26 +396,16 @@ int getMatchWithinSentences(SentenceFeatureValue &feature1, SentenceFeatureValue
 
     if(!isTrival(feature1.code) && !isTrival(feature2.code) && feature1.code == feature2.code)
     {
-        //cout<<"faatyre start"<<endl;
-        //cerr<<"(" << feature1.code << ", " << feature2.code<< ") " << score << endl;
         score += up * weightMap["code"];
     }
+    
     if(!isTrival(feature1.rootcode) && !isTrival(feature2.rootcode) && feature1.rootcode == feature2.rootcode)
     {
-        //cout<<"faatyre start"<<endl;
-        //cerr<<"(" << feature1.code << ", " << feature2.code<< ") " << score << endl;
         score += up * weightMap["rootcode"];
     }
-    // if(!isTrival(feature1.country_code) && !isTrival(feature2.country_code) && feature1.country_code == feature2.country_code)
-    // {
-    //     //cerr<<"(" << feature1.country_code << ", " << feature2.country_code<< ") " << score << endl;
-    //     //code += 2;
-    //     score += up;
-    // }
+    
     if(!isTrival(feature1.year) && !isTrival(feature2.year) && feature1.year == feature2.year)
     {
-        //cerr<<"(" << feature1.country_code << ", " << feature2.country_code<< ") " << score << endl;
-        //code += 2;
         score += up * weightMap["year"];
         //if year are the same and month are the same, the socre up again
         if(!isTrival(feature1.month) && !isTrival(feature2.month) && feature1.month == feature2.month)
@@ -557,26 +415,18 @@ int getMatchWithinSentences(SentenceFeatureValue &feature1, SentenceFeatureValue
     }
     if(!isTrival(feature1.src_actor) && !isTrival(feature2.src_actor) && feature1.src_actor == feature2.src_actor)
     {
-        //cerr<<"(" << feature1.src_actor << ", " << feature2.src_actor<< ") " << score << endl;
-        //code += 4;
         score += up * weightMap["src_actor"];
     }
     if(!isTrival(feature1.src_agent) && !isTrival(feature2.src_agent) && feature1.src_agent == feature2.src_agent)
     {
-        //cerr<<"(" << feature1.src_agent << ", " << feature2.src_agent<< ") " << score << endl;
-        //code += 8;
         score += up * weightMap["src_agent"];
     }
     if(!isTrival(feature1.tgt_actor) && !isTrival(feature2.tgt_actor) && feature1.tgt_actor == feature2.tgt_actor)
     {
-        //cerr<<"(" << feature1.tgt_actor << ", " << feature2.tgt_actor<< ") " << score << endl;
-        //code += 16;
         score += up * weightMap["tgt_actor"];
     }
     if(!isTrival(feature1.tgt_agent) && !isTrival(feature2.tgt_agent) && feature1.tgt_agent == feature2.tgt_agent)
     {
-        //cerr<<"(" << feature1.tgt_agent << ", " << feature2.tgt_agent<< ") " << score << endl;
-        //code += 32;
         score += up * weightMap["tgt_agent"];
     }
     //added for geolocation
@@ -596,27 +446,10 @@ int getMatchWithinSentences(SentenceFeatureValue &feature1, SentenceFeatureValue
              score += up * weightMap["latitude"];
         }
     }
-    //6 here is 6 features, and 1.0 is the weight for cosine similarity
-    // if(score == score_threshold)
-    // {
-    //     cout << "score: " << score << endl;
-    //     cout << feature1.id << "," << feature2.id << endl;
-    //     cout << feature1.code << "," << feature2.code << endl;
-    //     cout << feature1.rootcode << "," << feature2.rootcode << endl;
-    //     // cout << feature1.country_code << "," << feature2.country_code << endl;
-    //     cout << feature1.year << "," << feature2.year << endl;
-    //     cout << feature1.month << "," << feature2.month << endl;
-    //     cout << feature1.src_actor << "," << feature2.src_actor << endl;
-    //     cout << feature1.src_agent << "," << feature2.src_agent << endl;
-    //     cout << feature1.tgt_actor << "," << feature2.tgt_actor << endl;
-    //     cout << feature1.tgt_agent << "," << feature2.tgt_agent << endl;
-
-    // }
     return  score;
-
 }
 
-//this is not for feature weight learning yet, just everybody has the same weight for each property and also the vector similarity
+//this is not using feature weight learning yet, just everybody has the same weight for each property and also the vector similarity
 int getPropertyValueMatch(vector<Sentence *> &sentenceArray, vector<Incidence *> &incidenceArray, int incidenceindex, int sentenceindex, bool fromsource, int score_threshold, map<string, int> &weightMap)
 {
     int pairValues = 0;
@@ -628,10 +461,6 @@ int getPropertyValueMatch(vector<Sentence *> &sentenceArray, vector<Incidence *>
     //if the original incidence only have 1 sentence which is the sentence to be move, then assign this value to be a random number, I think.
     if(fromsource && sentencesid.size() == 1)
     {
-        //I am using 6 features now, this 5 needs to be changed based on how many features you are considering.
-        // pairValues = generateRandomInteger(0, 12);
-        //return pairValues;
-        //pairValues=0;
         return 0;
     }
     else
@@ -645,26 +474,13 @@ int getPropertyValueMatch(vector<Sentence *> &sentenceArray, vector<Incidence *>
             }
         }
     }
-    // if(pairValues == 8)
-    // {
-    //     cout << "incidence index: " << incidenceindex << endl;
-    //     cout << "sentence index: " << sentenceindex << endl;
-    // }
     return pairValues / (sentencesid.size());
-
 }
-
-//get pairwise feature match value
-// public map<string, int>& getPairwiseFeatureMap(int sentenceindex, int destinationincidenceindex)
-// {
-
-// }
 
 void linkSentenceToIncidence(vector<Incidence *> &incidenceArray, vector<Sentence *> &sentenceArray, int destincidenceindex, int sourceincidenceindex, int sentenceindex, int SenIndexInOriginalSentenceIds, SharedResources &shared)
 {
 
     Incidence *source = (incidenceArray[sourceincidenceindex]);
-    // int old_incidence_id=(*source).inci_id;
     vector<int> sourceSentencesid = (*source).sentencesid;
     //means there is no sentence to move around at all, so we should swap this incidence with the last "active" incidence.
     (*source).lock();
@@ -681,16 +497,13 @@ void linkSentenceToIncidence(vector<Incidence *> &incidenceArray, vector<Sentenc
         (*swappedIncidence).unlock();
 
         shared.lock();
-        //incidenceArray[lastActiveIncidenceIndex]
         incidenceArray[sourceincidenceindex] = incidenceArray[shared.lastActiveIncidenceIndex];
         //swap the last active incidenceIndex at the empty spot, then decreas the lastActiveIncidenceIndex.
         shared.lastActiveIncidenceIndex = shared.lastActiveIncidenceIndex - 1;
         shared.unlock();
-        // cout<<"after linked last active: "<<
-        //cout<<lastActiveIncidenceIndex<<endl
     }
 
-    //need to make thsi a pointer otherwise this information add new sentence into it will not get stored!
+    //need to make this a pointer otherwise this information add new sentence into it will not get stored!
     Incidence *dest = (incidenceArray[destincidenceindex]);
     (*dest).lock();
     (*dest).sentencesid.push_back(sentenceindex);
@@ -705,7 +518,6 @@ void linkSentenceToIncidence(vector<Incidence *> &incidenceArray, vector<Sentenc
 
 void do_work(vector<Incidence *> &incidenceArray, vector<Sentence *> &sentenceArray, SharedResources &shared, int iteration, int score, int threadid)
 {
-
     cout << "thread id: " << threadid << " get started!" << endl;
     int linkedcount = 0;
     for(int i = 0; i < iteration; i++)
@@ -713,10 +525,8 @@ void do_work(vector<Incidence *> &incidenceArray, vector<Sentence *> &sentenceAr
         try
         {
             int sizeOfIncidenceArray = incidenceArray.size();
-            //cout<<"size of incidence array is: "<<sizeOfIncidenceArray<<endl;
             int sourceIncidenceIndex = generateRandomInteger(0, sizeOfIncidenceArray - 1);
             int destinationIncidenceIndex = generateRandomInteger(0, sizeOfIncidenceArray - 1);
-            //int sourceIncidenceId = sourceIncidence.inci_id;
             //if source and destination are the same thing, then do nothing.
             if(sourceIncidenceIndex == destinationIncidenceIndex)
             {
@@ -725,7 +535,7 @@ void do_work(vector<Incidence *> &incidenceArray, vector<Sentence *> &sentenceAr
             Incidence sourceIncidence = *(incidenceArray[sourceIncidenceIndex]);
 
             int size = sourceIncidence.sentencesid.size();
-            //ToFo:if there is no sentence in the incidence we need to replace the tail incidence with the current one.
+            //ToDo:if there is no sentence in the incidence we need to replace the tail incidence with the current one.
             if(size == 0)
             {
                 //sawp the incidence with the last one
@@ -741,12 +551,8 @@ void do_work(vector<Incidence *> &incidenceArray, vector<Sentence *> &sentenceAr
             int sentenceIndexInSource = generateRandomInteger(0, size - 1);
             //in the sentencesid store the index of the global sentence array.
             int sentenceGlobalIndex = sourceIncidence.sentencesid[sentenceIndexInSource];
-            //cout << to_string(sentenceIndexInSource) + " " + to_string(sentenceGlobalIndex) << endl;
 
-
-            //int incidenceDestination = (*(incidenceArray[ destinationIncidenceIndex])).inci_id;
             map<string, int> weightMap;
-
             weightMap["code"] = 1;
             weightMap["rootcode"] = 0;
             weightMap["year"] = 1;
@@ -758,25 +564,21 @@ void do_work(vector<Incidence *> &incidenceArray, vector<Sentence *> &sentenceAr
 
             double originalSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceGlobalIndex, true);
             double newSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceGlobalIndex, false);
-            //            double originalPairs = getPropertyValueMatch(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceGlobalIndex, true, score, weightMap);
             double newPairs = getPropertyValueMatch(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceGlobalIndex, false, score, weightMap);
+            
             //using the metroplis hastings algorithms here
             //double originalFinalScore = (1.0 / 13.0) * originalSimilarity + (12.0 / 13.0) * originalPairs;
             //double newFinalScore = (1.0 / 13.0) * newSimilarity + (12.0 / 13.0) * newPairs;
             //double mh_value = min(1.0, originalFinalScore / newFinalScore);
             //double mh_value = min(1.0, newSimilarity / originalSimilarity );
-
-            //not link if 3 pairs not match for the new configureation
-            //give a new similairty threshold and asee
+            
+            //give a new similairty threshold and see
             if(newPairs >= score)
             {
                 if(originalSimilarity < newSimilarity && newSimilarity >= 0.5)
                 {
-                    //cout << "new similarity: " << newSimilarity << endl;
                     linkSentenceToIncidence(incidenceArray, sentenceArray, destinationIncidenceIndex, sourceIncidenceIndex, sentenceGlobalIndex, sentenceIndexInSource, ref(shared));
-                    // cout<<"sentence globalindex: "<<sentenceGlobalIndex<<endl;
                     linkedcount++;
-
                 }
             }
 
@@ -785,11 +587,8 @@ void do_work(vector<Incidence *> &incidenceArray, vector<Sentence *> &sentenceAr
         {
             // catch anything thrown within try block that derives from std::exception
             cout << "what is the error???" << i << endl;
-            //cout << exc.what();
         }
     }
-
-
     cout << "linked count is: " << linkedcount << endl;
 }
 
@@ -805,22 +604,18 @@ void do_work_biased(vector<Incidence *> &incidenceArray, vector<Sentence *> &sen
         if(!(*out))
         {
             cout << "could not open file" << endl;
-            //return ;
         }
     }
-    //std::ofstream  out(statsfile);
+
     clock_t start1 = clock();
     double elapsed_secs = 0.0;
     int successivenochange = 0; //this is successive 30 seconds no change count
     bool flag = false;
     int oldindex = shared.lastActiveIncidenceIndex;
-    /*for(int i = 0; i < iteration; i++)
-    {*/
-    //sicne each seconds will be logged too many times
+
     int previousSecond=-1;
     while(!shared.jumpout)
     {
-        //make
         if(threadid == 1)
         {
             elapsed_secs = double(clock() - start1) / CLOCKS_PER_SEC; //in seconds
@@ -833,7 +628,6 @@ void do_work_biased(vector<Incidence *> &incidenceArray, vector<Sentence *> &sen
                 int diff = oldindex - currindex;
                 cout << "diff:" << diff << endl;
                 (*out) << diff << ",";
-               // (*out) << "seconds:" << (int)elapsed_secs << endl;
                 if(diff == 0)
                 {
                     if(flag == true)
@@ -852,21 +646,16 @@ void do_work_biased(vector<Incidence *> &incidenceArray, vector<Sentence *> &sen
                 //20*30/60=10 mins
                 if(successivenochange == BOUND) 
                 {
-
-                    //break;
                     shared.lock();
                     shared.jumpout=true;
                     shared.unlock();
                 }
                 oldindex = currindex;
-
             }
         }
 
         try
         {
-            //this is wrong
-            //int sizeOfIncidenceArray = incidenceArray.size();
             int sizeOfIncidenceArray=(shared).lastActiveIncidenceIndex;
             int sizeOfSentences = sentenceArray.size();
 
