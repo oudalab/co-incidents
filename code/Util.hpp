@@ -44,7 +44,7 @@ void rtrim(std::string &s)
                 }).base(), s.end());
 }
 
-int dotProduct(int *vect_A, int *vect_B)
+int dotProduct(int *vect_A, int *vect_B, int EMBED_SIZE)
 {
 
     int product = 0;
