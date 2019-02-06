@@ -45,7 +45,7 @@ double cosineSimilarity(int *vec1, int *vec2)
     {
         return 0;
     }
-    return (dotProduct(vec1, vec2) * 1.0) / (vectorLength(vec1) * vectorLength(vec2));
+    return (dotProduct(vec1, vec2,EMBED_SIZE) * 1.0) / (vectorLength(vec1) * vectorLength(vec2));
 }
 
 /*****generate a random number within a range,  include min and max value *****/
