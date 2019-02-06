@@ -44,5 +44,27 @@ void rtrim(std::string &s)
                 }).base(), s.end());
 }
 
+int dotProduct(int *vect_A, int *vect_B)
+{
+
+    int product = 0;
+
+    // Loop for calculate cot product
+    for (int i = 0; i < EMBED_SIZE; i++)
+
+        product = product + vect_A[i] * vect_B[i];
+    return product;
+}
+
+double vectorLength(int *vect)
+{
+    double length = 0.0;
+    for (int i = 0; i < EMBED_SIZE; i++)
+    {
+        length = length + (vect[i] * 1.0) * (vect[i] * 1.0);
+    }
+    return sqrt(length);
+}
+
 
 #endif  // UTIL_HPP
