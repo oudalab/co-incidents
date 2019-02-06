@@ -19,6 +19,7 @@
 #include <pthread.h>
 #include "Sentence.h"
 #include "GlobalFeatureWeight.h"
+#include "Incidence.h"
 using namespace std;
 
 // Ctrl+Shift+Alt+Q: Quick Format.
@@ -77,34 +78,6 @@ public:
         pthread_mutex_lock(&mutex);
     }
 
-    void unlock()
-    {
-        pthread_mutex_unlock(&mutex);
-    }
-};
-
-class Incidence
-{
-public:
-    int inci_id; //should be the index in the incidence array so each time need to update it when something changed.
-    string sup_id;
-    pthread_mutex_t mutex;
-    /*will be a list of snetence id that is in the incidence*/
-    vector<int> sentencesid;
-    vector<string> subincidencesid;
-    IncidenceFeature featureMap;
-    Incidence(int incidenceid, vector<int> sentences): inci_id(incidenceid), sentencesid(move(sentences))
-    {
-        pthread_mutex_init(&mutex, NULL);
-    };
-    ~Incidence()
-    {
-        pthread_mutex_destroy(&mutex);
-    }
-    void lock()
-    {
-        pthread_mutex_lock(&mutex);
-    }
     void unlock()
     {
         pthread_mutex_unlock(&mutex);
