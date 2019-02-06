@@ -20,6 +20,8 @@
 #include "Sentence.h"
 #include "GlobalFeatureWeight.h"
 #include "Incidence.h"
+#include "SubIncidence.h" //not getting used yet in this code.
+#include "SuperIncidence.h" //not getting used yet in this code
 using namespace std;
 
 // Ctrl+Shift+Alt+Q: Quick Format.
@@ -58,26 +60,6 @@ public:
     {
         pthread_mutex_unlock(&mutex);
     }
-};
-
-class Subincidence
-{
-public:
-    //it hard to generate guid in c++, so maybe Subincidence don't need a guid
-    string sub_id;
-    string inci_id;
-    vector<string> sentencesid;
-    /*****list of features that subincidence care about*/;
-    Subincidence(string subid, string inciid): sub_id(subid), inci_id(inciid) {}
-};
-
-class SuperIncidence
-{
-public:
-    string sup_id;
-    /* nodeid when distributed which node this superincidence is on*/
-    string nodeid;
-    /****list of freatures that super incidence care about***/
 };
 
 //global variables
@@ -854,7 +836,7 @@ int main(int argc, char **argv)
     double cosine = cosineSimilarity(vec1, vec2);
     cout << cosine << endl;
     vector<Incidence *> incidenceArray;
-    vector<Subincidence *> subincidenceArray;
+    vector<SubIncidence *> subincidenceArray;
 
     int sentencesSize = sentenceArray.size();
     //initialize each sentence as an incidence.
