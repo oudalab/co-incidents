@@ -22,6 +22,8 @@
 #include "Incidence.h"
 #include "SubIncidence.h" //not getting used yet in this code.
 #include "SuperIncidence.h" //not getting used yet in this code
+#include "SharedResources.h"
+#include "Util.hpp"
 using namespace std;
 
 // Ctrl+Shift+Alt+Q: Quick Format.
@@ -32,62 +34,10 @@ using namespace std;
 //defines the successive no link number that makes the linking process stopped.
 #define BOUND 30
 
-int lastActiveIncidenceIndex = 0;
-
-class SharedResources
-{
-
-public:
-    int lastActiveIncidenceIndex;
-    bool jumpout = false;
-    pthread_mutex_t mutex;
-    SharedResources(int lastActiveIncidenceIndex1)
-    {
-        lastActiveIncidenceIndex = lastActiveIncidenceIndex1;
-        pthread_mutex_init(&mutex, NULL);
-    }
-    ~SharedResources()
-    {
-        pthread_mutex_destroy(&mutex);
-    }
-
-    void lock()
-    {
-        pthread_mutex_lock(&mutex);
-    }
-
-    void unlock()
-    {
-        pthread_mutex_unlock(&mutex);
-    }
-};
-
 //global variables
 int xlength = 1000;
+int lastActiveIncidenceIndex = 0;
 int length = (xlength * xlength - xlength) / 2 + xlength;
-
-
-int dotProduct(int *vect_A, int *vect_B)
-{
-
-    int product = 0;
-
-    // Loop for calculate cot product
-    for (int i = 0; i < EMBED_SIZE; i++)
-
-        product = product + vect_A[i] * vect_B[i];
-    return product;
-}
-
-double vectorLength(int *vect)
-{
-    double length = 0.0;
-    for (int i = 0; i < EMBED_SIZE; i++)
-    {
-        length = length + (vect[i] * 1.0) * (vect[i] * 1.0);
-    }
-    return sqrt(length);
-}
 
 double cosineSimilarity(int *vec1, int *vec2)
 {
