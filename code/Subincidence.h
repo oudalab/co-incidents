@@ -5,7 +5,7 @@
 #include <vector>
 
 
-class Subincidence
+class SubIncidence
 {
 public:
     //it hard to generate guid in c++, so maybe Subincidence don't need a guid
@@ -13,7 +13,7 @@ public:
     std::string inci_id;
     std::vector<std::string> sentencesid;
     /*****list of features that subincidence care about*/;
-    Subincidence(std::string subid, std::string inciid): sub_id(subid), inci_id(inciid) {}
+    SubIncidence(std::string subid, std::string inciid): sub_id(subid), inci_id(inciid) {}
 };
 
 
