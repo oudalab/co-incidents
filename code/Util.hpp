@@ -8,7 +8,7 @@
 #include <time.h>
 #include <cstring>
 #include "Sentence.h"
-#include "Incide"
+#include "Incidence.h"
 #include <vector>
 
 #define MAX(a,b) ( ((a) > (b)) ? (a) : (b) )
