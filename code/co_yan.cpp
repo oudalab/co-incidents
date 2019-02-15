@@ -126,7 +126,7 @@ int main(int argc, char **argv)
         // ""
     );
 
-    if (sqlite3_open ("../../coincidenceData/events1114.db", &db) != SQLITE_OK) {
+    if (sqlite3_open ("/home/lian9478/OU_Coincidence/coincidenceData/events1114.db", &db) != SQLITE_OK) {
         fprintf(stderr, "Error opening database.\n");
         return 2;
     }
