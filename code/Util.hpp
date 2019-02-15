@@ -141,7 +141,6 @@ double getSimilarityBySentenceId( vector<Sentence *> &sentenceArray, int sen1ind
     return cosine;
 }
 
-
 double getSentenceSimilarityWithinIncidence(vector<Sentence *> &sentenceArray, vector<Incidence *> &incidenceArray, int incidenceid, int sentenceindex, bool fromsource) 
 {
     double sentenceWithIncidenceSimilarity = 0;
