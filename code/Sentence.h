@@ -1,8 +1,7 @@
 #ifndef SENTENCE_H_
 #define SENTENCE_H_
 
-#include <string>
-#include <pthread>
+#include <pthread.h>
 #include "SentenceFeatureValue.h"
 
 class Sentence

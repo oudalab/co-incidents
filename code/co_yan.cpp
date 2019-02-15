@@ -2,7 +2,6 @@
 #include <pthread.h>
 #include <string>
 #include <ctime>
-#include <vector>
 #include <fstream>
 #include <stdlib.h>
 #include <algorithm>
@@ -16,13 +15,15 @@
 #include <cmath> 
 #include <mutex>
 #include <thread>
+#include <vector>
 #include <pthread.h>
-#include "Sentence.h"
 #include "GlobalFeatureWeight.h"
 #include "Incidence.h"
 #include "SubIncidence.h" //not getting used yet in this code.
 #include "SuperIncidence.h" //not getting used yet in this code
 #include "SharedResources.h"
+#include "Sentence.h"
+#include "SentenceFeatureValue.h"
 #include "Util.hpp"
 using namespace std;
 
@@ -30,9 +31,9 @@ using namespace std;
 // Ctrl+Shift+Alt+S: Selected Format.
 
 //this the dimenstion of the word embedding.
-#define EMBED_SIZE 150
+//const int EMBED_SIZE = 150;
 //defines the successive no link number that makes the linking process stopped.
-#define BOUND 30
+//const int BOUND = 30;
 
 //global variables
 int xlength = 1000;

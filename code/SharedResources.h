@@ -1,12 +1,10 @@
 #ifndef SHAREDRESOURCES_H_
 #define SHAREDRESOURCES_H_
 
-
 #include <pthread.h>
 
 class SharedResources
 {
-
     public:
         int lastActiveIncidenceIndex;
         bool jumpout = false;
