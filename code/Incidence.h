@@ -4,9 +4,7 @@
 #include <string>
 #include <utility>
 #include <vector>
-
 #include <pthread.h>
-
 #include "IncidenceFeature.h"
 
 

@@ -2,7 +2,7 @@
 #define SENVENCEFEATUREVALUE_H_
 
 #include <string>
-#include "Util.hpp"
+
 using namespace std;
 
 class SentenceFeatureValue
@@ -54,23 +54,28 @@ public:
 private:
     void trimall()
     {
-        rtrim(code );
+        rtrim(code);
         rtrim(rootcode);
-        rtrim(date8 );
-        rtrim(id );
+        rtrim(date8);
+        rtrim(id);
         rtrim(year);
         rtrim(month);
         rtrim(day);
-        rtrim(src_actor );
-        rtrim(src_agent );
-        rtrim(tgt_actor );
-        rtrim(tgt_agent );
+        rtrim(src_actor);
+        rtrim(src_agent);
+        rtrim(tgt_actor);
+        rtrim(tgt_agent);
         rtrim(geoname);
     }
+private:
+    void rtrim(std::string &s)
+    {
+        s.erase(std::find_if(s.rbegin(), s.rend(),
+                    [](int ch) { 
+                        return !std::isspace(ch);
+                    }).base(), s.end());
+    }
 };
-
-
-
 
 #endif // SENVENCEFEATUREVALUE_H_
 
