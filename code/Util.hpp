@@ -17,9 +17,9 @@
 #define DOT std::cerr << ".";
 
 //this the dimenstion of the word embedding.
-#define EMBED_SIZE 150
+const int EMBED_SIZE = 150;
 //defines the successive no link number that makes the linking process stopped.
-#define BOUND 30
+const int BOUND = 30;
 
 // This only works for C
 static const char *  currentTime () {
