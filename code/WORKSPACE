@@ -1,0 +1,11 @@
+http_archive (
+	name = "com_github_grpc_grpc",
+	urls = [
+		"https://github.com/grpc/grpc/archive/b3b5d634231ce2c5c0ec0c557b6844e1a43b482e.tar.gz",
+		],
+	strip_prefix = "grpc-b3b5d634231ce2c5c0ec0c557b6844e1a43b482e",
+)
+
+load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
+
+grpc_deps()
