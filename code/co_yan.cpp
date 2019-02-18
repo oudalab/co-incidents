@@ -36,7 +36,8 @@ int length = (xlength * xlength - xlength) / 2 + xlength;
 
 int main(int argc, char **argv)
 {
-    GOOGLE_PROTOBUF_VERIFY_VERSION;
+    //ToDo: need to figure this out, or if the serializetion is working, then we don't care i guess.
+    //GOOGLE_PROTOBUF_VERIFY_VERSION;
     //initialize global feature weight
     GlobalFeatureWeight globalFeatureWeight;
     //cout << globalFeatureWeight.featureWeight["code"] << endl;
@@ -145,7 +146,6 @@ int main(int argc, char **argv)
             embed  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0)); //embed
             latitude  = sqlite3_column_double(stmt, 1); //embed
             longitude = sqlite3_column_double(stmt, 2); //embed
-    }
             //this is to check if the field is null or not.
             if(sqlite3_column_text(stmt, 3))
             {
@@ -231,7 +231,7 @@ int main(int argc, char **argv)
          }
 
         
-         SentenceFeatureValue *value = new SentenceFeatureValue(code, root_code, date8, id, year, src_actor, src_other_agent,tgt_actor,tgt_agent, month, day, embed3, row,latitude,longitude,geoname)
+         SentenceFeatureValue *value = new SentenceFeatureValue(code, root_code, date8, id, year, src_actor, src_other_agent,tgt_actor,tgt_agent, month, day, embed3, row,latitude,longitude,geoname);
         
          //i will be the incidence id for this sentence
          sentenceArray.push_back(new Sentence(id, value, row));
