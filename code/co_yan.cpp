@@ -314,7 +314,15 @@ int main(int argc, char **argv)
     SharedResources *shared = new SharedResources(globalSize - 1);
 
     clock_t begin = clock();
-    pthread_t threads[number_of_thread];
+    
+
+    void *PrintHello(void *threadid) {
+   long tid;
+   tid = (long)threadid;
+   cout << "Hello World! Thread ID, " << tid << endl;
+   pthread_exit(NULL);
+}
+
     if(!biased)
     {
         thread t1(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 1);
@@ -467,15 +475,33 @@ int main(int argc, char **argv)
     }
     else
     {
-        for(int k=1; k<=number_of_thread;k++)
+        pthread_t threads[number_of_thread];
+        void * retvals[number_of_thread];
+        int count;
+          for (count = 0; count < number_of_thread; ++count)
+            {
+              if (pthread_create(&threads[count], NULL, do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, k, statsfile) != 0)
+                {
+                  fprintf(stderr, "error: Cannot create thread # %d\n", count);
+                  break;
+                }
+            }
+  for (int i = 0; i < count; ++i)
+    {
+      if (pthread_join(threads[i], &retvals[i]) != 0)
         {
-            thread t(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, k, statsfile);
-            threads[k-1]=&t;
+          fprintf(stderr, "error: Cannot join thread # %d\n", i);
         }
-        for(int k=1; k<number_of_thread;k++)
-        {
-            *(threads[k-1]).join();
-        }
+    }
+        // for(int k=1; k<=number_of_thread;k++)
+        // {
+        //     thread t(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, k, statsfile);
+        //     threads[k-1]=&t;
+        // }
+        // for(int k=1; k<number_of_thread;k++)
+        // {
+        //     (threads[k-1]).join();
+        // }
         // thread t2(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 2,statsfile);
         // thread t3(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 3,statsfile);
         // thread t4(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 4,statsfile);
