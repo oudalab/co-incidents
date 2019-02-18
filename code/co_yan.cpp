@@ -24,16 +24,9 @@
 #include "SharedResources.h"
 #include "Sentence.h"
 #include "SentenceFeatureValue.h"
+#include "event.pb.h"
 #include "Util.hpp"
 using namespace std;
-
-// Ctrl+Shift+Alt+Q: Quick Format.
-// Ctrl+Shift+Alt+S: Selected Format.
-
-//this the dimenstion of the word embedding.
-//const int EMBED_SIZE = 150;
-//defines the successive no link number that makes the linking process stopped.
-//const int BOUND = 30;
 
 //global variables
 const int xlength = 1000;
@@ -43,6 +36,7 @@ int length = (xlength * xlength - xlength) / 2 + xlength;
 
 int main(int argc, char **argv)
 {
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
     //initialize global feature weight
     GlobalFeatureWeight globalFeatureWeight;
     //cout << globalFeatureWeight.featureWeight["code"] << endl;
@@ -151,13 +145,7 @@ int main(int argc, char **argv)
             embed  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0)); //embed
             latitude  = sqlite3_column_double(stmt, 1); //embed
             longitude = sqlite3_column_double(stmt, 2); //embed
-
-            // printf ("%f \n", latitude);
-            // printf ("%f \n", longitude);
-             // if(row==85)
-             //     {
-             //        printf("I am at row 84 and ready to fail!");
-             //     }
+    }
             //this is to check if the field is null or not.
             if(sqlite3_column_text(stmt, 3))
             {
@@ -239,14 +227,11 @@ int main(int argc, char **argv)
          int *embed3 = new int[EMBED_SIZE];
          for(int j = 0; j < EMBED_SIZE; j++)
          {
-             //out<<embed.at(j*2+1)<<"*";
              embed3[j] = (int)embed.at(j*2+1);
-            // cout<<embed3[j]<<"|";
          }
 
         
-         SentenceFeatureValue *value = new SentenceFeatureValue(code, root_code, date8, id, year, src_actor, src_other_agent,tgt_actor,tgt_agent, month, day, embed3, row,latitude,longitude,geoname);
-         //printf("did you ever get here?");
+         SentenceFeatureValue *value = new SentenceFeatureValue(code, root_code, date8, id, year, src_actor, src_other_agent,tgt_actor,tgt_agent, month, day, embed3, row,latitude,longitude,geoname)
         
          //i will be the incidence id for this sentence
          sentenceArray.push_back(new Sentence(id, value, row));
@@ -619,8 +604,6 @@ int main(int argc, char **argv)
 
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
 
-    //do_work_biased(incidenceArray,sentenceArray,*shared,iteration,score);
-    // cout << "linked count: " + to_string(linkedcount) << endl;
   
     //int count = 0;
     ofstream out(outputfile);
