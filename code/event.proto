@@ -1,0 +1,59 @@
+// out<<v.code<<","<<v.rootcode<<","<<v.latitude<<","<<v.longitude<<","<<v.geoname<<","
+//                 <<v.date8<<","<<v.id<<","<<v.year<<","<<
+//                 v.src_actor<<","<<v.src_agent<<","<<v.tgt_actor<<","<<v.tgt_agent<<","<<v.month<<","<<v.day<<","<<v.index<<",";
+
+syntax = "proto2";
+
+package event_models;
+
+// message Person {
+//   required string name = 1;
+//   required int32 id = 2;
+//   optional string email = 3;
+
+//   enum PhoneType {
+//     MOBILE = 0;
+//     HOME = 1;
+//     WORK = 2;
+//   }
+
+//   message PhoneNumber {
+//     required string number = 1;
+//     optional PhoneType type = 2 [default = HOME];
+//   }
+
+//   repeated PhoneNumber phones = 4;
+// }
+
+// try to use this in the main
+// std::vector<std::string> my_strings; 
+// // add strings to vector MyCollection proto; 
+// vector<string>::iterator e = my_strings.end();
+// for (vector<string>::iterator i = my_strings.begin(); 
+//     i != e; 
+//     ++i) {
+//    *proto.add_str() = *i; 
+// }
+
+message Embed {   
+   repeated string str = 1;
+} 
+
+message Event {
+	optional string code = 1;
+	optional string rootcode = 2;
+	optional string latitude = 3;
+	optional string longitude = 4;
+	optional string geoname = 5;
+	optional string date8 = 6;
+	optional string id = 7;
+	optional string year = 8;
+	optional string src_actor = 9;
+    optional string src_agent = 10;
+    optional string tgt_actor = 11;
+    optional string tgt_agent = 12;
+    optional string month = 13;
+    optional string day = 14;
+    optional string index = 15;
+    required Embed embed = 16;
+}

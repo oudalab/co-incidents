@@ -619,8 +619,6 @@ int main(int argc, char **argv)
 
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
 
-    //do_work_biased(incidenceArray,sentenceArray,*shared,iteration,score);
-    // cout << "linked count: " + to_string(linkedcount) << endl;
   
     //int count = 0;
     ofstream out(outputfile);
