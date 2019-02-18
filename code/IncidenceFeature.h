@@ -26,8 +26,6 @@ class IncidenceFeature
 			featureMap["src_agent"] = "";
 			featureMap["tgt_actor"] = "";
 			featureMap["tgt_agent"] = "";
-			//featureMap["month"]="";
-			//featureMap["day"]="";
 		}
 };
 

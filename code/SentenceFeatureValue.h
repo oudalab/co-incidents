@@ -30,18 +30,13 @@ public:
     {
         code = code1;
         rootcode = rootcode1;
-        //country_code = country_code1;
         date8 = date81;
-        //geoname = geoname1;
         id = id1;
         year = year1;
-        //latitude = latitude1;
-        //longitude = longitude1;
         src_actor = src_actor1;
         src_agent = src_agent1;
         tgt_actor = tgt_actor1;
         tgt_agent = tgt_agent1;
-        //doc=doc1;
         month = month1;
         day = day1;
         embed = embed1;
