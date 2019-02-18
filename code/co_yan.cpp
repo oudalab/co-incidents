@@ -314,6 +314,7 @@ int main(int argc, char **argv)
     SharedResources *shared = new SharedResources(globalSize - 1);
 
     clock_t begin = clock();
+    pthread_t threads[number_of_thread];
     if(!biased)
     {
         thread t1(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 1);
@@ -469,9 +470,12 @@ int main(int argc, char **argv)
         for(int k=1; k<=number_of_thread;k++)
         {
             thread t(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, k, statsfile);
-            t.join();
+            threads[k-1]=&t;
         }
-        
+        for(int k=1; k<number_of_thread;k++)
+        {
+            *(threads[k-1]).join();
+        }
         // thread t2(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 2,statsfile);
         // thread t3(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 3,statsfile);
         // thread t4(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 4,statsfile);
