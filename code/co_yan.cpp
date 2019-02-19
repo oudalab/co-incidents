@@ -57,7 +57,11 @@ int main(int argc, char **argv)
     //int iteration=1000;
 
     string outputfile = std::string(argv[3]) + ".rst";
+<<<<<<< HEAD
     string tstout = std::string(argv[3]) + ".tst";
+=======
+    string tstout = std::string(aggv[3]) + ".tst";
+>>>>>>> 94e33e9e8154ef998cdfaa920ad39173466cff3b
     //string outputfile = "debug.rst";
 
     bool biased = false;
@@ -655,11 +659,19 @@ int main(int argc, char **argv)
                 
                 if(i==1)
                 {
+<<<<<<< HEAD
                     event_models::Event event;
                     event.set_code(v.code);
                     event.set_rootcode(v.rootcode);
                    // event.set_latitude(v.latitude);
                     //event.set_longitude(v.longitude);
+=======
+                    event_models::Event event
+                    event.set_code(v.code);
+                    event.set_rootcode(v.rootcode);
+                    event.set_latitude(v.latitude);
+                    event.set_longitude(v.longitude);
+>>>>>>> 94e33e9e8154ef998cdfaa920ad39173466cff3b
                     event.set_geoname(v.geoname);
                     event.set_date8(v.date8);
                     event.set_id(v.id);
@@ -668,9 +680,15 @@ int main(int argc, char **argv)
                     event.set_src_agent(v.src_agent);
                     event.set_tgt_actor(v.tgt_actor);
                     event.set_tgt_agent(v.tgt_agent);
+<<<<<<< HEAD
                     //event.set_month(v.month);
                     //event.set_day(v.day);
                     //event.set_index(v.index);
+=======
+                    event.set_month(v.month);
+                    event.set_day(v.day);
+                    event.set_index(v.index);
+>>>>>>> 94e33e9e8154ef998cdfaa920ad39173466cff3b
     
                     if (!event.SerializeToOstream(&output)) {
                       cerr << "Failed to write address book." << endl;
