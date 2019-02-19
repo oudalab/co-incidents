@@ -57,6 +57,7 @@ int main(int argc, char **argv)
     //int iteration=1000;
 
     string outputfile = std::string(argv[3]) + ".rst";
+    string tstout = std::string(aggv[3]) + ".tst";
     //string outputfile = "debug.rst";
 
     bool biased = false;
@@ -635,14 +636,13 @@ int main(int argc, char **argv)
     cout<<"total linked:"<<totallinked<<endl;
     out<<"total linked:"<<totallinked<<endl;
     out<<" "<<endl;
+    fstream output(tstout, ios::out | ios::trunc | ios::binary);
     for(int i = 0; i < (*shared).lastActiveIncidenceIndex; i++)
     {
         vector<int> sentencesid = (*(incidenceArray[i])).sentencesid;
         int sentencesidsize=sentencesid.size();
         if(sentencesidsize>=1)
         {
-            //count++;
-            // cout<<"you ever get here?"<<endl;
             int curr1 = -1;
             int curr2 = -1;
             int curr3 = -1;
@@ -652,6 +652,31 @@ int main(int argc, char **argv)
             {
                 int curr = sentencesid[j];
                 SentenceFeatureValue v=(*((*(sentenceArray[curr])).featureValue));
+                
+                if(i==1)
+                {
+                    event_models::Event event
+                    event.set_code(v.code);
+                    event.set_rootcode(v.rootcode);
+                    event.set_latitude(v.latitude);
+                    event.set_longitude(v.longitude);
+                    event.set_geoname(v.geoname);
+                    event.set_date8(v.date8);
+                    event.set_id(v.id);
+                    event.set_year(v.year);
+                    event.set_src_actor(v.src_actor);
+                    event.set_src_agent(v.src_agent);
+                    event.set_tgt_actor(v.tgt_actor);
+                    event.set_tgt_agent(v.tgt_agent);
+                    event.set_month(v.month);
+                    event.set_day(v.day);
+                    event.set_index(v.index);
+    
+                    if (!event.SerializeToOstream(&output)) {
+                      cerr << "Failed to write address book." << endl;
+                      return -1;
+                    }
+                }
 
                 out<<v.code<<","<<v.rootcode<<","<<v.latitude<<","<<v.longitude<<","<<v.geoname<<","
                 <<v.date8<<","<<v.id<<","<<v.year<<","<<
@@ -665,40 +690,10 @@ int main(int argc, char **argv)
                     }
                 }
                 out<<sentencesidsize<<","<<endl;
-
-                //string realid = (*((*(sentenceArray[curr])).featureValue)).id;
-                //cout << realid << endl;
-                //out << realid << endl;
-                // if(j!=0)
-                // {
-                // //current sentence similarity with the previous one
-                //  out << getSimilarityBySentenceId(sentenceArray, prev, curr) << endl;
-                // }
-                //set the prev value
-               // prev=curr;
             }
-            //cout << "cosine similiarty: " << getSimilarityBySentenceId(sentenceArray, curr1, curr2) << endl;
-            //out << getSimilarityBySentenceId(sentenceArray, curr1, curr2) << endl;
-            // if(curr3 != -1)
-            // {
-            //     out << "more than 2 together!" << endl;
-            //     out << getSimilarityBySentenceId(sentenceArray, curr2, curr3) << endl;
-            // }
-
-            //this means we jump to another incidence.
             out << " " << endl;
-           // cout << " " << endl;
-            //cout << " " << endl;
-            //return 0;
         }
     }
-
-
-    // cout << "test size is: " << test.size() << endl;
-    // vector<int> ressult = shuffleTheIndexOfVector(10);
-    // if( __cplusplus == 201103L ) std::cout << "C++11\n" ;
-    // else if( __cplusplus == 19971L ) std::cout << "C++98\n" ;
-    // else std::cout << "pre-standard C++\n" ;
     return 0;
 }
 
