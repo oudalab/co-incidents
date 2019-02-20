@@ -654,11 +654,11 @@ int main(int argc, char **argv)
                 SentenceFeatureValue v=(*((*(sentenceArray[curr])).featureValue));
                 if(i==1)
                 {
-                    event_models::Event* event=new event_models::Event();
+                    models::Event* event = new models::Event();
                     event->set_code(v.code);
-                    event->set_rootcode(v.rootcode);
-                   // event.set_latitude(v.latitude);
-                    //event.set_longitude(v.longitude);
+	            event->set_rootcode(v.rootcode);
+	            event->set_latitude(v.latitude);
+                    event->set_longitude(v.longitude);
                     event->set_geoname(v.geoname);
                     event->set_date8(v.date8);
                     event->set_id(v.id);
@@ -667,28 +667,46 @@ int main(int argc, char **argv)
                     event->set_src_agent(v.src_agent);
                     event->set_tgt_actor(v.tgt_actor);
                     event->set_tgt_agent(v.tgt_agent);
-                    //event.set_month(v.month);
-                    //event.set_day(v.day);
-                    //event.set_index(v.index);
-    
-                    if (!event->SerializeToOstream(&output)) {
-                      cerr << "Failed to write address book." << endl;
-                      return -1;
+                    event->set_month(v.month);
+                    event->set_day(v.day);
+                    event->set_index(v.index);
+                    
+                    std::vector<int> embedding;
+                    for(int k=0;k<EMBED_SIZE;k++)
+                     {
+                        embedding.push_back((v.embed)[k]);
+                     }
+
+                    //refer to this link https://stackoverflow.com/questions/684390/how-can-protocol-buffers-support-serialization-deserialization-of-std-containers
+                    models::Embed* embed = new models::Embed();
+
+                    // add strings to vector MyCollection proto; 
+                    vector<int>::iterator e = embedding.end();
+                    for (vector<int>::iterator i = embedding.begin(); 
+                        i != e; 
+                        ++i) {
+                      embed->add_str(*i); 
                     }
+                    event->set_allocated_embed(embed);
+                    
+                    if (!event->SerializeToOstream(&output)) {
+                     out << "Failed to write address book." << endl;
+                      return -1;
+                    }    
                 }
 
                 out<<v.code<<","<<v.rootcode<<","<<v.latitude<<","<<v.longitude<<","<<v.geoname<<","
                 <<v.date8<<","<<v.id<<","<<v.year<<","<<
                 v.src_actor<<","<<v.src_agent<<","<<v.tgt_actor<<","<<v.tgt_agent<<","<<v.month<<","<<v.day<<","<<v.index<<",";
-                for(int k=0;k<EMBED_SIZE;k++)
-                {
-                    out<<(v.embed)[k];
-                    if(k!=EMBED_SIZE-1)
-                    {
-                        out<<"|";
-                    }
-                }
-                out<<sentencesidsize<<","<<endl;
+                //for(int k=0;k<EMBED_SIZE;k++)
+                //{
+                  //  out<<(v.embed)[k];
+                    //if(k!=EMBED_SIZE-1)
+                    //{
+                      //  out<<"|";
+                   // }
+               // }
+               // out<<sentencesidsize<<","<<endl;
             }
             out << " " << endl;
         }

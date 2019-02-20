@@ -4,7 +4,7 @@
 
 syntax = "proto2";
 
-package event_models;
+package models;
 
 // message Person {
 //   required string name = 1;
@@ -36,24 +36,24 @@ package event_models;
 // }
 
 message Embed {   
-   repeated string str = 1;
+   repeated int32 str = 1;
 } 
 
 message Event {
 	optional string code = 1;
 	optional string rootcode = 2;
-	optional string latitude = 3;
-	optional string longitude = 4;
+	optional double latitude = 3;
+	optional double longitude = 4;
 	optional string geoname = 5;
 	optional string date8 = 6;
 	optional string id = 7;
 	optional string year = 8;
 	optional string src_actor = 9;
-    optional string src_agent = 10;
-    optional string tgt_actor = 11;
-    optional string tgt_agent = 12;
-    optional string month = 13;
-    optional string day = 14;
-    optional string index = 15;
-    required Embed embed = 16;
+        optional string src_agent = 10;
+        optional string tgt_actor = 11;
+        optional string tgt_agent = 12;
+        optional string month = 13;
+        optional string day = 14;
+        optional int32 index = 15;
+        optional Embed embed = 16;
 }
