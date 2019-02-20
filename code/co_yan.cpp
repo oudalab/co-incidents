@@ -654,19 +654,19 @@ int main(int argc, char **argv)
                 SentenceFeatureValue v=(*((*(sentenceArray[curr])).featureValue));
                 if(i==1)
                 {
-                    event_models::Event* event=new event_models::Event();
+                    models::Event* event = new models::Event();
                     event->set_code(v.code);
                     event->set_rootcode(v.rootcode);
-                   // event.set_latitude(v.latitude);
-                    //event.set_longitude(v.longitude);
+                    //event.set_latitude(v.latitude);
+                   // event.set_longitude(v.longitude);
                     event->set_geoname(v.geoname);
                     event->set_date8(v.date8);
                     event->set_id(v.id);
                     event->set_year(v.year);
                     event->set_src_actor(v.src_actor);
                     event->set_src_agent(v.src_agent);
-                    event->set_tgt_actor(v.tgt_actor);
-                    event->set_tgt_agent(v.tgt_agent);
+                    //event.set_tgt_actor(v.tgt_actor);
+                    //event.set_tgt_agent(v.tgt_agent);
                     //event.set_month(v.month);
                     //event.set_day(v.day);
                     //event.set_index(v.index);

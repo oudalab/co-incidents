@@ -4,7 +4,7 @@
 
 syntax = "proto2";
 
-package event_models;
+package models;
 
 // message Person {
 //   required string name = 1;
@@ -55,5 +55,5 @@ message Event {
     optional string month = 13;
     optional string day = 14;
     optional string index = 15;
-    required Embed embed = 16;
+    optional Embed embed = 16;
 }
