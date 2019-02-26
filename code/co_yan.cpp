@@ -55,10 +55,10 @@ int main(int argc, char **argv)
     //iteration times
     int iteration = atoi(argv[2]);
     //int iteration=1000;
-
+    string startyear = argv[3];
     string outputfile = std::string(argv[3]) + ".rst";
     string tstout = std::string(argv[3]) + ".tst";
-    //string outputfile = "debug.rst";
+    //string outputfile = "debu:g.rst";
 
     bool biased = false;
     string statsfile = std::string(argv[3]) + ".stas";
@@ -636,24 +636,24 @@ int main(int argc, char **argv)
     cout<<"total linked:"<<totallinked<<endl;
     out<<"total linked:"<<totallinked<<endl;
     out<<" "<<endl;
-    fstream output(tstout, ios::out | ios::trunc | ios::binary);
     for(int i = 0; i < (*shared).lastActiveIncidenceIndex; i++)
     {
         vector<int> sentencesid = (*(incidenceArray[i])).sentencesid;
-        int sentencesidsize=sentencesid.size();
-        if(sentencesidsize>=1)
-        {
-            int curr1 = -1;
-            int curr2 = -1;
-            int curr3 = -1;
+       // int sentencesidsize=sentencesid.size();
+       // if(sentencesidsize>=1)
+       // {
+         //   int curr1 = -1;
+           // int curr2 = -1;
+           // int curr3 = -1;
+            string temp= std::string(startyear)+"_"+std::to_string(i);
+            fstream output(temp,ios::out | ios::trunc | ios::binary);
+            models::Incidence* incidence=new models::Incidence();
             int prev=sentencesid[0];
-
             for(unsigned int j = 0; j < sentencesid.size(); j++)
             {
                 int curr = sentencesid[j];
                 SentenceFeatureValue v=(*((*(sentenceArray[curr])).featureValue));
-<<<<<<< HEAD
-                models::Event* event = new models::Event();
+                models::Event* event = incidence->add_event();;
                 event->set_code(v.code);
                 event->set_rootcode(v.rootcode);
                 event->set_latitude(v.latitude);
@@ -684,57 +684,13 @@ int main(int argc, char **argv)
                     i != e; 
                     ++i) {
                   embed->add_str(*i); 
-=======
-                if(i==1)
-                {
-                    models::Event* event = new models::Event();
-                    event->set_code(v.code);
-	            event->set_rootcode(v.rootcode);
-	            event->set_latitude(v.latitude);
-                    event->set_longitude(v.longitude);
-                    event->set_geoname(v.geoname);
-                    event->set_date8(v.date8);
-                    event->set_id(v.id);
-                    event->set_year(v.year);
-                    event->set_src_actor(v.src_actor);
-                    event->set_src_agent(v.src_agent);
-                    event->set_tgt_actor(v.tgt_actor);
-                    event->set_tgt_agent(v.tgt_agent);
-                    event->set_month(v.month);
-                    event->set_day(v.day);
-                    event->set_index(v.index);
-                    
-                    std::vector<int> embedding;
-                    for(int k=0;k<EMBED_SIZE;k++)
-                     {
-                        embedding.push_back((v.embed)[k]);
-                     }
-
-                    //refer to this link https://stackoverflow.com/questions/684390/how-can-protocol-buffers-support-serialization-deserialization-of-std-containers
-                    models::Embed* embed = new models::Embed();
-
-                    // add strings to vector MyCollection proto; 
-                    vector<int>::iterator e = embedding.end();
-                    for (vector<int>::iterator i = embedding.begin(); 
-                        i != e; 
-                        ++i) {
-                      embed->add_str(*i); 
-                    }
-                    event->set_allocated_embed(embed);
-                    
-                    if (!event->SerializeToOstream(&output)) {
-                     out << "Failed to write address book." << endl;
-                      return -1;
-                    }    
->>>>>>> 0047ec01f7d65dc7b463d2ca018db6238307eb10
                 }
                 event->set_allocated_embed(embed);
-                
-                if (!event->SerializeToOstream(&output)) {
+                if (!incidence->SerializeToOstream(&output)) {
                  out << "Failed to write address book." << endl;
                   return -1;
                 }    
-            }
+           // }
             out << " " << endl;
         }
     }

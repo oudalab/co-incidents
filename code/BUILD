@@ -24,6 +24,14 @@ cc_binary(
                 ":event_cc_proto",
 	],
 )
+cc_binary(
+    name = "read",
+    srcs = ["readEvents.cpp"],
+        deps = [
+                ":all-files",
+                ":event_cc_proto",
+        ],
+)
 # Convention:
 # A cc_proto_library that wraps a proto_library named foo_proto
 # should be called foo_cc_proto.

@@ -1,39 +1,7 @@
-// out<<v.code<<","<<v.rootcode<<","<<v.latitude<<","<<v.longitude<<","<<v.geoname<<","
-//                 <<v.date8<<","<<v.id<<","<<v.year<<","<<
-//                 v.src_actor<<","<<v.src_agent<<","<<v.tgt_actor<<","<<v.tgt_agent<<","<<v.month<<","<<v.day<<","<<v.index<<",";
 
 syntax = "proto2";
 
 package models;
-
-// message Person {
-//   required string name = 1;
-//   required int32 id = 2;
-//   optional string email = 3;
-
-//   enum PhoneType {
-//     MOBILE = 0;
-//     HOME = 1;
-//     WORK = 2;
-//   }
-
-//   message PhoneNumber {
-//     required string number = 1;
-//     optional PhoneType type = 2 [default = HOME];
-//   }
-
-//   repeated PhoneNumber phones = 4;
-// }
-
-// try to use this in the main
-// std::vector<std::string> my_strings; 
-// // add strings to vector MyCollection proto; 
-// vector<string>::iterator e = my_strings.end();
-// for (vector<string>::iterator i = my_strings.begin(); 
-//     i != e; 
-//     ++i) {
-//    *proto.add_str() = *i; 
-// }
 
 message Embed {   
    repeated int32 str = 1;
@@ -56,4 +24,8 @@ message Event {
         optional string day = 14;
         optional int32 index = 15;
         optional Embed embed = 16;
+}
+//incidence is a collection of events
+message Incidence {
+   repeated Event event = 1;
 }
