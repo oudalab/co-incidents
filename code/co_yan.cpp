@@ -36,7 +36,6 @@ int length = (xlength * xlength - xlength) / 2 + xlength;
 int main(int argc, char **argv)
 {
     GlobalFeatureWeight globalFeatureWeight;
-    bool alive = true;
     vector<Sentence *> sentenceArray;
 
     // if you input two paramters the argc will be 3.
@@ -51,19 +50,9 @@ int main(int argc, char **argv)
     string startyear = argv[3];
     string outputfile = std::string(argv[3]) + ".rst";
     string tstout = std::string(argv[3]) + ".tst";
-
-    bool biased = false;
     string statsfile = std::string(argv[3]) + ".stas";
-    string clibias = argv[4];
-    string startdate=argv[5];
-    string enddate=argv[6];
-
-    if(clibias == "1")
-    {
-        biased = true;
-        cout << "you are running it with biased sampling." << endl;
-    }
-
+    string startdate=argv[4];
+    string enddate=argv[5];
     cout << "score threshold is: " << score << endl;
     cout << "No of iterations: " << iteration << endl;
     int sqlitecount=0;
@@ -461,7 +450,6 @@ int main(int argc, char **argv)
         string temp= std::string(startyear)+"_"+std::to_string(i);
         fstream output(temp,ios::out | ios::trunc | ios::binary);
         models::Incidence* incidence=new models::Incidence();
-        int prev=sentencesid[0];
         for(unsigned int j = 0; j < sentencesid.size(); j++)
         {
             int curr = sentencesid[j];

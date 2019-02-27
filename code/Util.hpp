@@ -11,9 +11,6 @@
 #include "Incidence.h"
 #include <vector>
 
-#define MAX(a,b) ( ((a) > (b)) ? (a) : (b) )
-#define MIN(a,b) ( ((a) < (b)) ? (a) : (b) )
-
 #define DOT std::cerr << ".";
 
 //this the dimenstion of the word embedding.
