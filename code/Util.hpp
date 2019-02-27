@@ -318,82 +318,7 @@ void linkSentenceToIncidence(vector<Incidence *> &incidenceArray, vector<Sentenc
     (*sen).unlock();
 }
 
-void do_work(vector<Incidence *> &incidenceArray, vector<Sentence *> &sentenceArray, SharedResources &shared, int iteration, int score, int threadid)
-{
-    cout << "thread id: " << threadid << " get started!" << endl;
-    int linkedcount = 0;
-    for(int i = 0; i < iteration; i++)
-    {
-        try
-        {
-            int sizeOfIncidenceArray = incidenceArray.size();
-            int sourceIncidenceIndex = generateRandomInteger(0, sizeOfIncidenceArray - 1);
-            int destinationIncidenceIndex = generateRandomInteger(0, sizeOfIncidenceArray - 1);
-            //if source and destination are the same thing, then do nothing.
-            if(sourceIncidenceIndex == destinationIncidenceIndex)
-            {
-                continue;
-            }
-            Incidence sourceIncidence = *(incidenceArray[sourceIncidenceIndex]);
-
-            int size = sourceIncidence.sentencesid.size();
-            //ToDo:if there is no sentence in the incidence we need to replace the tail incidence with the current one.
-            if(size == 0)
-            {
-                //sawp the incidence with the last one
-                shared.lock();
-                incidenceArray[sourceIncidenceIndex] = incidenceArray[shared.lastActiveIncidenceIndex];
-                //swap the last active incidenceIndex at the empty spot, then decreas the lastActiveIncidenceIndex.
-
-                shared.lastActiveIncidenceIndex = shared.lastActiveIncidenceIndex - 1;
-                shared.unlock();
-                continue;
-            }
-            //otherwise choose a sentence to move
-            int sentenceIndexInSource = generateRandomInteger(0, size - 1);
-            //in the sentencesid store the index of the global sentence array.
-            int sentenceGlobalIndex = sourceIncidence.sentencesid[sentenceIndexInSource];
-
-            map<string, int> weightMap;
-            weightMap["code"] = 1;
-            weightMap["rootcode"] = 0;
-            weightMap["year"] = 1;
-            weightMap["month"] = 1;
-            weightMap["src_actor"] = 1;
-            weightMap["src_agent"] = 1;
-            weightMap["tgt_actor"] = 1;
-            weightMap["tgt_agent"] = 1;
-
-            double originalSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceGlobalIndex, true);
-            double newSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceGlobalIndex, false);
-            double newPairs = getPropertyValueMatch(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceGlobalIndex, false, score, weightMap);
-            
-            //using the metroplis hastings algorithms here
-            //double originalFinalScore = (1.0 / 13.0) * originalSimilarity + (12.0 / 13.0) * originalPairs;
-            //double newFinalScore = (1.0 / 13.0) * newSimilarity + (12.0 / 13.0) * newPairs;
-            //double mh_value = min(1.0, originalFinalScore / newFinalScore);
-            //double mh_value = min(1.0, newSimilarity / originalSimilarity );
-            
-            //give a new similairty threshold and see
-            if(newPairs >= score)
-            {
-                if(originalSimilarity < newSimilarity && newSimilarity >= 0.5)
-                {
-                    linkSentenceToIncidence(incidenceArray, sentenceArray, destinationIncidenceIndex, sourceIncidenceIndex, sentenceGlobalIndex, sentenceIndexInSource, ref(shared));
-                    linkedcount++;
-                }
-            }
-
-        }
-        catch (...)
-        {
-            // catch anything thrown within try block that derives from std::exception
-            cout << "what is the error???" << i << endl;
-        }
-    }
-    cout << "linked count is: " << linkedcount << endl;
-}
-
+//the stop criteria for now actually is not controller by the iteration. but keep it as a place holder here that we might use later.
 void do_work_biased(vector<Incidence *> &incidenceArray, vector<Sentence *> &sentenceArray, SharedResources &shared, int iteration, int score, int threadid,string stasfilename)
 {
 
@@ -470,7 +395,7 @@ void do_work_biased(vector<Incidence *> &incidenceArray, vector<Sentence *> &sen
             int sentenceGlobalIndex = sourceIncidence.sentencesid[sentenceIndexInSource];
 
 
-            // while can those bound be changed each time???
+            //can those bound be changed each time???
             //will be 70 percent get
             //10% ith large range 100, 90% with small range which is 80%
             int explore_range = 30;
@@ -483,34 +408,25 @@ void do_work_biased(vector<Incidence *> &incidenceArray, vector<Sentence *> &sen
             //sicen it includes the bound so need to -1.
             int rightBound = min(sentenceGlobalIndex + explore_range, sizeOfSentences - 1);
             int nearSentenceId = generateRandomInteger(leftBound, rightBound);
-            // cout<<"nearsentenceid: "<<nearSentenceId<<endl;
             //then find which incidence this near incidence sentence is belong to
             int destinationIncidenceIndex = (*(sentenceArray[nearSentenceId])).incidence_id;
-            //cout<<"destinationidex "<<destinationIncidenceIndex<<endl;
-            //            int sourceIncidenceId = sourceIncidence.inci_id;
             if(sourceIncidenceIndex == destinationIncidenceIndex)
             {
                 continue;
             }
 
-            // string sourceIncidenceId = sourceIncidence.inci_id;
-
-            //ToFo:if there is no sentence in the incidence we need to replace the tail incidence with the current one.
             if(size == 0)
             {
                 //sawp the incidence with the last one
                 shared.lock();
                 incidenceArray[sourceIncidenceIndex] = incidenceArray[shared.lastActiveIncidenceIndex];
                 //swap the last active incidenceIndex at the empty spot, then decreas the lastActiveIncidenceIndex.
-
                 shared.lastActiveIncidenceIndex = shared.lastActiveIncidenceIndex - 1;
                 shared.unlock();
                 continue;
             }
 
-            //string incidenceDestination = (*(incidenceArray[ destinationIncidenceIndex])).inci_id;
             map<string, int> weightMap;
-
             weightMap["code"] = 1;
             weightMap["rootcode"] = 0;
             weightMap["year"] = 1;
@@ -520,13 +436,14 @@ void do_work_biased(vector<Incidence *> &incidenceArray, vector<Sentence *> &sen
             weightMap["tgt_actor"] = 1;
             weightMap["tgt_agent"] = 1;
             weightMap["geoname"]=1;
-            //thsi weight consider both of the longiture and latitude.
+            //this weight controls both of the longiture and latitude.
             weightMap["latitude"]=1;
 
             if(sourceIncidenceIndex>=shared.lastActiveIncidenceIndex)
             {
                 continue;
             }
+
             double originalSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceGlobalIndex, true);
             if(destinationIncidenceIndex>=shared.lastActiveIncidenceIndex)
             {
@@ -535,35 +452,20 @@ void do_work_biased(vector<Incidence *> &incidenceArray, vector<Sentence *> &sen
             double newSimilarity = getSentenceSimilarityWithinIncidence(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceGlobalIndex, false);
             //            double originalPairs = getPropertyValueMatch(sentenceArray, incidenceArray, sourceIncidenceIndex, sentenceGlobalIndex, true, score, weightMap);
             double newPairs = getPropertyValueMatch(sentenceArray, incidenceArray, destinationIncidenceIndex, sentenceGlobalIndex, false, score, weightMap);
-            //using the metroplis hastings algorithms here
-            //double originalFinalScore = (1.0 / 13.0) * originalSimilarity + (12.0 / 13.0) * originalPairs;
-            //double newFinalScore = (1.0 / 13.0) * newSimilarity + (12.0 / 13.0) * newPairs;
-            //double mh_value = min(1.0, originalFinalScore / newFinalScore);
-            //double mh_value = min(1.0, newSimilarity / originalSimilarity );
 
-            //not link if 3 pairs not match for the new configureation
-            //give a new similairty threshold and asee
-            //  cout<<"you ever get here?"<<endl;
             if(newPairs >= score)
             {
                 if(originalSimilarity < newSimilarity && newSimilarity >= 0.5)
                 {
-                    //cout << "new similarity: " << newSimilarity << endl;
-
                     linkSentenceToIncidence(incidenceArray, sentenceArray, destinationIncidenceIndex, sourceIncidenceIndex, sentenceGlobalIndex, sentenceIndexInSource, ref(shared));
-                    // cout<<"sentence globalindex: "<<sentenceGlobalIndex<<endl;
                     linkedcount++;
-                   // cout << "linked count: " << linkedcount << endl;
-
                 }
             }
 
         }
         catch (...)
         {
-            // catch anything thrown within try block that derives from std::exception
             cout << "what is the error???" << endl;
-            //cout << exc.what();
         }
     }
 
@@ -573,9 +475,7 @@ void do_work_biased(vector<Incidence *> &incidenceArray, vector<Sentence *> &sen
     {
         (*out).close();
         (*out).clear(); // clear flags
-
     }
-
 }
 
 #endif  // UTIL_HPP
