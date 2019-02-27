@@ -28,7 +28,6 @@
 #include "Util.hpp"
 using namespace std;
 
-//global variables
 const int xlength = 1000;
 const int number_of_thread = 64;
 int lastActiveIncidenceIndex = 0;
@@ -36,13 +35,10 @@ int length = (xlength * xlength - xlength) / 2 + xlength;
 
 int main(int argc, char **argv)
 {
-    //ToDo: need to figure this out, or if the serializetion is working, then we don't care i guess.
-    //GOOGLE_PROTOBUF_VERIFY_VERSION;
-    //initialize global feature weight
     GlobalFeatureWeight globalFeatureWeight;
-    //cout << globalFeatureWeight.featureWeight["code"] << endl;
     bool alive = true;
     vector<Sentence *> sentenceArray;
+
     // if you input two paramters the argc will be 3.
     if (argc < 7)
      {
@@ -58,16 +54,10 @@ int main(int argc, char **argv)
     string startyear = argv[3];
     string outputfile = std::string(argv[3]) + ".rst";
     string tstout = std::string(argv[3]) + ".tst";
-    //string outputfile = "debu:g.rst";
 
     bool biased = false;
     string statsfile = std::string(argv[3]) + ".stas";
-    //string statsfile = "debug.stas";
     string clibias = argv[4];
-    //string clibias="1";
-    //string startdate="20040102";
-    //string enddate="20050606";
-    //
     string startdate=argv[5];
     string enddate=argv[6];
 
@@ -80,8 +70,8 @@ int main(int argc, char **argv)
     cout << "score threshold is: " << score << endl;
     cout << "No of iterations: " << iteration << endl;
     int sqlitecount=0;
-    /******start to connect to database********/
 
+    /******start to connect to database********/
     char                 q[999];
     sqlite3*             db;
     sqlite3_stmt*        stmt;
@@ -111,160 +101,148 @@ int main(int argc, char **argv)
     string root_code="";
     string src_agent="";
 
-    /*******start to connect to database *******/
-    //pair<int, int> adjs[4] = {make_pair(, current_node.second), ...};
-
     q[sizeof q - 1] = '\0';
     snprintf(
         q,
         sizeof q - 1,
         ("SELECT * FROM events WHERE date8 >='"+startdate+"' and date8<='"+enddate+"'").c_str()
-        // ,
-        // ""
     );
 
     if (sqlite3_open ("/home/lian9478/OU_Coincidence/coincidenceData/events1114.db", &db) != SQLITE_OK) {
         fprintf(stderr, "Error opening database.\n");
         return 2;
     }
+
     printf("Query: %s\n", q);
 
     sqlite3_prepare(db, q, sizeof q, &stmt, NULL);
 
     bool done = false;
-    //int i=-1;
+
     while (!done) {
         //printf("In select while\n");
         switch (sqlite3_step (stmt)) {
         case SQLITE_ROW:
         {
-        	 // i=i+1;
             try
             {
-                 bytes = sqlite3_column_bytes(stmt, 0);
-            //printf ("count %d:,(%d bytes)\n", row,bytes);
-            //this can be column 1,2 , 3 ....
-            embed  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0)); //embed
-            latitude  = sqlite3_column_double(stmt, 1); //embed
-            longitude = sqlite3_column_double(stmt, 2); //embed
-            //this is to check if the field is null or not.
-            if(sqlite3_column_text(stmt, 3))
-            {
-                geoname  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3)); //embed
-            }
-            if(sqlite3_column_text(stmt, 4))
-            {
-                tgt_actor  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4)); //tgt_actor
-            }
-            if(sqlite3_column_text(stmt, 5))
-            {
-                root_code  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5)); //root_code   
-            }
-            if(sqlite3_column_text(stmt, 6))
-            {
-                src_actor  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6)); //src_actor
-            }
-             if(sqlite3_column_text(stmt, 7))
-            { 
-                mediasource2  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7)); //mediasource2       
-            }
-            if(sqlite3_column_text(stmt, 8))
-            {
-                target  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 8)); 
-            }
-             if(sqlite3_column_text(stmt, 9))
-            {
-                goldstein  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 9)); //goldstein
-            }
-            if(sqlite3_column_text(stmt, 10))
-            {
-                tgt_other_agent  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 10)); //tgt_other_agent
-            }
-            if(sqlite3_column_text(stmt, 11))
-            {
-                code = reinterpret_cast<const char*>(sqlite3_column_text(stmt,11)); //code
-            }
-            if(sqlite3_column_text(stmt, 12))
-            {
-                day = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 12)); //day
-            }
-             if(sqlite3_column_text(stmt, 13))
-            {
-                month = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 13)); //month
-            }
-            if(sqlite3_column_text(stmt, 14))
-            {
-                quad_class = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 14)); //quad_class
-            }
-            if(sqlite3_column_text(stmt, 15))
-            {
-                mediasource1 = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 15)); //mediasource1
-            }
-            if(sqlite3_column_text(stmt, 16))
-            {
-             src_other_agent= reinterpret_cast<const char*>(sqlite3_column_text(stmt, 16)); //src_other_agent   
-            }
-             if(sqlite3_column_text(stmt, 17))
-            {
-             id = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 17)); //id
-            }
-            if(sqlite3_column_text(stmt, 18))
-            {
-                tgt_agent = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 18)); //tgt_agent
-            }
-             if(sqlite3_column_text(stmt, 19))
-            {
-                date8 = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 19)); //date8
-            }
-            if(sqlite3_column_text(stmt, 20))
-            {
-                year = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 20)); //year
-            }
-            if(sqlite3_column_text(stmt, 21))
-            {
-               src_agent=reinterpret_cast<const char*>(sqlite3_column_text(stmt, 21)); //source agent
-            }
-         //int embedsize=150; //since the last position does not have the ,so the length that has the number will be (x+1)/2                 
-         int *embed3 = new int[EMBED_SIZE];
-         for(int j = 0; j < EMBED_SIZE; j++)
-         {
-             embed3[j] = (int)embed.at(j*2+1);
-         }
-
-        
-         SentenceFeatureValue *value = new SentenceFeatureValue(code, root_code, date8, id, year, src_actor, src_other_agent,tgt_actor,tgt_agent, month, day, embed3, row,latitude,longitude,geoname);
-        
-         //i will be the incidence id for this sentence
-         sentenceArray.push_back(new Sentence(id, value, row));
-           sqlitecount=row;
-           if(row>0&&row<100)
-           {
-            printf ("count %d:,(%d bytes)\n", row,bytes);
-           }  
+                bytes = sqlite3_column_bytes(stmt, 0);
+                //this can be column 1,2 , 3 ....
+                embed  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0)); //embed
+                latitude  = sqlite3_column_double(stmt, 1); //embed
+                longitude = sqlite3_column_double(stmt, 2); //embed
+                //this is to check if the field is null or not.
+                if(sqlite3_column_text(stmt, 3))
+                {
+                    geoname  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3)); //embed
+                }
+                if(sqlite3_column_text(stmt, 4))
+                {
+                    tgt_actor  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4)); //tgt_actor
+                }
+                if(sqlite3_column_text(stmt, 5))
+                {
+                    root_code  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5)); //root_code   
+                }
+                if(sqlite3_column_text(stmt, 6))
+                {
+                    src_actor  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6)); //src_actor
+                }
+                 if(sqlite3_column_text(stmt, 7))
+                { 
+                    mediasource2  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7)); //mediasource2       
+                }
+                if(sqlite3_column_text(stmt, 8))
+                {
+                    target  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 8)); 
+                }
+                 if(sqlite3_column_text(stmt, 9))
+                {
+                    goldstein  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 9)); //goldstein
+                }
+                if(sqlite3_column_text(stmt, 10))
+                {
+                    tgt_other_agent  = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 10)); //tgt_other_agent
+                }
+                if(sqlite3_column_text(stmt, 11))
+                {
+                    code = reinterpret_cast<const char*>(sqlite3_column_text(stmt,11)); //code
+                }
+                if(sqlite3_column_text(stmt, 12))
+                {
+                    day = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 12)); //day
+                }
+                 if(sqlite3_column_text(stmt, 13))
+                {
+                    month = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 13)); //month
+                }
+                if(sqlite3_column_text(stmt, 14))
+                {
+                    quad_class = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 14)); //quad_class
+                }
+                if(sqlite3_column_text(stmt, 15))
+                {
+                    mediasource1 = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 15)); //mediasource1
+                }
+                if(sqlite3_column_text(stmt, 16))
+                {
+                    src_other_agent= reinterpret_cast<const char*>(sqlite3_column_text(stmt, 16)); //src_other_agent   
+                }
+                 if(sqlite3_column_text(stmt, 17))
+                {
+                 id = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 17)); //id
+                }
+                if(sqlite3_column_text(stmt, 18))
+                {
+                    tgt_agent = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 18)); //tgt_agent
+                }
+                 if(sqlite3_column_text(stmt, 19))
+                {
+                    date8 = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 19)); //date8
+                }
+                if(sqlite3_column_text(stmt, 20))
+                {
+                    year = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 20)); //year
+                }
+                if(sqlite3_column_text(stmt, 21))
+                {
+                   src_agent=reinterpret_cast<const char*>(sqlite3_column_text(stmt, 21)); //source agent
+                }                
+                int *embed3 = new int[EMBED_SIZE];
+                for(int j = 0; j < EMBED_SIZE; j++)
+                {
+                   embed3[j] = (int)embed.at(j*2+1);
+                }
             
-            row++;
-            break;
-
+               SentenceFeatureValue *value = new SentenceFeatureValue(code, root_code, date8, id, year, src_actor, src_other_agent,tgt_actor,tgt_agent, month, day, embed3, row,latitude,longitude,geoname);
+            
+                //i will be the incidence id for this sentence
+               sentenceArray.push_back(new Sentence(id, value, row));
+               sqlitecount=row;
+               if(row>0&&row<100)
+               {
+                  printf ("count %d:,(%d bytes)\n", row,bytes);
+               }   
+                row++;
+                break;
             }
-            catch (exception& e)
-          {
-            cout <<"my own message"<< e.what() << '\n';
-          }
-
+        catch (exception& e)
+            {
+                cout <<"my own message"<< e.what() << '\n';
+            }
         }
           
-
-        case SQLITE_DONE:
-        {
-        	done = true;
-            break;
-        }
-            
-        default:
-        {
-        	fprintf(stderr, "Failed.\n");
-            return 1;
-        }
+            case SQLITE_DONE:
+            {
+            	done = true;
+                break;
+            }
+                
+            default:
+            {
+            	fprintf(stderr, "Failed.\n");
+                return 1;
+            }
             
         }
     }
@@ -280,17 +258,16 @@ int main(int argc, char **argv)
     vector<SubIncidence *> subincidenceArray;
 
     int sentencesSize = sentenceArray.size();
+
     //initialize each sentence as an incidence.
     for(int i = 0; i < sentencesSize; i++)
     {
         vector<int> *sentencesid = new vector<int>();
-        //string id = (*((*(sentenceArray[i])).featureValue)).id;
         (*sentencesid).push_back(i);
-        //sentencesid is a pointer  here.
         incidenceArray.push_back(new Incidence(i, *sentencesid));
     }
-    cout << "size of the incidence array is " << to_string(incidenceArray.size()) << endl;
 
+    cout << "size of the incidence array is " << to_string(incidenceArray.size()) << endl;
 
     string incidenceDestination = "";
     string sentenceid = "";
@@ -300,6 +277,7 @@ int main(int argc, char **argv)
     SharedResources *shared = new SharedResources(globalSize - 1);
 
     clock_t begin = clock();
+
     if(!biased)
     {
         thread t1(do_work, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 1);
@@ -598,24 +576,22 @@ int main(int argc, char **argv)
         t62.join();
         t63.join();
         t64.join();
-
-
     }
+
     clock_t end = clock();
 
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
 
-  
-    //int count = 0;
     ofstream out(outputfile);
-    // out.open(outputfile);
+
     if(!out)
     {
         cout << "could not open file" << endl;
         return 0;
     }
-    //out.close();
+
     out << "time taken in seconds with " << iteration << " score" << score << " in seconds: " << elapsed_secs << endl;
+
     if(biased)
     {
         out << "I am doing biased sampling" << endl;
@@ -639,59 +615,50 @@ int main(int argc, char **argv)
     for(int i = 0; i < (*shared).lastActiveIncidenceIndex; i++)
     {
         vector<int> sentencesid = (*(incidenceArray[i])).sentencesid;
-       // int sentencesidsize=sentencesid.size();
-       // if(sentencesidsize>=1)
-       // {
-         //   int curr1 = -1;
-           // int curr2 = -1;
-           // int curr3 = -1;
-            string temp= std::string(startyear)+"_"+std::to_string(i);
-            fstream output(temp,ios::out | ios::trunc | ios::binary);
-            models::Incidence* incidence=new models::Incidence();
-            int prev=sentencesid[0];
-            for(unsigned int j = 0; j < sentencesid.size(); j++)
-            {
-                int curr = sentencesid[j];
-                SentenceFeatureValue v=(*((*(sentenceArray[curr])).featureValue));
-                models::Event* event = incidence->add_event();;
-                event->set_code(v.code);
-                event->set_rootcode(v.rootcode);
-                event->set_latitude(v.latitude);
-                event->set_longitude(v.longitude);
-                event->set_geoname(v.geoname);
-                event->set_date8(v.date8);
-                event->set_id(v.id);
-                event->set_year(v.year);
-                event->set_src_actor(v.src_actor);
-                event->set_src_agent(v.src_agent);
-                event->set_tgt_actor(v.tgt_actor);
-                event->set_tgt_agent(v.tgt_agent);
-                event->set_month(v.month);
-                event->set_day(v.day);
-                event->set_index(v.index);
-                
-                std::vector<int> embedding;
-                for(int k=0;k<EMBED_SIZE;k++)
-                 {
-                    embedding.push_back((v.embed)[k]);
-                 }
+        string temp= std::string(startyear)+"_"+std::to_string(i);
+        fstream output(temp,ios::out | ios::trunc | ios::binary);
+        models::Incidence* incidence=new models::Incidence();
+        int prev=sentencesid[0];
+        for(unsigned int j = 0; j < sentencesid.size(); j++)
+        {
+            int curr = sentencesid[j];
+            SentenceFeatureValue v=(*((*(sentenceArray[curr])).featureValue));
+            models::Event* event = incidence->add_event();;
+            event->set_code(v.code);
+            event->set_rootcode(v.rootcode);
+            event->set_latitude(v.latitude);
+            event->set_longitude(v.longitude);
+            event->set_geoname(v.geoname);
+            event->set_date8(v.date8);
+            event->set_id(v.id);
+            event->set_year(v.year);
+            event->set_src_actor(v.src_actor);
+            event->set_src_agent(v.src_agent);
+            event->set_tgt_actor(v.tgt_actor);
+            event->set_tgt_agent(v.tgt_agent);
+            event->set_month(v.month);
+            event->set_day(v.day);
+            event->set_index(v.index);
+            
+            std::vector<int> embedding;
+            for(int k=0;k<EMBED_SIZE;k++)
+             {
+                embedding.push_back((v.embed)[k]);
+             }
 
-                
-                models::Embed* embed = new models::Embed();
-                //link https://stackoverflow.com/questions/684390/how-can-protocol-buffers-support-serialization-deserialization-of-std-containers
-                vector<int>::iterator e = embedding.end();
-                for (vector<int>::iterator i = embedding.begin(); 
-                    i != e; 
-                    ++i) {
-                  embed->add_str(*i); 
-                }
-                event->set_allocated_embed(embed);
-                if (!incidence->SerializeToOstream(&output)) {
-                 out << "Failed to write address book." << endl;
-                  return -1;
-                }    
-           // }
-            out << " " << endl;
+            models::Embed* embed = new models::Embed();
+            //link https://stackoverflow.com/questions/684390/how-can-protocol-buffers-support-serialization-deserialization-of-std-containers
+            vector<int>::iterator e = embedding.end();
+            for (vector<int>::iterator i = embedding.begin(); 
+                i != e; 
+                ++i) {
+              embed->add_str(*i); 
+            }
+            event->set_allocated_embed(embed);
+            if (!incidence->SerializeToOstream(&output)) {
+             out << "Failed to write address book." << endl;
+              return -1;
+            }    
         }
     }
     return 0;
