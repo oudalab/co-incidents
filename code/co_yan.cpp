@@ -263,17 +263,18 @@ int main(int argc, char **argv)
     SharedResources *shared = new SharedResources(globalSize - 1);
 
     clock_t begin = clock();
-    std::vector<thread*> threads; 
+    std::vector<thread> threads; 
     for(int i=0;i<number_of_thread;i++)
     { 
-       thread* newthread=new thread(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 1,statsfile);
-       threads.add(newthread);
+       thread* newthread=new thread(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, i,statsfile);
+       threads.add(*newthread);
     }
     
     for(int i=0;i<number_of_thread;i++)
     {
-        threads[i]->join();
+        threads[i].join();
     }
+    threads.clear();
 
 
         // thread t1(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 1,statsfile);
