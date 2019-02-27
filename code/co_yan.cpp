@@ -39,7 +39,7 @@ int main(int argc, char **argv)
     vector<Sentence *> sentenceArray;
 
     // if you input two paramters the argc will be 3.
-    if (argc < 7)
+    if (argc < 6)
      {
          cout << "input the scorethreshold and also the sample number, filename, biased or not, and startdate, and enddate: " << endl;
          return 0;
@@ -424,10 +424,6 @@ int main(int argc, char **argv)
 
     out << "time taken in seconds with " << iteration << " score" << score << " in seconds: " << elapsed_secs << endl;
 
-    if(biased)
-    {
-        out << "I am doing biased sampling" << endl;
-    }
     cout << "last active when start: " << sentenceArray.size() << endl;
     cout << "last active when end: " + to_string((*shared).lastActiveIncidenceIndex) << endl;
     cout << "sqlite count is: "<<sqlitecount<<endl;
