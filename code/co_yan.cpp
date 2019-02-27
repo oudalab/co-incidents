@@ -14,7 +14,8 @@
 #include <cstdlib>
 #include <cmath> 
 #include <mutex>
-#include <thread>
+// #include <thread>
+#include <boost/thread.hpp> 
 #include <vector>
 #include <pthread.h>
 #include "GlobalFeatureWeight.h"
@@ -263,18 +264,29 @@ int main(int argc, char **argv)
     SharedResources *shared = new SharedResources(globalSize - 1);
 
     clock_t begin = clock();
-    std::vector<thread> threads; 
-    for(int i=0;i<number_of_thread;i++)
-    { 
-       thread* newthread=new thread(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, i,statsfile);
-       threads.add(*newthread);
-    }
+    // std::vector<thread> threads; 
+    // for(int i=0;i<number_of_thread;i++)
+    // { 
+    //    thread* newthread=new thread(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, i,statsfile);
+    //    threads.add(*newthread);
+    // }
     
-    for(int i=0;i<number_of_thread;i++)
-    {
-        threads[i].join();
-    }
-    threads.clear();
+    // for(int i=0;i<number_of_thread;i++)
+    // {
+    //     threads[i].join();
+    // }
+   // threads.clear();
+    int count=64;
+    while (count > 0) {
+  std::vector<boost::thread *> threads(count);
+  for (size_t i = 0; i < threads.size(); ++i) { // Start appropriate number of threads
+    threads[i] = new boost::thread(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, i,statsfile);
+  }
+  for (size_t i = 0; i < threads.size(); ++i) { // Wait for all threads to finish
+    threads[i]->join();
+    delete threads[i];
+    --count;
+ }
 
 
         // thread t1(do_work_biased, ref(incidenceArray), ref(sentenceArray), ref(*shared), iteration, score, 1,statsfile);
