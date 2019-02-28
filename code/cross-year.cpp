@@ -127,7 +127,7 @@ int lastActiveIncidenceIndex = 0;
 *Transform the event from incidence into the sentence form that we will use
 *return a pointer to this sentence.
 */
-void Sentence* TransformEvent(const models::Event& event,int incidenceIndex)
+Sentence* TransformEvent(const models::Event& event,int incidenceIndex)
 {
     string embed="";
     double latitude;
