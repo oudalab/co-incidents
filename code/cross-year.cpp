@@ -34,95 +34,95 @@ int lastActiveIncidenceIndex = 0;
 void rtrim(std::string &);
 
 
-void deserializeIncidence(string str,Incidence& incidence,vector<Incidence*> &incidenceArray, vector<Sentence*> &sentenceArray)
-{
+// void deserializeIncidence(string str,Incidence& incidence,vector<Incidence*> &incidenceArray, vector<Sentence*> &sentenceArray)
+// {
 
-    stringstream stream(str);
-    int parsedindex=0;
-    int sentenceIndex=sentenceArray.size();
-    vector<int> sentencesid=incidence.sentencesid;
-    int incidenceIndex=incidenceArray.size();
-    SentenceFeatureValue* v=new SentenceFeatureValue();
+//     stringstream stream(str);
+//     int parsedindex=0;
+//     int sentenceIndex=sentenceArray.size();
+//     vector<int> sentencesid=incidence.sentencesid;
+//     int incidenceIndex=incidenceArray.size();
+//     SentenceFeatureValue* v=new SentenceFeatureValue();
     
-    string word;
-    string inword;
-    string embedstring;
-    while( getline(stream, word, ',') )
-    {
-      parsedindex++;
-      switch(parsedindex) {
-      case 1 : (*v).code=word;break;
-      case 2 : (*v).rootcode=word;break;
-      case 3 : 
-        if(word!=" "&&word!="")
-        {
-          try
-          {
-             (*v).latitude=stod(word);
-          }
-          catch(exception& e)
-          {
-            cout<<"exception encountered!"<<endl;
-          }
+//     string word;
+//     string inword;
+//     string embedstring;
+//     while( getline(stream, word, ',') )
+//     {
+//       parsedindex++;
+//       switch(parsedindex) {
+//       case 1 : (*v).code=word;break;
+//       case 2 : (*v).rootcode=word;break;
+//       case 3 : 
+//         if(word!=" "&&word!="")
+//         {
+//           try
+//           {
+//              (*v).latitude=stod(word);
+//           }
+//           catch(exception& e)
+//           {
+//             cout<<"exception encountered!"<<endl;
+//           }
          
-        }
-        break;
-      case 4 : 
-        if(word!=" "&&word!="")
-        {
-          try
-          {
-            (*v).longitude=stod(word);
-          }
-          catch(exception& e)
-          {
-            cout<<"exception encountered!"<<endl;
-          }
-        }
-        break;
-      case 5 : (*v).geoname=word;break;
-      case 6 : (*v).date8=word;break;
-      case 7 : (*v).id=word;break;
-      case 8 : (*v).year=word;break;
-      case 9 : (*v).src_actor=word;break;
-      case 10: (*v).src_agent=word;break;
-      case 11: (*v).tgt_actor=word;break;
-      case 12: (*v).tgt_agent=word;break;
-      case 13: (*v).month=word;break;
-      case 14: (*v).day=word;break;
-      case 15: 
-        if(word!=" "&&word!="")
-        {
-         //cout<<parsedindex<<word<<endl;
-         (*v).index=stoi(word); 
-        }
-        break;
-      case 16: 
-               cout<<"you ever get here??"<<endl;
-               embedstring=word;
-               cout<<word<<endl;
-               break;
-      }
-    }
-    Sentence* sentence=new Sentence((*v).id,v,incidenceIndex);
-    sentenceArray.push_back(sentence);
-    (*v).index=sentenceIndex;
-    (*v).embed=new int[EMBED_SIZE];
+//         }
+//         break;
+//       case 4 : 
+//         if(word!=" "&&word!="")
+//         {
+//           try
+//           {
+//             (*v).longitude=stod(word);
+//           }
+//           catch(exception& e)
+//           {
+//             cout<<"exception encountered!"<<endl;
+//           }
+//         }
+//         break;
+//       case 5 : (*v).geoname=word;break;
+//       case 6 : (*v).date8=word;break;
+//       case 7 : (*v).id=word;break;
+//       case 8 : (*v).year=word;break;
+//       case 9 : (*v).src_actor=word;break;
+//       case 10: (*v).src_agent=word;break;
+//       case 11: (*v).tgt_actor=word;break;
+//       case 12: (*v).tgt_agent=word;break;
+//       case 13: (*v).month=word;break;
+//       case 14: (*v).day=word;break;
+//       case 15: 
+//         if(word!=" "&&word!="")
+//         {
+//          //cout<<parsedindex<<word<<endl;
+//          (*v).index=stoi(word); 
+//         }
+//         break;
+//       case 16: 
+//                cout<<"you ever get here??"<<endl;
+//                embedstring=word;
+//                cout<<word<<endl;
+//                break;
+//       }
+//     }
+//     Sentence* sentence=new Sentence((*v).id,v,incidenceIndex);
+//     sentenceArray.push_back(sentence);
+//     (*v).index=sentenceIndex;
+//     (*v).embed=new int[EMBED_SIZE];
 
-    int innerindex=0;
-    cout<<embedstring<<endl;
-    stringstream ss(embedstring);
-    while(getline(ss,inword,'|'))
-    {
-       cout<<inword<<"||";
-       (*v).embed[innerindex]=stoi(inword);
-       innerindex++;
-    }
+//     int innerindex=0;
+//     cout<<embedstring<<endl;
+//     stringstream ss(embedstring);
+//     while(getline(ss,inword,'|'))
+//     {
+//        cout<<inword<<"||";
+//        (*v).embed[innerindex]=stoi(inword);
+//        innerindex++;
+//     }
     
-    //each incidence has a sentences array.
-    incidence.sentencesid.push_back(sentenceIndex);
-    //sentenceArray.push_back(sentence);
-}
+//     //each incidence has a sentences array.
+//     incidence.sentencesid.push_back(sentenceIndex);
+//     //sentenceArray.push_back(sentence);
+// }
 
 void ListEvents(const models::Incidence& incidence) {
   cout<< incidence.event_size()<<endl;
@@ -147,7 +147,7 @@ void ListEvents(const models::Incidence& incidence) {
 }     
 }
 
-void LoadIncidence(string incidence_file_name,Incidence& incidence,vector<Incidence*> &incidenceArray, vector<Sentence*> &sentenceArray)
+void LoadIncidence(string incidence_file_name,Incidence& incidence1,vector<Incidence*> &incidenceArray, vector<Sentence*> &sentenceArray)
 {
     models::Incidence incidence;
     // Read the existing address book.
@@ -156,6 +156,7 @@ void LoadIncidence(string incidence_file_name,Incidence& incidence,vector<Incide
        cerr<<"can not parse the incidence"<<endl;
        break;
     }
+    incidenceArray.push_back(&incidence);
    ListEvents(incidence);
 }
 
@@ -235,12 +236,12 @@ int main(int argc, char *argv[])
   for(int i=1;i<10;i++)
   {
     string dir="./data1980/test1980_"+std::to_string(i);
-    LoadIncidence(dir,*incidence_pointer, ref(incidenceArray),ref(sentenceArray))
+    LoadIncidence(dir,*incidence_pointer, ref(incidenceArray),ref(sentenceArray));
   }
   //Optional:  Delete all global objects allocated by libprotobuf.
   google::protobuf::ShutdownProtobufLibrary();
-
-
+  cout<<endl;
+  cout<<"size of the incidence array: "<<incidenceArray.size()<<endl;
 /****************************/
 /***end of loading all the year data now need to start linking
 *****************************/
