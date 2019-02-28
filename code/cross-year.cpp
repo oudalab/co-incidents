@@ -31,7 +31,6 @@ using namespace std;
 #define EMBED_SIZE 150
 #define BOUND 100
 int lastActiveIncidenceIndex = 0;
-void rtrim(std::string &);
 
 
 // void deserializeIncidence(string str,Incidence& incidence,vector<Incidence*> &incidenceArray, vector<Sentence*> &sentenceArray)
@@ -147,17 +146,18 @@ void ListEvents(const models::Incidence& incidence) {
 }     
 }
 
-void LoadIncidence(string incidence_file_name,Incidence& incidence1,vector<Incidence*> &incidenceArray, vector<Sentence*> &sentenceArray)
+void LoadIncidence(string incidence_file_name,vector<models::Incidence*> &incidenceArray, vector<Sentence*> &sentenceArray)
 {
     models::Incidence incidence;
+    cout<<incidence_file_name<<endl;
     // Read the existing address book.
     fstream input(incidence_file_name, ios::in | ios::binary);
     if(!incidence.ParseFromIstream(&input)) {   
        cerr<<"can not parse the incidence"<<endl;
-       break;
+       return;
     }
     incidenceArray.push_back(&incidence);
-   ListEvents(incidence);
+    ListEvents(incidence);
 }
 
 int main(int argc, char *argv[])
@@ -167,11 +167,7 @@ int main(int argc, char *argv[])
   ifstream in(firstyear+".rst");
   ifstream in2(secondyear+".rst");
 
-  if(!in) {
-    cout << "Cannot open input file.\n";
-    return 1;
-  }
-  vector<Incidence*> incidenceArray;//=new vector<Incidence*>();
+  vector<models::Incidence*> incidenceArray;//=new vector<Incidence*>();
   vector<Sentence*> sentenceArray;//=new vector<Sentence*>();
   //char str[255];
   string data="";
@@ -236,7 +232,7 @@ int main(int argc, char *argv[])
   for(int i=1;i<10;i++)
   {
     string dir="./data1980/test1980_"+std::to_string(i);
-    LoadIncidence(dir,*incidence_pointer, ref(incidenceArray),ref(sentenceArray));
+    LoadIncidence(dir, ref(incidenceArray),ref(sentenceArray));
   }
   //Optional:  Delete all global objects allocated by libprotobuf.
   google::protobuf::ShutdownProtobufLibrary();

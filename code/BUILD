@@ -61,5 +61,6 @@ cc_binary(
     srcs = ["cross-year.cpp"],
     deps = [
         ":all-files",
+        ":event_cc_proto"
     ],
 )
