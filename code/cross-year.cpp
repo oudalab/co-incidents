@@ -129,66 +129,91 @@ int lastActiveIncidenceIndex = 0;
 */
 void Sentence* TransformEvent(const models::Event& event,int incidenceIndex)
 {
-    SentenceFeatureValue* v=new SentenceFeatureValue();
+    string embed="";
+    double latitude;
+    double longitude;
+    string geoname="";
+    string tgt_actor="";
+    string src_actor="";
+    string mediasource2="";
+    string target="";
+    string goldstein="";
+    string tgt_other_agent="";
+    string code="";
+    string day="";
+    string month="";
+    string quad_class="";
+    string mediasource1="";
+    string src_other_agent="";
+    string id="";
+    string tgt_agent="";
+    string date8="";
+    string year="";
+    string root_code="";
+    string src_agent="";
+
     if(event.has_code())
     {
-        v->code=event.code();
+        code=event.code();
     }
     if(event.has_rootcode())
     {
-        v->rootcode=event.rootcode();
+        rootcode=event.rootcode();
     }
     if(event.has_latitude())
     {
-        v->latitude=event.latitude();
+        latitude=event.latitude();
     }
     if(event.has_longitude())
     {
-        v->longitude=event.longitude();
+        longitude=event.longitude();
     }
     if(event.has_geoname())
     {
-        v->geoname=event.geoname();
+        geoname=event.geoname();
     }
     if(event.has_date8())
     {
-        v->date8=event.date8();
+        date8=event.date8();
     }
     if(event.has_src_actor())
     {
-        v->src_actor=event.src_actor();
+        src_actor=event.src_actor();
     }
     if(event.has_src_agent())
     {
-        v->src_agent=event.src_agent();
+        src_agent=event.src_agent();
     }
     if(event.has_tgt_actor())
     {
-        v->tgt_agent=event.tgt_actor();
+        tgt_agent=event.tgt_actor();
     }
     if(event.has_tgt_agent())
     {
-        v->tgt_agent=event.tgt_agent();
+        tgt_agent=event.tgt_agent();
     }
     if(event.has_month())
     {
-        v->month=event.month();
+        month=event.month();
     }
     if(event.has_day())
     {
-        v->day=event.day();
+        day=event.day();
     }
     if(event.has_id())
     {
-        v->id=event.id();
+        id=event.id();
     }
+    int embed = new int[EMBED_SIZE];
     if(event.has_embed())
     {
        for(int j=0;j<event.embed().str_size();j++)
        {
-           v->embed[j]=stoi(event.embed().str(j));
+           embed[j]=stoi(event.embed().str(j));
        }
     }
+    SentenceFeatureValue* v=new SentenceFeatureValue(code, root_code, date8, id, year, src_actor, src_other_agent,tgt_actor,tgt_agent, month, day, embed, row,latitude,longitude,geoname);
+
     Sentence* sentence=new Sentence(v->id,v,incidenceIndex);
 }
 /*
