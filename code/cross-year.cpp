@@ -28,8 +28,9 @@
 #include "Util.hpp"
 using namespace std;
 
-#define EMBED_SIZE 150
-#define BOUND 100
+
+// #define EMBED_SIZE 150
+// #define BOUND 100
 int lastActiveIncidenceIndex = 0;
 
 
@@ -103,7 +104,7 @@ int lastActiveIncidenceIndex = 0;
 //                break;
 //       }
 //     }
-//     Sentence* sentence=new Sentence((*v).id,v,incidenceIndex);
+//    c
 //     sentenceArray.push_back(sentence);
 //     (*v).index=sentenceIndex;
 //     (*v).embed=new int[EMBED_SIZE];
@@ -122,42 +123,116 @@ int lastActiveIncidenceIndex = 0;
 //     incidence.sentencesid.push_back(sentenceIndex);
 //     //sentenceArray.push_back(sentence);
 // }
-
-void ListEvents(const models::Incidence& incidence) {
-  cout<< incidence.event_size()<<endl;
-  for (int i = 0; i < incidence.event_size(); i++) {
-    const models::Event& event = incidence.event(i);
+/*
+*Transform the event from incidence into the sentence form that we will use
+*return a pointer to this sentence.
+*/
+void Sentence* TransformEvent(const models::Event& event,int incidenceIndex)
+{
+    SentenceFeatureValue* v=new SentenceFeatureValue();
+    if(event.has_code())
+    {
+        v->code=event.code();
+    }
     if(event.has_rootcode())
     {
-      cout<<event.rootcode()<<endl;
+        v->rootcode=event.rootcode();
+    }
+    if(event.has_latitude())
+    {
+        v->latitude=event.latitude();
+    }
+    if(event.has_longitude())
+    {
+        v->longitude=event.longitude();
+    }
+    if(event.has_geoname())
+    {
+        v->geoname=event.geoname();
+    }
+    if(event.has_date8())
+    {
+        v->date8=event.date8();
     }
     if(event.has_src_actor())
     {
-      cout<<event.src_actor()<<endl;
+        v->src_actor=event.src_actor();
+    }
+    if(event.has_src_agent())
+    {
+        v->src_agent=event.src_agent();
+    }
+    if(event.has_tgt_actor())
+    {
+        v->tgt_agent=event.tgt_actor();
+    }
+    if(event.has_tgt_agent())
+    {
+        v->tgt_agent=event.tgt_agent();
+    }
+    if(event.has_month())
+    {
+        v->month=event.month();
+    }
+    if(event.has_day())
+    {
+        v->day=event.day();
+    }
+    if(event.has_id())
+    {
+        v->id=event.id();
     }
     if(event.has_embed())
     {
        for(int j=0;j<event.embed().str_size();j++)
        {
-           cout<<event.embed().str(j)<<",";
+           v->embed[j]=stoi(event.embed().str(j));
        }
-
     }
-}     
+    Sentence* sentence=new Sentence(v->id,v,incidenceIndex);
+}
+/*
+*it will decode the models::incidence into Incidence format and then create sentencesId for the Incidence
+and add sentences and incidence to the sentenceArray and incidenceArray.
+*/
+ Incidence* TranformIncidence(const models::Incidence& incidence,vector<Incidence*> &incidenceArray, vector<Sentence*> &sentenceArray) {
+  //cout<< incidence.event_size()<<endl;
+  
+  int incidenceIndex=incidenceArray.size();
+  
+  vector<int>* sentencesid=new vector<int>();
+
+  Incidence * transformedIncidence=new Incidence(incidenceIndex, sentencesid);
+
+  for (int i = 0; i < incidence.event_size(); i++) {
+    const models::Event& event = incidence.event(i);
+
+    int sentenceIndex=sentenceArray.size();
+
+    sentencesid.push_back(sentenceIndex);
+
+    Sentence* sentence=TransformEvent(ref(event),incidenceIndex);
+
+    sentenceArray.push_back(sentence);
+ }  
+  return transformedIncidence;
 }
 
-void LoadIncidence(string incidence_file_name,vector<models::Incidence*> &incidenceArray, vector<Sentence*> &sentenceArray)
-{
+/*
+*Load in one incidence from disk and call decodeIncidence to transform to the Incidence type we use.
+*/
+void LoadIncidence(string incidence_file_name,vector<Incidence*> &incidenceArray, vector<Sentence*> &sentenceArray)
+{ 
     models::Incidence incidence;
     cout<<incidence_file_name<<endl;
     // Read the existing address book.
     fstream input(incidence_file_name, ios::in | ios::binary);
+
     if(!incidence.ParseFromIstream(&input)) {   
        cerr<<"can not parse the incidence"<<endl;
        return;
     }
-    incidenceArray.push_back(&incidence);
-    ListEvents(incidence);
+    DecodeIncidence(ref(incidence),ref(incidenceArray),ref(sentenceArray));
 }
 
 int main(int argc, char *argv[])
@@ -166,8 +241,9 @@ int main(int argc, char *argv[])
   string secondyear=std::string(argv[4]);
   ifstream in(firstyear+".rst");
   ifstream in2(secondyear+".rst");
-
-  vector<models::Incidence*> incidenceArray;//=new vector<Incidence*>();
+  
+  //the Incidence type should be the old one, not the serialzied one, since it has critical section in it.
+  vector<Incidence*> incidenceArray;//=new vector<Incidence*>();
   vector<Sentence*> sentenceArray;//=new vector<Sentence*>();
   //char str[255];
   string data="";
