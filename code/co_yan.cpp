@@ -446,14 +446,14 @@ int main(int argc, char **argv)
     for(int i = 0; i < (*shared).lastActiveIncidenceIndex; i++)
     {
         vector<int> sentencesid = (*(incidenceArray[i])).sentencesid;
-        string temp= std::string(startyear)+"_"+std::to_string(i);
-        fstream output(temp,ios::out | ios::trunc | ios::binary);
         models::Incidence* incidence=new models::Incidence();
         for(unsigned int j = 0; j < sentencesid.size(); j++)
         {
             int curr = sentencesid[j];
             SentenceFeatureValue v=(*((*(sentenceArray[curr])).featureValue));
             models::Event* event = incidence->add_event();;
+            string temp= std::string(startyear)+"_"+std::to_string(i)+"_"+std::to_string(v.src_actor)+"_"+std::to_string(tgt_actor)+"_"+std::to_string(src_agent)+"_"+std::to_string(tgt_agent);
+            fstream output(temp,ios::out | ios::trunc | ios::binary);
             event->set_code(v.code);
             event->set_rootcode(v.rootcode);
             event->set_latitude(v.latitude);
@@ -493,11 +493,6 @@ int main(int argc, char **argv)
     }
     return 0;
 }
-
-
-
-
-
 
 
 
