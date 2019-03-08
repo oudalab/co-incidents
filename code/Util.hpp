@@ -136,6 +136,7 @@ double getSimilarityBySentenceId( vector<Sentence *> &sentenceArray, int sen1ind
     int *vec1 = (*((*(sentenceArray[sen1index])).featureValue)).embed;
     int *vec2 = (*((*(sentenceArray[sen2index])).featureValue)).embed;
     double cosine = cosineSimilarity(vec1, vec2);
+    cout<<"similarity: "<<std::to_string(cosine)<<endl;
     return cosine;
 }
 
