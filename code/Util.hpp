@@ -18,6 +18,8 @@
 const int EMBED_SIZE = 150;
 //defines the successive no link number that makes the linking process stopped.
 const int BOUND = 30;
+const int LOW_EXPLORE_RANGE = 100;
+const int HIGH_EXPLORE_RANGE = 500;
 
 // This only works for C
 static const char *  currentTime () {
@@ -397,10 +399,10 @@ void do_work_biased(vector<Incidence *> &incidenceArray, vector<Sentence *> &sen
             //can those bound be changed each time???
             //will be 70 percent get
             //10% ith large range 100, 90% with small range which is 80%
-            int explore_range = 30;
+            int explore_range = LOW_EXPLORE_RANGE;
             if(generateRandomInteger(0, 100) / 100.0 < 0.1)
             {
-                explore_range = 100;
+                explore_range = HIGH_EXPLORE_RANGE;
             }
 
             int leftBound = max(0, sentenceGlobalIndex - explore_range);
