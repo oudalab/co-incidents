@@ -17,6 +17,7 @@ from nltk.tokenize import RegexpTokenizer
 from stop_words import get_stop_words
 from nltk.stem.porter import PorterStemmer
 from gensim.models.doc2vec import TaggedDocument
+import gzip
 
 download('punkt')  # tokenizer, run once
 download('stopwords')  # stopwords dictionary, run once
@@ -49,8 +50,8 @@ count = 0
 totalcount = 0
 dataWithVec = []
 index = 0
-with open('/home/yan/hanover_backup/coincidenceData/DallasData/merged6.json'
-          , 'r') as infile:
+with gzip.open('/home/yan/hanover_backup/coincidenceData/geodata_latest/terrier-location-text-source-part1.json.gz'
+          , 'rb') as infile:
     for line in infile:
         if totalcount > 20000:
             break
@@ -59,29 +60,41 @@ with open('/home/yan/hanover_backup/coincidenceData/DallasData/merged6.json'
                 print ('{} processed'.format(totalcount))
             doc = json.loads(line)
         try:
-            processed_doc = preprocess(doc['doc'])
+            processed_doc = preprocess(doc['text'])
             data = {}
-            data['id'] = doc['mongoid']
-            data['mediasource1'] = doc['time']
-            data['mediasource2'] = doc['source']
+            data['id'] = doc['mongo_id']
+            data['source'] = doc['source']
             #change the ndarray to an array to be json serializable
-            data['embed'] = document_vector(model, processed_doc).flatten()  # hotembedding.todense().tolist()[0]
-            data['code'] = doc['code']
+            data['embed'] = document_vector(model, processed_doc).tolist() # hotembedding.todense().tolist()[0]
+            data['code'] = ""
+            if 'code' in doc:
+                data['code'] = doc['code']
             data['date8'] = doc['date8']
             data['day'] = doc['day']
             data['year'] = doc['year']
             data['month'] = doc['month']
-            data['goldstein'] = doc['goldstein']
-            data['quad_class'] = doc['quad_class']
+            data['target']= doc['target']
             data['root_code'] = doc['root_code']
             data['src_actor'] = doc['src_actor']
             data['src_agent'] = doc['src_agent']
             data['tgt_actor'] = doc['tgt_actor']
             data['tgt_agent'] = doc['tgt_agent']
             data['tgt_other_agent'] = doc['tgt_other_agent']
-            data['latitude'] = doc['lat']
-            data['longitude'] = doc['lon']
-            data['geoname'] = doc['location_name']
+            data['latitude'] = ""
+            data['longitude'] = ""
+            data['geoname'] = ""
+            data['countrycode'] = ""
+            data['statecode'] = ""
+            data["stategeonameid"] = ""
+            data["countrygeonameid"] = ""
+            if 'geo_location' in doc:
+                data['latitude'] = doc['geo_location']['lat']
+                data['longitude'] = doc['geo_location']['lon']
+                data['geoname'] = doc['geo_location']['location_name']
+                data['countrycode'] = doc['geo_location']['countryCode']
+                data['statecode'] = doc['geo_location']["stateCode"]
+                data["stategeonameid"] = doc['geo_location']["stateGeoNameId"]
+                data["countrygeonameid"] = doc['geo_location']["countryGeoNameId"]
             totalcount = totalcount + 1
             dataWithVec.append(data)
             if totalcount % 1000 == 0:
@@ -96,6 +109,5 @@ with open('/home/yan/hanover_backup/coincidenceData/DallasData/merged6.json'
             print (e)
             print ('count:' + str(count) + ' ' + 'totalcount: ' \
                 + str(totalcount))
-
 
             
