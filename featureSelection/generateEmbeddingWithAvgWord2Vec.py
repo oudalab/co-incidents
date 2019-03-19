@@ -50,36 +50,15 @@ count = 0
 totalcount = 0
 dataWithVec = []
 index = 0
-with gzip.open('/home/yan/hanover_backup/coincidenceData/geodata_latest/terrier-location-text-source-part1.json.gz'
+with gzip.open('/home/lian9478/OU_Coincidence/dallasData/terrier-location-text-source-part1.json.gz'
           , 'rb') as infile:
     for line in infile:
-        if totalcount > 20000:
-            break
-        else:
+        try:
             if totalcount % 20000 == 0:
                 print ('{} processed'.format(totalcount))
-            doc = json.loads(line)
-        try:
+                doc = json.loads(line)
             processed_doc = preprocess(doc['text'])
             data = {}
-            data['id'] = doc['mongo_id']
-            data['source'] = doc['source']
-            #change the ndarray to an array to be json serializable
-            data['embed'] = document_vector(model, processed_doc).tolist() # hotembedding.todense().tolist()[0]
-            data['code'] = ""
-            if 'code' in doc:
-                data['code'] = doc['code']
-            data['date8'] = doc['date8']
-            data['day'] = doc['day']
-            data['year'] = doc['year']
-            data['month'] = doc['month']
-            data['target']= doc['target']
-            data['root_code'] = doc['root_code']
-            data['src_actor'] = doc['src_actor']
-            data['src_agent'] = doc['src_agent']
-            data['tgt_actor'] = doc['tgt_actor']
-            data['tgt_agent'] = doc['tgt_agent']
-            data['tgt_other_agent'] = doc['tgt_other_agent']
             data['latitude'] = ""
             data['longitude'] = ""
             data['geoname'] = ""
@@ -87,6 +66,49 @@ with gzip.open('/home/yan/hanover_backup/coincidenceData/geodata_latest/terrier-
             data['statecode'] = ""
             data["stategeonameid"] = ""
             data["countrygeonameid"] = ""
+            data['id'] = ""
+            data['source'] = ""
+            data['code'] = ""
+            data['date8'] = ""
+            data['day'] = ""
+            data['year'] = ""
+            data['month'] = ""
+            data['target']=""
+            data['id'] = ""
+            data['source'] = ""
+            data['root_code'] = ""
+            data['src_actor'] = ""
+            data['src_agent'] = ""
+            data['tgt_actor'] = ""
+            data['tgt_agent'] = ""
+            data['tgt_other_agent'] = ""
+            #change the ndarray to an array to be json serializable
+            data['embed'] = document_vector(model, processed_doc).tolist() # hotembedding.todense().tolist()[0]
+            data['code'] = ""
+            if 'code' in doc:
+                data['code'] = doc['code']
+            if 'date8' in doc:
+                data['date8'] = doc['date8']
+            if 'day' in doc:
+                data['day'] = doc['day']
+            if 'year' in doc:
+                data['year'] = doc['year']
+            if 'month' in doc:
+                data['month'] = doc['month']
+            if 'target' in doc:
+                data['target']= doc['target']
+            if 'root_code' in doc:
+                data['root_code'] = doc['root_code']
+            if 'scr_actor' in doc:
+                data['src_actor'] = doc['src_actor']
+            if 'src_agent' in doc:
+                data['src_agent'] = doc['src_agent']
+            if 'tgt_actor' in doc:
+                data['tgt_actor'] = doc['tgt_actor']
+            if 'tgt_agent' in doc:
+                data['tgt_agent'] = doc['tgt_agent']
+            if 'tgt_other_agent' in doc:
+                data['tgt_other_agent'] = doc['tgt_other_agent'] 
             if 'geo_location' in doc:
                 data['latitude'] = doc['geo_location']['lat']
                 data['longitude'] = doc['geo_location']['lon']
@@ -98,7 +120,7 @@ with gzip.open('/home/yan/hanover_backup/coincidenceData/geodata_latest/terrier-
             totalcount = totalcount + 1
             dataWithVec.append(data)
             if totalcount % 1000 == 0:
-                with open('/home/yan/hanover_backup/coincidenceData/DallasData/datawithembed0311-avg.json'
+                with open('/home/lian9478/OU_Coincidence/dallasData/datawithembed0311-avg1.json'
                           , 'a') as outfile:
                     print ('save to disk: ' + str(totalcount))
                     for d in dataWithVec:
