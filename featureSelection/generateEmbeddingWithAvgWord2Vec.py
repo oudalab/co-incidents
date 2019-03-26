@@ -82,11 +82,14 @@ with gzip.open('/home/lian9478/OU_Coincidence/dallasData/terrier-location-text-s
             data['tgt_actor'] = ""
             data['tgt_agent'] = ""
             data['tgt_other_agent'] = ""
+            data['mongo_id'] = ""
             #change the ndarray to an array to be json serializable
             data['embed'] = document_vector(model, processed_doc).tolist() # hotembedding.todense().tolist()[0]
             data['code'] = ""
             if 'code' in doc:
                 data['code'] = doc['code']
+            if 'mongo_id' in doc:
+                data['mongo_id'] = doc['mongo_id']
             if 'date8' in doc:
                 data['date8'] = doc['date8']
             if 'day' in doc:
