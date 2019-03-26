@@ -56,7 +56,7 @@ with gzip.open('/home/lian9478/OU_Coincidence/dallasData/terrier-location-text-s
         try:
             if totalcount % 20000 == 0:
                 print ('{} processed'.format(totalcount))
-                doc = json.loads(line)
+            doc = json.loads(line)
             processed_doc = preprocess(doc['text'])
             data = {}
             data['latitude'] = ""
