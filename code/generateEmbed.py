@@ -49,13 +49,14 @@ def document_vector(word2vec_model, doc):
 count = 0
 totalcount = 0
 count_hasdoc=0
+file_index = sys.argv[1]
 dataWithVec = []
-#1975 to 2018 25+18+1=44
-for i in range(0,44):
+#1975 to 2018 25+18+1=44 add 1 for node year find
+for i in range(0,45):
     dataWithVec.append([])
-    
+
 index = 0
-with gzip.open('/home/lian9478/OU_Coincidence/dallasData/terrier-location-text-source-part6.json.gz'
+with gzip.open('/home/lian9478/OU_Coincidence/dallasData/terrier-location-text-source-part' + file_index + '.json.gz'
           , 'rb') as infile:
     for line in infile:
         try:
@@ -134,14 +135,25 @@ with gzip.open('/home/lian9478/OU_Coincidence/dallasData/terrier-location-text-s
                 data["stategeonameid"] = doc['geo_location']["stateGeoNameId"]
                 data["countrygeonameid"] = doc['geo_location']["countryGeoNameId"]
             totalcount = totalcount + 1
-            dataWithVec.append(data)
+            if year_tosave != "":
+                dataWithVec[int(year_tosave)-1975].append(data)
+            else:
+                #append the one with no year information goes to the last element in the vec.
+                dataWithVec[44].append(data)
             if totalcount % 1000 == 0:
-                with open('/home/lian9478/OU_Coincidence/dallasData/datawithembed0311-avg1.json'
-                          , 'a') as outfile:
-                    print ('save to disk: ' + str(totalcount))
-                    for d in dataWithVec:
-                        json.dump(d, outfile)
-                        outfile.write('\n')
+                    year_index= 1974
+                    for vec in dataWithVec:
+                            year_index = year_index + 1
+                            with open('/home/lian9478/OU_Coincidence/dallasData/datawithembed0527_' + str(year_index) + '.json'
+                              , 'a') as outfile:
+                                #pickle.dump(vec, outfile)
+                                for d in vec:
+                                    json.dump(d, outfile)
+                                    outfile.write('\n')
+                            print ('save to disk: ' + str(len(vec)))
+                    dataWithVec=[]
+                    for i in range(0,45):
+                        dataWithVec.append([])
         except Exception as e:
             count = count + 1
             print (e)
