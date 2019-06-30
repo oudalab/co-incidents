@@ -17,6 +17,16 @@ we implemented by using spark by using the following logic. (at the same time we
   Following is the graph to illustrate this.
   
   ![alt text](https://github.com/oudalab/co-incidents/blob/master/experiments/blocking.jpg)
+  on each iteration we will do 4 steps:
+    * repartion by the blocking key
+    * within the repartion do the linkage
+    * merge the Incidence coming from different partition based on the previous incidence key
+    * update the attributes value on the incidence (say Incidence should have a counrty list, when new event added into the incidence, we need to update the the country list for this Incidence. 
+  Example:
+  say after blokcing by year and did the first round linkage, we get E1 and E5 belongs to I1,
+  E2 and E4 belongs to I2, E3 and E6 belongs to I3. 
+  
+  
   
 ## event evloving (event diffusion)
 which kind of event is evolving along time, since we our event data is temporal.
