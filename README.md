@@ -22,10 +22,13 @@ we implemented by using spark by using the following logic. (at the same time we
     1. within the repartion do the linkage
     1. merge the Incidence coming from different partition based on the previous incidence key
     1. update the attributes value on the incidence (say Incidence should have a counrty list, when new event added into the incidence, we need to update the the country list for this Incidence. 
-  Example:
-  say after blokcing by year and did the first round linkage, we get E1 and E5 belongs to I1,
-  E2 and E4 belongs to I2, E3 and E6 belongs to I3. 
   
+Example:
+  say after blokcing by year and did the first round linkage, we get E1 and E5 belongs to I1,
+  E2 and E4 belongs to I2, E3 and E6 belongs to I3. then we block by Actor , so E1 and E2 will be on the same partion, E3 and E4 will be on the same partition and E5, E6 will be on the same partiton.  and within each partion we do the linkage, then merged the list of output incidence from each partion and update the merged incidence attribues. 
+  two good things of blocking in this way:
+   * when doing partion, we only need to care about one dimension say only Actor values for the second round partition
+   * by merging the incidence coming from the output of the linkage, we don't lose the information from the previous blocking iteration result
   
   
 ## event evloving (event diffusion)
