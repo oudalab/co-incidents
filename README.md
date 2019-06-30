@@ -15,8 +15,8 @@ we implemented by using spark by using the following logic. (at the same time we
   * We model the blocking idea as follows: so we are going to block by the event attribute: say time, actor, target, geolocation, eventcode.
   we constrcut an dataframe in spark, and each row represent an event (E) , for each block iteration, we can generally model the input for each layer as a list of incidence (a set of events that has been merged together denoted as I), and then after merge on the current blocking layer, we output it as a list of incidence.
   Following is the graph to illustrate this.
-  ![Image of event dataframe]
-  (https://github.com/oudalab/co-incidents/blob/master/experiments/blocking.jpg)
+  
+  ![alt text](https://github.com/oudalab/co-incidents/blob/master/experiments/blocking.jpg)
   
 ## event evloving (event diffusion)
 which kind of event is evolving along time, since we our event data is temporal.
