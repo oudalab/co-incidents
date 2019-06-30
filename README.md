@@ -29,7 +29,7 @@ Example:
   two good things of blocking in this way:
    * when doing partion, we only need to care about one dimension say only Actor values for the second round partition
    * by merging the incidence coming from the output of the linkage, we don't lose the information from the previous blocking iteration result
-  
+  ![alt text](https://github.com/oudalab/co-incidents/blob/master/experiments/process.jpg)
   
 ## event evloving (event diffusion)
 which kind of event is evolving along time, since we our event data is temporal.
