@@ -1,0 +1,299 @@
+{"_id":{"$oid":"587d4e5b09308c3aadbdb0f3"},"name":"033:Express intent to provide material aid, not specified","id":"033"}
+{"_id":{"$oid":"587d4e5b09308c3aadbdb0f4"},"name":"1034:Demand military protection or peacekeeping","id":"1034"}
+{"_id":{"$oid":"587d4e5c09308c3aadbdb0f5"},"name":"0831:Accede to demands for change in leadership","id":"0831"}
+{"_id":{"$oid":"587d4e5c09308c3aadbdb0f6"},"name":"086:Allow international involvement, not specified","id":"086"}
+{"_id":{"$oid":"587d4e5c09308c3aadbdb0f7"},"name":"1033:Demand humanitarian aid","id":"1033"}
+{"_id":{"$oid":"587d4e5c09308c3aadbdb0f8"},"name":"116:Find guilty or liable (legally)","id":"116"}
+{"_id":{"$oid":"587d4e5d09308c3aadbdb0f9"},"name":"1412:Demonstrate or rally for policy change","id":"1412"}
+{"_id":{"$oid":"587d4e5d09308c3aadbdb0fa"},"name":"140:Engage in political dissent, not specified","id":"140"}
+{"_id":{"$oid":"587d4e5d09308c3aadbdb0fb"},"name":"023:Appeal for material aid, not specified ","id":"023"}
+{"_id":{"$oid":"587d4e5e09308c3aadbdb0fc"},"name":"107:Demand settling of dispute ","id":"107"}
+{"_id":{"$oid":"587d4e5e09308c3aadbdb0fd"},"name":"173:Arrest or detain","id":"173"}
+{"_id":{"$oid":"587d4e5e09308c3aadbdb0fe"},"name":"105:Demand that target yield, not specified","id":"105"}
+{"_id":{"$oid":"587d4e5e09308c3aadbdb0ff"},"name":"1381:Threaten blockade","id":"1381"}
+{"_id":{"$oid":"587d4e5f09308c3aadbdb100"},"name":"1246:Refuse to de-escalate military engagement","id":"1246"}
+{"_id":{"$oid":"587d4e6109308c3aadbdb101"},"name":"101:Demand material cooperation, not specified","id":"101"}
+{"_id":{"$oid":"587d4e6309308c3aadbdb102"},"name":"1833:Carry out roadside bombing ","id":"1833"}
+{"_id":{"$oid":"587d4e6309308c3aadbdb103"},"name":"0874:Retreat or surrender militarily","id":"0874"}
+{"_id":{"$oid":"587d4e6409308c3aadbdb104"},"name":"056:Forgive","id":"056"}
+{"_id":{"$oid":"587d4e6409308c3aadbdb105"},"name":"025:Appeal to yield, not specified ","id":"025"}
+{"_id":{"$oid":"587d4e6409308c3aadbdb106"},"name":"1032:Demand military aid","id":"1032"}
+{"_id":{"$oid":"587d4e6509308c3aadbdb107"},"name":"0333:Express intent to provide humanitarian aid","id":"0333"}
+{"_id":{"$oid":"587d4e6509308c3aadbdb108"},"name":"016:Reject accusation, deny responsibility ","id":"016"}
+{"_id":{"$oid":"587d4e6509308c3aadbdb109"},"name":"064:Share intelligence or information","id":"064"}
+{"_id":{"$oid":"587d4e6609308c3aadbdb10a"},"name":"141:Demonstrate or rally, not specified","id":"141"}
+{"_id":{"$oid":"587d4e6609308c3aadbdb10b"},"name":"0255:Appeal to allow international involvement (non-mediation)","id":"0255"}
+{"_id":{"$oid":"587d4e6709308c3aadbdb10c"},"name":"142:Conduct hunger strike, not specified below","id":"142"}
+{"_id":{"$oid":"587d4e6709308c3aadbdb10d"},"name":"131:Threaten non-force, not specified below","id":"131"}
+{"_id":{"$oid":"587d4e6709308c3aadbdb10e"},"name":"0833:Accede to demands for rights","id":"0833"}
+{"_id":{"$oid":"587d4e6809308c3aadbdb10f"},"name":"137:Threaten with repression","id":"137"}
+{"_id":{"$oid":"587d4e6809308c3aadbdb110"},"name":"0256:Appeal for target to de-escalation of military engagement ","id":"0256"}
+{"_id":{"$oid":"587d4e6909308c3aadbdb111"},"name":"1453:Engage in violent protest to demand rights","id":"1453"}
+{"_id":{"$oid":"587d4e6909308c3aadbdb112"},"name":"084:Return, release, not specified ","id":"084"}
+{"_id":{"$oid":"587d4e6909308c3aadbdb113"},"name":"1821:Sexually assault","id":"1821"}
+{"_id":{"$oid":"587d4e6a09308c3aadbdb114"},"name":"0232:Appeal for military aid","id":"0232"}
+{"_id":{"$oid":"587d4e6a09308c3aadbdb115"},"name":"150:Exhibit military or police power, not specified","id":"150"}
+{"_id":{"$oid":"587d4e6b09308c3aadbdb116"},"name":"1722:Ban political parties or politicians","id":"1722"}
+{"_id":{"$oid":"587d4e6b09308c3aadbdb117"},"name":"060:Engage in material cooperation, not specified ","id":"060"}
+{"_id":{"$oid":"587d4e6c09308c3aadbdb118"},"name":"035:Express intent to yield, not specified ","id":"035"}
+{"_id":{"$oid":"587d4e6d09308c3aadbdb119"},"name":"011:Decline comment","id":"011"}
+{"_id":{"$oid":"587d4e6d09308c3aadbdb11a"},"name":"0313:Express intent to cooperate in judicial matters","id":"0313"}
+{"_id":{"$oid":"587d4e6d09308c3aadbdb11b"},"name":"0355:Express intent to allow international involvement (non mediation)","id":"0355"}
+{"_id":{"$oid":"587d4e6e09308c3aadbdb11c"},"name":"1012:Demand military cooperation","id":"1012"}
+{"_id":{"$oid":"587d4e6e09308c3aadbdb11d"},"name":"1011:Demand economic cooperation","id":"1011"}
+{"_id":{"$oid":"587d4e6e09308c3aadbdb11e"},"name":"071:Provide economic aid","id":"071"}
+{"_id":{"$oid":"587d4e6f09308c3aadbdb11f"},"name":"0233:Appeal for humanitarian aid","id":"0233"}
+{"_id":{"$oid":"587d4e6f09308c3aadbdb120"},"name":"1431:Conduct strike or boycott for change in leadership   ","id":"1431"}
+{"_id":{"$oid":"587d4e7009308c3aadbdb121"},"name":"075:Grant asylum","id":"075"}
+{"_id":{"$oid":"587d4e7009308c3aadbdb122"},"name":"0813:Ease curfew","id":"0813"}
+{"_id":{"$oid":"587d4e7009308c3aadbdb123"},"name":"041:Discuss by telephone","id":"041"}
+{"_id":{"$oid":"587d4e7109308c3aadbdb124"},"name":"1213:Reject judicial cooperation","id":"1213"}
+{"_id":{"$oid":"587d4e7109308c3aadbdb125"},"name":"0351:Express intent to ease administrative sanctions","id":"0351"}
+{"_id":{"$oid":"587d4e7209308c3aadbdb126"},"name":"124:Refuse to yield, not specified","id":"124"}
+{"_id":{"$oid":"587d4e7309308c3aadbdb127"},"name":"0354:Express intent to ease economic sanctions, boycott, or embargo","id":"0354"}
+{"_id":{"$oid":"587d4e7409308c3aadbdb128"},"name":"0834:Accede to demands for change in institutions, regime","id":"0834"}
+{"_id":{"$oid":"587d4e7509308c3aadbdb129"},"name":"090:Investigate, not specified","id":"090"}
+{"_id":{"$oid":"587d4e7609308c3aadbdb12a"},"name":"082:Ease political dissent","id":"082"}
+{"_id":{"$oid":"587d4e7609308c3aadbdb12b"},"name":"085:Ease economic sanctions, boycott, embargo","id":"085"}
+{"_id":{"$oid":"587d4e7709308c3aadbdb12c"},"name":"164:Halt negotiations","id":"164"}
+{"_id":{"$oid":"587d4e7809308c3aadbdb12d"},"name":"083:Accede to requests or demands for political reform, not specified ","id":"083"}
+{"_id":{"$oid":"587d4e8409308c3aadbdb12e"},"name":"1323:Threaten to impose curfew","id":"1323"}
+{"_id":{"$oid":"587d4e8409308c3aadbdb12f"},"name":"1312:Threaten to boycott, embargo, or sanction","id":"1312"}
+{"_id":{"$oid":"587d4e8509308c3aadbdb130"},"name":"0861:Receive deployment of peacekeepers","id":"0861"}
+{"_id":{"$oid":"587d4e8509308c3aadbdb131"},"name":"103:Demand material aid, not specified","id":"103"}
+{"_id":{"$oid":"587d4e8509308c3aadbdb132"},"name":"018:Make empathetic comment","id":"018"}
+{"_id":{"$oid":"587d4e8509308c3aadbdb133"},"name":"1433:Conduct strike or boycott for rights","id":"1433"}
+{"_id":{"$oid":"587d4e8609308c3aadbdb134"},"name":"070:Provide aid, not specified ","id":"070"}
+{"_id":{"$oid":"587d4e8609308c3aadbdb135"},"name":"1052:Demand easing of political dissent","id":"1052"}
+{"_id":{"$oid":"587d4e8a09308c3aadbdb136"},"name":"0311:Express intent to cooperate economically","id":"0311"}
+{"_id":{"$oid":"587d4e8b09308c3aadbdb137"},"name":"126:Reject mediation","id":"126"}
+{"_id":{"$oid":"587d4eb609308c3aadbdb17f"},"name":"0811:Ease restrictions on freedoms such as speech, expression, assembly ","id":"0811"}
+{"_id":{"$oid":"587d4eb609308c3aadbdb180"},"name":"152:Increase military alert status","id":"152"}
+{"_id":{"$oid":"587d4eb709308c3aadbdb181"},"name":"170:Coerce, not specified below ","id":"170"}
+{"_id":{"$oid":"587d4eb709308c3aadbdb182"},"name":"0862:Receive inspectors","id":"0862"}
+{"_id":{"$oid":"587d4eb809308c3aadbdb183"},"name":"1013:Demand Judicial cooperation","id":"1013"}
+{"_id":{"$oid":"587d4eb809308c3aadbdb184"},"name":"138:Threaten with military force, not specified below","id":"138"}
+{"_id":{"$oid":"587d4eb809308c3aadbdb185"},"name":"135:Threaten to halt mediation","id":"135"}
+{"_id":{"$oid":"587d4eb909308c3aadbdb186"},"name":"0343:Express intent to provide rights","id":"0343"}
+{"_id":{"$oid":"587d4eb909308c3aadbdb187"},"name":"027:Appeal to others to settle dispute","id":"027"}
+{"_id":{"$oid":"587d4eba09308c3aadbdb188"},"name":"0234:Appeal for military protection or peacekeeping","id":"0234"}
+{"_id":{"$oid":"587d4eba09308c3aadbdb189"},"name":"0872:Ease military blockade","id":"0872"}
+{"_id":{"$oid":"587d4eba09308c3aadbdb18a"},"name":"1053:Demand release of persons or property","id":"1053"}
+{"_id":{"$oid":"587d4ebb09308c3aadbdb18b"},"name":"193:Fight with small arms and light weapons","id":"193"}
+{"_id":{"$oid":"587d4ebb09308c3aadbdb18c"},"name":"174:Expel or deport individuals","id":"174"}
+{"_id":{"$oid":"587d4ebd09308c3aadbdb18d"},"name":"1043:Demand rights","id":"1043"}
+{"_id":{"$oid":"587d4ebd09308c3aadbdb18e"},"name":"034:Express intent to institute political reform not specified","id":"034"}
+{"_id":{"$oid":"587d4ebe09308c3aadbdb18f"},"name":"020:Make an appeal or request, not specified below","id":"020"}
+{"_id":{"$oid":"587d4ebe09308c3aadbdb190"},"name":"026:Appeal to others to meet or negotiate","id":"026"}
+{"_id":{"$oid":"587d4ebe09308c3aadbdb191"},"name":"120:Reject, not specified below","id":"120"}
+{"_id":{"$oid":"587d4ebe09308c3aadbdb192"},"name":"139:Give ultimatum","id":"139"}
+{"_id":{"$oid":"587d4ebf09308c3aadbdb193"},"name":"0356:Express intent to de-escalate military engagement ","id":"0356"}
+{"_id":{"$oid":"587d4ec109308c3aadbdb194"},"name":"054:Grant diplomatic recognition","id":"054"}
+{"_id":{"$oid":"587d4ec109308c3aadbdb195"},"name":"1014:Demand intelligence cooperation","id":"1014"}
+{"_id":{"$oid":"587d4ec209308c3aadbdb196"},"name":"1724:Impose state of emergency or martial law","id":"1724"}
+{"_id":{"$oid":"587d4ec209308c3aadbdb197"},"name":"0214:Appeal for intelligence cooperation","id":"0214"}
+{"_id":{"$oid":"587d4ec209308c3aadbdb198"},"name":"0334:Express intent to provide military protection or peacekeeping","id":"0334"}
+{"_id":{"$oid":"587d4ec209308c3aadbdb199"},"name":"129:Veto ","id":"129"}
+{"_id":{"$oid":"587d4ec309308c3aadbdb19a"},"name":"1324:Threaten to impose state of emergency or martial law","id":"1324"}
+{"_id":{"$oid":"587d4ec409308c3aadbdb19b"},"name":"166:Expel or withdraw, not specified below","id":"166"}
+{"_id":{"$oid":"587d4ec409308c3aadbdb19c"},"name":"1712:Destroy property","id":"1712"}
+{"_id":{"$oid":"587d4ec409308c3aadbdb19d"},"name":"074:Provide military protection or peacekeeping","id":"074"}
+{"_id":{"$oid":"587d4ec409308c3aadbdb19e"},"name":"1223:Reject request for humanitarian aid","id":"1223"}
+{"_id":{"$oid":"587d4ec509308c3aadbdb19f"},"name":"1832:Carry out vehicular bombing","id":"1832"}
+{"_id":{"$oid":"587d4ec509308c3aadbdb1a0"},"name":"182:Physically assault, not specified below","id":"182"}
+{"_id":{"$oid":"587d4ec509308c3aadbdb1a1"},"name":"0314:Express intent to cooperate on intelligence","id":"0314"}
+{"_id":{"$oid":"587d4ec609308c3aadbdb1a2"},"name":"0863:Allow for humanitarian access","id":"0863"}
+{"_id":{"$oid":"587d4ec609308c3aadbdb1a3"},"name":"010:Make statement, not specified below","id":"010"}
+{"_id":{"$oid":"587d4ec609308c3aadbdb1a4"},"name":"165:Halt mediation","id":"165"}
+{"_id":{"$oid":"587d4ec609308c3aadbdb1a5"},"name":"012:Make pessimistic comment","id":"012"}
+{"_id":{"$oid":"587d4ec709308c3aadbdb1a6"},"name":"092:Investigate human rights abuses","id":"092"}
+{"_id":{"$oid":"587d4ec709308c3aadbdb1a7"},"name":"1056:Demand de-escalation of military engagement","id":"1056"}
+{"_id":{"$oid":"587d4ec809308c3aadbdb1a8"},"name":"106:Demand meeting, negotiation ","id":"106"}
+{"_id":{"$oid":"587d4ec809308c3aadbdb1a9"},"name":"1823:Kill by physical assault","id":"1823"}
+{"_id":{"$oid":"587d4ec809308c3aadbdb1aa"},"name":"038:Express intent to accept mediation","id":"038"}
+{"_id":{"$oid":"587d4ec809308c3aadbdb1ab"},"name":"1382:Threaten occupation ","id":"1382"}
+{"_id":{"$oid":"587d4ec909308c3aadbdb1ac"},"name":"104:Demand political reform, not specified ","id":"104"}
+{"_id":{"$oid":"587d4ec909308c3aadbdb1ad"},"name":"0244:Appeal for change in institutions, regime","id":"0244"}
+{"_id":{"$oid":"587d4ec909308c3aadbdb1ae"},"name":"108:Demand mediation","id":"108"}
+{"_id":{"$oid":"587d4ec909308c3aadbdb1af"},"name":"1042:Demand policy change","id":"1042"}
+{"_id":{"$oid":"587d4eca09308c3aadbdb1b0"},"name":"1055:Demand to allow international involvement (non-mediation)","id":"1055"}
+{"_id":{"$oid":"587d4eca09308c3aadbdb1b1"},"name":"043:Host a visit","id":"043"}
+{"_id":{"$oid":"587d4eca09308c3aadbdb1b2"},"name":"100:Demand, not specified ","id":"100"}
+{"_id":{"$oid":"587d4eca09308c3aadbdb1b3"},"name":"163:Impose embargo, boycott, or sanctions","id":"163"}
+{"_id":{"$oid":"587d4ecb09308c3aadbdb1b4"},"name":"013:Make optimistic comment","id":"013"}
+{"_id":{"$oid":"587d4ecb09308c3aadbdb1b5"},"name":"1454:Engage in violent protest to demand change in institutions, regime","id":"1454"}
+{"_id":{"$oid":"587d4ecb09308c3aadbdb1b6"},"name":"044:Meet at a “third” location","id":"044"}
+{"_id":{"$oid":"587d4ecc09308c3aadbdb1b7"},"name":"0251:Appeal for easing of administrative sanction","id":"0251"}
+{"_id":{"$oid":"587d4ecc09308c3aadbdb1b8"},"name":"153:Mobilize or increase police power","id":"153"}
+{"_id":{"$oid":"587d4ecc09308c3aadbdb1b9"},"name":"191:Impose blockade, restrict movement ","id":"191"}
+{"_id":{"$oid":"587d4ecc09308c3aadbdb1ba"},"name":"0331:Express intent to provide economic aid","id":"0331"}
+{"_id":{"$oid":"587d4ecd09308c3aadbdb1bb"},"name":"037:Express intent to settle dispute","id":"037"}
+{"_id":{"$oid":"587d4ecd09308c3aadbdb1bc"},"name":"203:Engage in ethnic cleansing","id":"203"}
+{"_id":{"$oid":"587d4ece09308c3aadbdb1bd"},"name":"0242:Appeal for policy change","id":"0242"}
+{"_id":{"$oid":"587d4ece09308c3aadbdb1be"},"name":"192:Occupy territory","id":"192"}
+{"_id":{"$oid":"587d4ece09308c3aadbdb1bf"},"name":"046:Engage in negotiation","id":"046"}
+{"_id":{"$oid":"587d4ecf09308c3aadbdb1c0"},"name":"032:Express intent to engage in diplomatic cooperation (such as policy support )","id":"032"}
+{"_id":{"$oid":"587d4ecf09308c3aadbdb1c1"},"name":"015:Acknowledge or claim responsibility","id":"015"}
+{"_id":{"$oid":"587d4ecf09308c3aadbdb1c2"},"name":"019:Express accord","id":"019"}
+{"_id":{"$oid":"587d4ed009308c3aadbdb1c3"},"name":"1211:Reject economic cooperation","id":"1211"}
+{"_id":{"$oid":"587d4ed009308c3aadbdb1c4"},"name":"1244:Refuse to ease economic sanctions, boycott, or embargo","id":"1244"}
+{"_id":{"$oid":"587d4ed009308c3aadbdb1c5"},"name":"0353:Express intent to release persons or property","id":"0353"}
+{"_id":{"$oid":"587d4ed109308c3aadbdb1c6"},"name":"0213:Appeal for judicial cooperation ","id":"0213"}
+{"_id":{"$oid":"587d4ed109308c3aadbdb1c7"},"name":"039:Express intent to mediate","id":"039"}
+{"_id":{"$oid":"587d4ed109308c3aadbdb1c8"},"name":"073:Provide humanitarian aid","id":"073"}
+{"_id":{"$oid":"587d4ed109308c3aadbdb1c9"},"name":"1413:Demonstrate for rights","id":"1413"}
+{"_id":{"$oid":"587d4ed209308c3aadbdb1ca"},"name":"1234:Reject request for change in institutions, regime ","id":"1234"}
+{"_id":{"$oid":"587d4ed209308c3aadbdb1cb"},"name":"127:Reject plan, agreement to settle dispute","id":"127"}
+{"_id":{"$oid":"587d4ed209308c3aadbdb1cc"},"name":"1041:Demand change in leadership","id":"1041"}
+{"_id":{"$oid":"587d4ed209308c3aadbdb1cd"},"name":"132:Threaten with administrative sanctions, not specified below","id":"132"}
+{"_id":{"$oid":"587d4ed309308c3aadbdb1ce"},"name":"110:Disapprove, not specified below","id":"110"}
+{"_id":{"$oid":"587d4ed309308c3aadbdb1cf"},"name":"1452:Engage in violent protest to demand policy change","id":"1452"}
+{"_id":{"$oid":"587d4ed309308c3aadbdb1d0"},"name":"087:De-escalate military engagement, not specified","id":"087"}
+{"_id":{"$oid":"587d4ed309308c3aadbdb1d1"},"name":"1443:Obstruct passage to demand rights","id":"1443"}
+{"_id":{"$oid":"587d4ed409308c3aadbdb1d2"},"name":"1662:Expel or withdraw inspectors, observers","id":"1662"}
+{"_id":{"$oid":"587d4ed409308c3aadbdb1d3"},"name":"072:Provide military aid","id":"072"}
+{"_id":{"$oid":"587d4ed409308c3aadbdb1d4"},"name":"081:Ease administrative sanctions, not specified ","id":"081"}
+{"_id":{"$oid":"587d4ed409308c3aadbdb1d5"},"name":"171:Seize or damage property, not specified below","id":"171"}
+{"_id":{"$oid":"587d4ed509308c3aadbdb1d6"},"name":"145:Protest violently, riot, not specified","id":"145"}
+{"_id":{"$oid":"587d4ed509308c3aadbdb1d7"},"name":"055:Apologize","id":"055"}
+{"_id":{"$oid":"587d4ed509308c3aadbdb1d8"},"name":"0352:Express intent to ease popular dissent","id":"0352"}
+{"_id":{"$oid":"587d4ed509308c3aadbdb1d9"},"name":"130:Threaten, not specified below","id":"130"}
+{"_id":{"$oid":"587d4ed609308c3aadbdb1da"},"name":"091:Investigate crime, corruption","id":"091"}
+{"_id":{"$oid":"587d4ed609308c3aadbdb1db"},"name":"042:Make a visit","id":"042"}
+{"_id":{"$oid":"587d4ed609308c3aadbdb1dc"},"name":"021:Appeal for material cooperation","id":"021"}
+{"_id":{"$oid":"587d4ed609308c3aadbdb1dd"},"name":"1054:Demand easing of economic sanctions, boycott, or embargo","id":"1054"}
+{"_id":{"$oid":"587d4ed709308c3aadbdb1de"},"name":"0871:Declare truce, ceasefire","id":"0871"}
+{"_id":{"$oid":"587d4ed709308c3aadbdb1df"},"name":"080:Yield, not specified ","id":"080"}
+{"_id":{"$oid":"587d4ed709308c3aadbdb1e0"},"name":"0241:Appeal for change in leadership","id":"0241"}
+{"_id":{"$oid":"587d4ed809308c3aadbdb1e1"},"name":"061:Cooperate economically","id":"061"}
+{"_id":{"$oid":"587d4ed809308c3aadbdb1e2"},"name":"1031:Demand economic aid","id":"1031"}
+{"_id":{"$oid":"587d4ed809308c3aadbdb1e3"},"name":"017:Engage in symbolic act","id":"017"}
+{"_id":{"$oid":"587d4ed809308c3aadbdb1e4"},"name":"175:Use repression  ","id":"175"}
+{"_id":{"$oid":"587d4ed909308c3aadbdb1e5"},"name":"050:Engage in diplomatic cooperation, not specified","id":"050"}
+{"_id":{"$oid":"587d4ed909308c3aadbdb1e6"},"name":"176:Attack cybernetically","id":"176"}
+{"_id":{"$oid":"587d4ed909308c3aadbdb1e7"},"name":"1432:Conduct strike or boycott for policy change","id":"1432"}
+{"_id":{"$oid":"587d4ed909308c3aadbdb1e8"},"name":"1222:Reject request for military aid","id":"1222"}
+{"_id":{"$oid":"587d4eda09308c3aadbdb1e9"},"name":"0873:Demobilize armed forces","id":"0873"}
+{"_id":{"$oid":"587d4eda09308c3aadbdb1ea"},"name":"0212:Appeal for military cooperation","id":"0212"}
+{"_id":{"$oid":"587d4eda09308c3aadbdb1eb"},"name":"1711:Confiscate property","id":"1711"}
+{"_id":{"$oid":"587d4eda09308c3aadbdb1ec"},"name":"113:Rally opposition against","id":"113"}
+{"_id":{"$oid":"587d4edb09308c3aadbdb1ed"},"name":"0342:Express intent to change policy","id":"0342"}
+{"_id":{"$oid":"587d4edb09308c3aadbdb1ee"},"name":"160:Reduce relations, not specified below","id":"160"}
+{"_id":{"$oid":"587d4edb09308c3aadbdb1ef"},"name":"1822:Torture","id":"1822"}
+{"_id":{"$oid":"587d4edc09308c3aadbdb1f0"},"name":"0231:Appeal for economic aid","id":"0231"}
+{"_id":{"$oid":"587d4edc09308c3aadbdb1f1"},"name":"122:Reject request or demand for material aid, not specified","id":"122"}
+{"_id":{"$oid":"587d4edc09308c3aadbdb1f2"},"name":"014:Consider policy option","id":"014"}
+{"_id":{"$oid":"587d4edc09308c3aadbdb1f3"},"name":"185:Attempt to assassinate","id":"185"}
+{"_id":{"$oid":"587d4edd09308c3aadbdb1f4"},"name":"057:Sign formal agreement","id":"057"}
+{"_id":{"$oid":"587d4edd09308c3aadbdb1f5"},"name":"063:Engage in judicial cooperation","id":"063"}
+{"_id":{"$oid":"587d4edd09308c3aadbdb1f6"},"name":"1661:Expel or withdraw peacekeepers","id":"1661"}
+{"_id":{"$oid":"587d4edd09308c3aadbdb1f7"},"name":"1721:Impose restrictions on political freedom such as freedom of speech, expression, and assembly ","id":"1721"}
+{"_id":{"$oid":"587d4ede09308c3aadbdb1f8"},"name":"1233:Reject request for rights","id":"1233"}
+{"_id":{"$oid":"587d4ede09308c3aadbdb1f9"},"name":"1383:Threaten unconventional attack ","id":"1383"}
+{"_id":{"$oid":"587d4ede09308c3aadbdb1fa"},"name":"045:Engage in mediation","id":"045"}
+{"_id":{"$oid":"587d4ede09308c3aadbdb1fb"},"name":"1322:Threaten to ban political parties or politicians","id":"1322"}
+{"_id":{"$oid":"587d4edf09308c3aadbdb1fc"},"name":"123:Reject request or demand for political reform, not specified","id":"123"}
+{"_id":{"$oid":"587d4edf09308c3aadbdb1fd"},"name":"0253:Appeal for release of persons or property","id":"0253"}
+{"_id":{"$oid":"587d4edf09308c3aadbdb1fe"},"name":"154:Mobilize or increase armed forces ","id":"154"}
+{"_id":{"$oid":"587d4ee009308c3aadbdb1ff"},"name":"0312:Express intent to cooperate militarily","id":"0312"}
+{"_id":{"$oid":"587d4ee009308c3aadbdb200"},"name":"0812:Ease ban on political parties or politicians","id":"0812"}
+{"_id":{"$oid":"587d4ee009308c3aadbdb201"},"name":"180:Use unconventional violence, not specified below","id":"180"}
+{"_id":{"$oid":"587d4ee009308c3aadbdb202"},"name":"1834:Carry out location bombing","id":"1834"}
+{"_id":{"$oid":"587d4ee109308c3aadbdb203"},"name":"052:Defend verbally","id":"052"}
+{"_id":{"$oid":"587d4ee109308c3aadbdb204"},"name":"1422:Conduct hunger strike for policy change","id":"1422"}
+{"_id":{"$oid":"587d4ee109308c3aadbdb205"},"name":"040:Consult, not specified","id":"040"}
+{"_id":{"$oid":"587d4ee109308c3aadbdb206"},"name":"155:Mobilize or increase cyber-forces","id":"155"}
+{"_id":{"$oid":"587d4ee209308c3aadbdb207"},"name":"184:Use as human shield ","id":"184"}
+{"_id":{"$oid":"587d4ee209308c3aadbdb208"},"name":"024:Appeal for political reform, not specified below","id":"024"}
+{"_id":{"$oid":"587d4ee209308c3aadbdb209"},"name":"1221:Reject request for economic aid","id":"1221"}
+{"_id":{"$oid":"587d4ee209308c3aadbdb20a"},"name":"1411:Demonstrate or rally for change in leadership","id":"1411"}
+{"_id":{"$oid":"587d4ee309308c3aadbdb20b"},"name":"1442:Obstruct passage to demand policy change","id":"1442"}
+{"_id":{"$oid":"587d4ee309308c3aadbdb20c"},"name":"133:Threaten political dissent","id":"133"}
+{"_id":{"$oid":"587d4ee409308c3aadbdb20d"},"name":"1663:Expel or withdraw aid agencies","id":"1663"}
+{"_id":{"$oid":"587d4ee409308c3aadbdb20e"},"name":"1311:Threaten to reduce or stop aid","id":"1311"}
+{"_id":{"$oid":"587d4ee509308c3aadbdb20f"},"name":"028:Appeal to others to engage in or accept mediation","id":"028"}
+{"_id":{"$oid":"587d4ee809308c3aadbdb210"},"name":"0211:Appeal for economic cooperation ","id":"0211"}
+{"_id":{"$oid":"587d4eea09308c3aadbdb211"},"name":"053:Rally support on behalf of","id":"053"}
+{"_id":{"$oid":"587d4eeb09308c3aadbdb212"},"name":"195:Employ aerial weapons, not specified ","id":"195"}
+{"_id":{"$oid":"587d4eec09308c3aadbdb213"},"name":"202:Engage in mass killings","id":"202"}
+{"_id":{"$oid":"587d4eec09308c3aadbdb214"},"name":"204:Use weapons of mass destruction, not specified below","id":"204"}
+{"_id":{"$oid":"587d4eed09308c3aadbdb215"},"name":"136:Threaten to halt international involvement (non-mediation) ","id":"136"}
+{"_id":{"$oid":"587d4efb09308c3aadbdb216"},"name":"0344:Express intent to change institutions, regime","id":"0344"}
+{"_id":{"$oid":"587d4efb09308c3aadbdb217"},"name":"112:Accuse, not specified below","id":"112"}
+{"_id":{"$oid":"587d4f1409308c3aadbdb218"},"name":"1424:Conduct hunger strike for change in institutions, regime ","id":"1424"}
+{"_id":{"$oid":"587d4f1909308c3aadbdb219"},"name":"1414:Demonstrate for change in institutions, regime","id":"1414"}
+{"_id":{"$oid":"587d4f1a09308c3aadbdb21a"},"name":"144:Obstruct passage, block, not specified","id":"144"}
+{"_id":{"$oid":"587d4f1b09308c3aadbdb21b"},"name":"0841:Return, release person(s)","id":"0841"}
+{"_id":{"$oid":"587d4f1c09308c3aadbdb21c"},"name":"1212:Reject military cooperation","id":"1212"}
+{"_id":{"$oid":"587d4f1c09308c3aadbdb21d"},"name":"183:Conduct suicide, car, or other non-military bombing, not spec below","id":"183"}
+{"_id":{"$oid":"587d4f1d09308c3aadbdb21e"},"name":"1321:Threaten with restrictions on political freedoms (such as freedoms of speech, expression, and assembly) ","id":"1321"}
+{"_id":{"$oid":"587d4f1d09308c3aadbdb21f"},"name":"1444:Obstruct passage to demand change in institutions, regime","id":"1444"}
+{"_id":{"$oid":"587d4f2009308c3aadbdb220"},"name":"1313:Threaten to reduce or break relations","id":"1313"}
+{"_id":{"$oid":"587d4f2109308c3aadbdb221"},"name":"0243:Appeal for rights","id":"0243"}
+{"_id":{"$oid":"587d4f2109308c3aadbdb222"},"name":"201:Engage in mass expulsion","id":"201"}
+{"_id":{"$oid":"587d4f2209308c3aadbdb223"},"name":"196:Violate ceasefire ","id":"196"}
+{"_id":{"$oid":"587d4f2209308c3aadbdb224"},"name":"031:Express intent to engage in material cooperation,  not specified","id":"031"}
+{"_id":{"$oid":"587d4f2309308c3aadbdb225"},"name":"0254:Appeal for easing of economic sanctions, boycott, or embargo","id":"0254"}
+{"_id":{"$oid":"587d4f2309308c3aadbdb226"},"name":"1421:Conduct hunger strike for change in leadership","id":"1421"}
+{"_id":{"$oid":"587d4f2509308c3aadbdb227"},"name":"2042:Detonate nuclear weapons","id":"2042"}
+{"_id":{"$oid":"587d4f2709308c3aadbdb228"},"name":"1123:Accuse of aggression","id":"1123"}
+{"_id":{"$oid":"587d4f2809308c3aadbdb229"},"name":"1621:Reduce or stop economic assistance","id":"1621"}
+{"_id":{"$oid":"587d4f2809308c3aadbdb22a"},"name":"1434:Conduct strike or boycott for change in institutions, regime","id":"1434"}
+{"_id":{"$oid":"587d4f2909308c3aadbdb22b"},"name":"1224:Reject request for military protection or peacekeeping","id":"1224"}
+{"_id":{"$oid":"587d4f2909308c3aadbdb22c"},"name":"200:Use massive unconventional force, not specified below","id":"200"}
+{"_id":{"$oid":"587d4f2b09308c3aadbdb22d"},"name":"161:Reduce or break diplomatic relations","id":"161"}
+{"_id":{"$oid":"587d4f2c09308c3aadbdb22e"},"name":"062:Cooperate militarily","id":"062"}
+{"_id":{"$oid":"587d4f2f09308c3aadbdb22f"},"name":"093:Investigate military action","id":"093"}
+{"_id":{"$oid":"587d4f2f09308c3aadbdb230"},"name":"1952:Employ remotely piloted aerial munitions","id":"1952"}
+{"_id":{"$oid":"587d4f3009308c3aadbdb231"},"name":"0842:Return, release property","id":"0842"}
+{"_id":{"$oid":"587d4f3009308c3aadbdb232"},"name":"1451:Engage in violent protest for leadership change","id":"1451"}
+{"_id":{"$oid":"587d4f3009308c3aadbdb233"},"name":"1242:Refuse to ease popular dissent","id":"1242"}
+{"_id":{"$oid":"587d4f3109308c3aadbdb234"},"name":"1214:Reject intelligence cooperation","id":"1214"}
+{"_id":{"$oid":"587d4f3f09308c3aadbdb235"},"name":"0814:Ease state of emergency or martial law","id":"0814"}
+{"_id":{"$oid":"587d4f3f09308c3aadbdb236"},"name":"186:Assassinate ","id":"186"}
+{"_id":{"$oid":"587d4f3f09308c3aadbdb237"},"name":"1231:Reject request to change leadership","id":"1231"}
+{"_id":{"$oid":"587d4f4009308c3aadbdb238"},"name":"102:Demand for diplomatic cooperation (such as policy support)","id":"102"}
+{"_id":{"$oid":"587d4f4009308c3aadbdb239"},"name":"128:Defy norms, law","id":"128"}
+{"_id":{"$oid":"587d4f4009308c3aadbdb23a"},"name":"134:Threaten to halt negotiations","id":"134"}
+{"_id":{"$oid":"587d4f4009308c3aadbdb23b"},"name":"094:Investigate war crimes","id":"094"}
+{"_id":{"$oid":"587d4f4109308c3aadbdb23c"},"name":"0341:Express intent to change leadership","id":"0341"}
+{"_id":{"$oid":"587d4f4109308c3aadbdb23d"},"name":"190:Use conventional military force, not specified below","id":"190"}
+{"_id":{"$oid":"587d4f4409308c3aadbdb23e"},"name":"194:Fight with artillery and tanks","id":"194"}
+{"_id":{"$oid":"587d4f4509308c3aadbdb23f"},"name":"125:Reject proposal to meet, discuss, negotiate","id":"125"}
+{"_id":{"$oid":"587d4f4609308c3aadbdb240"},"name":"1622:Reduce or stop military assistance","id":"1622"}
+{"_id":{"$oid":"587d4f4609308c3aadbdb241"},"name":"1441:Obstruct passage to demand change in  leadership   ","id":"1441"}
+{"_id":{"$oid":"587d4f4609308c3aadbdb242"},"name":"0832:Accede to demands for change in policy","id":"0832"}
+{"_id":{"$oid":"587d4f4e09308c3aadbdb243"},"name":"121:Reject material cooperation, not specified","id":"121"}
+{"_id":{"$oid":"587d4f4e09308c3aadbdb244"},"name":"1831:Carry out suicide bombing","id":"1831"}
+{"_id":{"$oid":"587d4f4f09308c3aadbdb245"},"name":"172:Impose administrative sanctions, not specified below","id":"172"}
+{"_id":{"$oid":"587d4f4f09308c3aadbdb246"},"name":"181:Abduct, hijack, or take hostage ","id":"181"}
+{"_id":{"$oid":"587d4f4f09308c3aadbdb247"},"name":"111:Criticize or denounce ","id":"111"}
+{"_id":{"$oid":"587d4f4f09308c3aadbdb248"},"name":"151:Increase police alert status","id":"151"}
+{"_id":{"$oid":"587d4f5009308c3aadbdb249"},"name":"0332:Express intent to provide military aid","id":"0332"}
+{"_id":{"$oid":"587d4f5009308c3aadbdb24a"},"name":"0252:Appeal for easing of political dissent ","id":"0252"}
+{"_id":{"$oid":"587d4f5109308c3aadbdb24b"},"name":"022:Appeal for diplomatic cooperation (such as policy support) ","id":"022"}
+{"_id":{"$oid":"587d4f5109308c3aadbdb24c"},"name":"051:Praise or endorse","id":"051"}
+{"_id":{"$oid":"587d4f5109308c3aadbdb24d"},"name":"036:Express intent to meet or negotiate","id":"036"}
+{"_id":{"$oid":"587d4f5109308c3aadbdb24e"},"name":"115:Bring lawsuit against ","id":"115"}
+{"_id":{"$oid":"587d4f5209308c3aadbdb24f"},"name":"1723:Impose curfew","id":"1723"}
+{"_id":{"$oid":"587d4f5209308c3aadbdb250"},"name":"1121:Accuse of crime, corruption","id":"1121"}
+{"_id":{"$oid":"587d4f5209308c3aadbdb251"},"name":"1951:Employ precision-guided aerial munitions","id":"1951"}
+{"_id":{"$oid":"587d4f5309308c3aadbdb252"},"name":"030:Express intent to cooperate, not specified","id":"030"}
+{"_id":{"$oid":"587d4f5309308c3aadbdb253"},"name":"1623:Reduce or stop humanitarian assistance","id":"1623"}
+{"_id":{"$oid":"587d4f5309308c3aadbdb254"},"name":"1423:Conduct hunger strike for rights","id":"1423"}
+{"_id":{"$oid":"587d4f5309308c3aadbdb255"},"name":"1232:Reject request to change policy","id":"1232"}
+{"_id":{"$oid":"587d4f5409308c3aadbdb256"},"name":"1241:Refuse to ease administrative sanctions","id":"1241"}
+{"_id":{"$oid":"587d4f5409308c3aadbdb257"},"name":"1385:Threaten unconventional mass violence ","id":"1385"}
+{"_id":{"$oid":"587d4f5409308c3aadbdb258"},"name":"1051:Demand easing of administrative sanctions","id":"1051"}
+{"_id":{"$oid":"587d4f5409308c3aadbdb259"},"name":"143:Conduct strike or boycott, not specified below","id":"143"}
+{"_id":{"$oid":"587d4f5509308c3aadbdb25a"},"name":"1124:Accuse of war crimes","id":"1124"}
+{"_id":{"$oid":"587d4f5509308c3aadbdb25b"},"name":"114:Complain officially ","id":"114"}
+{"_id":{"$oid":"587d4f5509308c3aadbdb25c"},"name":"1243:Refuse to release persons or property","id":"1243"}
+{"_id":{"$oid":"587d4f5509308c3aadbdb25d"},"name":"1245:Refuse to allow international involvement ( non-mediation)","id":"1245"}
+{"_id":{"$oid":"587d4f5609308c3aadbdb25e"},"name":"162:Reduce or stop material aid, not specified below","id":"162"}
+{"_id":{"$oid":"587d4f5609308c3aadbdb25f"},"name":"1044:Demand change in institutions, regime","id":"1044"}
+{"_id":{"$oid":"587d4f5609308c3aadbdb260"},"name":"1122:Accuse of human rights abuses","id":"1122"}
+{"_id":{"$oid":"587d4f5609308c3aadbdb261"},"name":"1384:Threaten conventional attack  ","id":"1384"}
+{"_id":{"$oid":"587d4f5709308c3aadbdb262"},"name":"2041:Use chemical, biological, or radiological weapons","id":"2041"}
+{"_id":{"$oid":"587d4f5709308c3aadbdb263"},"name":"1125:Accuse of espionage, treason","id":"1125"}
+{"_id":{"$oid":"589617c009308c6aecf0a03d"},"name":"000:NA","id":"000"}

@@ -1,0 +1,15 @@
+{"_id":{"$oid":"577035db172ab81225ec9ee5"},"id":"COP","name":"COP:Police forces"}
+{"_id":{"$oid":"577035db172ab81225ec9ee6"},"id":"OPP","name":"OPP:Political opposition"}
+{"_id":{"$oid":"577035db172ab81225ec9ee7"},"id":"JUD","name":"JUD:Judiciary: judges, courts"}
+{"_id":{"$oid":"577035db172ab81225ec9ee8"},"id":"SPY","name":"SPY:State intelligence services"}
+{"_id":{"$oid":"577035db172ab81225ec9ee9"},"id":"REB","name":"REB:Rebels: armed and violent opposition groups, individuals"}
+{"_id":{"$oid":"577035db172ab81225ec9eea"},"id":"GOV","name":"GOV:Government: the executive, governing parties"}
+{"_id":{"$oid":"577035db172ab81225ec9eeb"},"id":"UAF","name":"UAF:Armed forces aligned neither with nor against their government"}
+{"_id":{"$oid":"57bc514509308c1da7d737ad"},"id":"MED","name":"MED:Media: journalists, newspapers, television stations"}
+{"_id":{"$oid":"57bc514709308c1da7d737ae"},"id":"MIL","name":"MIL:Military: troops, soldiers, all state-military personnel/equipment"}
+{"_id":{"$oid":"57bc514709308c1da7d737af"},"id":"BUS","name":"BUS:Business: businesspeople, companies, and enterprises, not including MNCs"}
+{"_id":{"$oid":"57bc514709308c1da7d737b0"},"id":"CVL","name":"CVL:Civilian individuals or groups; catch-all"}
+{"_id":{"$oid":"57bc514709308c1da7d737b1"},"id":"PTY","name":"PTY:Political party"}
+{"_id":{"$oid":"57bc514709308c1da7d737b2"},"id":"EDU","name":"EDU:Education: educators, schools, students, or organizations"}
+{"_id":{"$oid":"57bc514709308c1da7d737b3"},"id":"CRM","name":"CRM:Criminals"}
+{"_id":{"$oid":"58962ff509308c6aecf0a049"},"name":"000:NA","id":"000"}
