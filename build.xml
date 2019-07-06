@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+
+<project name="co-incidents-1.0" basedir="." default="release" xmlns:ht="happytrails">
+
+  <property name="allow.empty.sources.dir" value="true"/>
+  <import file="${happytrails.root}/happytrails.xml"/>
+
+  <property name="tests.additional.jvmargs" value=""/>
+  <property name="ht.include.cfg" value="true"/>
+
+  <!-- Scala 2.11 Package support -->
+  <property name="standard.compile.classpath.suffix">${bp:build.scalaclasspath.2.11}</property>
+  <property name="tests.additional.runtime.classpath">${bp:testrun.scalaclasspath.2.11}</property>
+
+  <property name="checkstyle.configuration.file" value="${bp:[LatticeTeamConfig]pkg.antfiles}/latticeCheckstyle.xml"/>
+  <property name="findbugs.report.level" value="high"/>
+
+  <ht:import file="happier-trails.xml"/>
+  <ht:import file="lombok/happier-trails.xml"/>
+
+  <property name="superjar.out.dir" value="${bp:package-build-root}/superjar"/>
+  <property name="superjar.basename" value="${ant.project.name}-super.jar"/>
+  <property name="superjar.jar" value="${superjar.out.dir}/${superjar.basename}"/>
+
+  <ht:import file="superjar.xml"/>
+  <target name="build-superjar" depends="build">
+      <mkdir dir="${superjar.out.dir}"/>
+      <superjar destfile="${superjar.jar}"
+          classpath="${bp:run.classpath};${bp:build.scalaclasspath.2.11}"
+          zip64Mode="as-needed"
+          excludes="AWS*.jar,commons-httpclient-3.1.jar,Spire*.jar,Breeze*.jar,spark*.jar,*scala*.jar,*Scala*.jar,hadoop*.jar,META-INF/*.RSA,META-INF/*.SF,META-INF/*.DSA"/>
+
+      <property name="superjar.add.dir" location="${output.dir}/private/superjar-add"/>
+      <property name="superjar.root.dir" location="${superjar.add.dir}/META-INF/amazon/com.amazon.lattice.emr"/>
+      <mkdir dir="${superjar.root.dir}"/>
+      <copy todir="${superjar.root.dir}">
+          <fileset dir="${bp:run.configfarm.brazil-config}">
+              <include name="brazil-config/**/*"/>
+          </fileset>
+      </copy>
+      <jar destfile="${superjar.jar}"
+          basedir="${superjar.add.dir}"
+          update="true"
+          zip64Mode="as-needed"/>
+  </target>
+
+  <ht:taskdef name="copy-file-to-s3"
+      classname="amazon.wapqa.utils.CopyFileToS3Task"
+      classpath="${bp:tool.classpath}"
+      description="Copies a file from the local filesystem to S3"/>
+  <target name="S3Copy" depends="build-superjar">
+      <copy-file-to-s3
+          localFilePath="${superjar.jar}"
+          remoteFileOnS3="s3n://lattice-demeter-superjar-beta/${user.name}/${superjar.basename}"
+          deployRegion="us-west-2"
+          useEncryptionClient="false"
+          materialSet="com.amazon.lattice.lattice-demeter-dev"/>
+  </target>
+
+  <target name="release" depends="standard-release,build-superjar"/>
+       
+</project>
