@@ -4,7 +4,7 @@ Using PMG to model the relation between events.
 
 ## co-incidence resolution (clustering)
 * for linking part:
-Using hierarchical MCMC with Metropolis Hastings algorithm to cluster news corpus into appropriate cluster.
+Using hierarchical MCMC with Metropolis Hastings algorithm to cluster news corpus into appropriate cluster.(basically we are solving a MAP problem, and using MCMC as the sampling method for inferecen) http://sameersingh.org/files/papers/largescale-acl11.pdf
 tfidf embedding of the article and also event properties that are extrated from Petrach2 will be used as learning features.
 (Sample rank to determine the attribute weight is not implemented here)
 
