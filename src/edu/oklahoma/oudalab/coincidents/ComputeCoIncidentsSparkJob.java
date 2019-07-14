@@ -45,6 +45,8 @@ public class ComputeCoIncidentsSparkJob extends AbstractSparkJob implements Seri
         Dataset<Row> eventDataset = sparkSession.read().json(eventS3Path);
         log.info("The size of eventDataset is: {}", eventDataset.count());
 
+        //eventDataseet = eventDataset.withColumn("currentGroup",Column); 
+
         String[] dimensions = {
             "target",
             "longitude",
