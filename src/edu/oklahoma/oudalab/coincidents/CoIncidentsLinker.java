@@ -13,16 +13,15 @@ import static org.apache.spark.sql.functions.desc;
 
 public class CoIncidentsLinker implements Serializable {
 
-    public Map<Integer, Integer> runLinkage(String dimension, Dataset<Row> events) {
+    public Dataset<Row> runLinkage(String dimension, Dataset<Row> events) {
 
-        Map<Integer, Integer> linkedGroups = new HashMap<Integer, Integer>();
-        Dataset<Row> partitionedEvents = events.repartition(col(dimension)); 
+        Dataset<Row> partitionedEvents = events.repartition(200, col(dimension)); 
         Dataset<Row> orderedEvents = partitionedEvents.orderBy(desc(dimension));
 
+        //todo: partition/groupby + flatmap, etc to run linkage.
+        //result will contain oldGroup -> new group || large group -> small group
         //orderEvents.flatMap();
-        //orderEvents.foreachPartition();
 
-        return linkedGroups;
+        return orderedEvents;
     }
-
 }

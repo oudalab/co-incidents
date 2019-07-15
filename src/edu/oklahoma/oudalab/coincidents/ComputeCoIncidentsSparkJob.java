@@ -28,7 +28,7 @@ public class ComputeCoIncidentsSparkJob extends AbstractSparkJob implements Seri
 
     private static final long serialVersionUID = 1L;
 
-    @Option(name = "--eventS3Path", required = false, usage = "The s3 path of the event dataset")
+    @Option(name = "--eventS3Path", required = true, usage = "The s3 path of the event dataset")
     private String eventS3Path;
 
     private SparkSession sparkSession;
@@ -46,11 +46,12 @@ public class ComputeCoIncidentsSparkJob extends AbstractSparkJob implements Seri
         log.info("The size of eventDataset is: {}", eventDataset.count());
 
         //eventDataseet = eventDataset.withColumn("currentGroup",Column); 
+        //eventDataseet = eventDataset.withColumn("currentGroup",Column); 
 
         String[] dimensions = {
             "target",
             "longitude",
-            "stategeonameid",
+            //"stategeonameid",
             "tgt_actor",
             "src_actor",
             "date8",
@@ -58,16 +59,16 @@ public class ComputeCoIncidentsSparkJob extends AbstractSparkJob implements Seri
             "countrycode",
             "root_code",
             "geoname",
-            "countrygeonameid",
+            //"countrygeonameid",
             "tgt_agent",
             //"month",
             "src_agent",
-            "mongo_id",
+            //"mongo_id",
             "tgt_other_agent",
             //"year",
             "statecode",
             "latitude",
-            "source",
+            "source", //media source
             //"day",
             "target"};
 
@@ -81,21 +82,15 @@ public class ComputeCoIncidentsSparkJob extends AbstractSparkJob implements Seri
             final Dataset<Row> leftEvents = eventDataset.except(effectiveEvents);
             log.info("There are {} left events for dimension {}", leftEvents.count(), dimension);
 
-            final Map<Integer, Integer> linkedGroups = coIncidentsLinker.runLinkage(dimension, effectiveEvents);
-            final Map<Integer, Integer> computedGroups = computeGroups(linkedGroups);
-
-            final Dataset<Row> mergedEvents = mergeGroups(computedGroups, effectiveEvents);
+            final Dataset<Row> linkedGroups = coIncidentsLinker.runLinkage(dimension, effectiveEvents);
+            final Dataset<Row> mergedEvents = mergeGroups(linkedGroups, effectiveEvents);
 
             eventDataset = mergedEvents.union(leftEvents);
             log.info("Size of eventDataset is {} after dealing dimension {}", eventDataset.count(), dimension);
         }
     }
 
-    private Map<Integer, Integer> computeGroups(Map<Integer, Integer> linkedGroups) {
-        return linkedGroups;
-    }
-
-    private Dataset<Row> mergeGroups(Map<Integer, Integer> computedGroups, Dataset<Row> effetiveEvents) {
+    private Dataset<Row> mergeGroups(Dataset<Row> linkedGroups, Dataset<Row> effetiveEvents) {
         return effetiveEvents;
     }
 }
