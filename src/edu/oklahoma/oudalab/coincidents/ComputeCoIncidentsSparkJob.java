@@ -8,6 +8,7 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.expressions.Window;
 import org.kohsuke.args4j.Option;
 
 import lombok.NonNull;
@@ -17,6 +18,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.row_number;
 
 /**
  * This Spark job loads the event dataset, runs blocking, merging,
@@ -43,11 +45,11 @@ public class ComputeCoIncidentsSparkJob extends AbstractSparkJob implements Seri
         coIncidentsLinker = new CoIncidentsLinker();
 
         Dataset<Row> eventDataset = sparkSession.read().json(eventS3Path);
+        eventDataset = eventDataset.withColumn("groupId", row_number().over(Window.orderBy("date8"))); 
         log.info("The size of eventDataset is: {}", eventDataset.count());
 
-        //eventDataseet = eventDataset.withColumn("currentGroup",Column); 
-        //eventDataseet = eventDataset.withColumn("currentGroup",Column); 
 
+        /*
         String[] dimensions = {
             "target",
             "longitude",
@@ -71,26 +73,18 @@ public class ComputeCoIncidentsSparkJob extends AbstractSparkJob implements Seri
             "source", //media source
             //"day",
             "target"};
+        */
+
+        String[] dimensions = {
+            "date8"
+        };
 
         for (String dimension : dimensions) {
-
-            final Dataset<Row> effectiveEvents = eventDataset
-                    .where(col(dimension).isNotNull())
-                    .where(col(dimension).notEqual(""));
-            log.info("There are {} effective events for dimension {}", effectiveEvents.count(), dimension);
-
-            final Dataset<Row> leftEvents = eventDataset.except(effectiveEvents);
-            log.info("There are {} left events for dimension {}", leftEvents.count(), dimension);
-
-            final Dataset<Row> linkedGroups = coIncidentsLinker.runLinkage(dimension, effectiveEvents);
-            final Dataset<Row> mergedEvents = mergeGroups(linkedGroups, effectiveEvents);
-
-            eventDataset = mergedEvents.union(leftEvents);
+            eventDataset = coIncidentsLinker.runLinkage(dimension, eventDataset);
             log.info("Size of eventDataset is {} after dealing dimension {}", eventDataset.count(), dimension);
         }
-    }
 
-    private Dataset<Row> mergeGroups(Dataset<Row> linkedGroups, Dataset<Row> effetiveEvents) {
-        return effetiveEvents;
+        String s3LinkedEventsPath = "s3://shupingj-gamma/linked-events";
+        eventDataset.write().mode(SaveMode.Overwrite).parquet(s3LinkedEventsPath);
     }
 }
