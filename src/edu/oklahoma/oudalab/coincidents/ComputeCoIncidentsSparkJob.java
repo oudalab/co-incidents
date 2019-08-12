@@ -49,6 +49,7 @@ public class ComputeCoIncidentsSparkJob extends AbstractSparkJob implements Seri
         log.info("The size of eventDataset is: {}", eventDataset.count());
 
 
+
         /*
         String[] dimensions = {
             "target",
@@ -72,7 +73,8 @@ public class ComputeCoIncidentsSparkJob extends AbstractSparkJob implements Seri
             "latitude",
             "source", //media source
             //"day",
-            "target"};
+            "target",
+            "embed"};
         */
 
         String[] dimensions = {
