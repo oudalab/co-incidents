@@ -89,14 +89,14 @@ public class CoIncidentsLinker implements Serializable {
             randomTimes--;
             int index1 = ThreadLocalRandom.current().nextInt(0, embed1_array.size());
             int index2 = ThreadLocalRandom.current().nextInt(0, embed2_array.size());
-            // double[] em1 = embed1_array.get(index1).split(" ");
-            //ToDo: need to check if the embed is sperated by " "
-            double[] em1 = Arrays.stream(embed1_array.get(index1).split(" ")).mapToDouble(Double::parseDouble).toArray();
-            double[] em2 = Arrays.stream(embed2_array.get(index2).split(" ")).mapToDouble(Double::parseDouble).toArray();
+            //checked it is seperated by ,
+            double[] em1 = Arrays.stream(embed1_array.get(index1).split(",")).mapToDouble(Double::parseDouble).toArray();
+            double[] em2 = Arrays.stream(embed2_array.get(index2).split(",")).mapToDouble(Double::parseDouble).toArray();
             similarity += cosineSimilarity_single(em1, em2);
             embed1_array.remove(index1);
             embed2_array.remove(index2);
         }
+
         //then return the average
         return similarity / randomTimes;
     }
