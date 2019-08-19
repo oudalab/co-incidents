@@ -48,9 +48,6 @@ public class ComputeCoIncidentsSparkJob extends AbstractSparkJob implements Seri
         eventDataset = eventDataset.withColumn("groupId", row_number().over(Window.orderBy("date8"))); 
         log.info("The size of eventDataset is: {}", eventDataset.count());
 
-
-
-        /*
         String[] dimensions = {
             "target",
             "longitude",
@@ -75,11 +72,6 @@ public class ComputeCoIncidentsSparkJob extends AbstractSparkJob implements Seri
             //"day",
             "target",
             "embed"};
-        */
-
-        String[] dimensions = {
-            "date8"
-        };
 
         for (String dimension : dimensions) {
             eventDataset = coIncidentsLinker.runLinkage(dimension, eventDataset);

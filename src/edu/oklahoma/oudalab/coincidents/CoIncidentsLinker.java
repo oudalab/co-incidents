@@ -203,49 +203,55 @@ public class CoIncidentsLinker implements Serializable {
         KeyValueGroupedDataset<String, Row> groupedEvents = events.groupByKey(new MapFunction<Row, String>() {
             @Override
             public String call(Row row) throws Exception {
-                return row.getAs(dimension);
+                String dimensionValue = row.getAs(dimension);
+                if (dimensionValue == null || dimensionValue.length() == 0) {
+                     dimensionValue = "default";
+                }
+                return dimensionValue;
             }
-        }, Encoders.bean(String.class));
+        }, Encoders.STRING());
 
+        log.info("Successfully run the events.groupByKey function!");
         log.info("The size of groupedEvents is: " + groupedEvents.count());
 
         List<HashMap<String, String>> hashmapList = new ArrayList<>();
         Dataset<Row> linkedEvents = groupedEvents.flatMapGroups(new FlatMapGroupsFunction<String, Row, Row>() {
+
             @Override
             public Iterator<Row> call(String dimension, Iterator<Row> rowIter) throws Exception {
 
-                // todo: @Yan, please provide your implementation here
+                // Step 1: store all the rows in a list
                 List<Row> newRows = new ArrayList<>();
                 while (rowIter.hasNext()) {
                     Row oldRow = rowIter.next();
+                    // Row to map, then map to row for all records. Is it  mandatory?
+                    // Suggest to convert only when necessary.
                     hashmapList.add(rowToMap(oldRow));
                 }
-                //after we construct the hashMapList, we can make the linkage now.
 
-                //step1: randomly choose two element in the arrayList:
+                //Step 2: randomly choose two elements in the list:
                 int linkCount = 0;
                 //toDo: 10000 is set for test purpose and need to be changed
                 while (linkCount < 10000) {
                     linkCount = linkCount + 1;
 
-                    int eventLength = hashmapList.size();
-                    int fromIndex = ThreadLocalRandom.current().nextInt(0, eventLength);
-                    int toIndex = ThreadLocalRandom.current().nextInt(0, eventLength);
+                    int eventNumber = hashmapList.size();
+                    int fromIndex = ThreadLocalRandom.current().nextInt(0, eventNumber);
+                    int toIndex = ThreadLocalRandom.current().nextInt(0, eventNumber);
 
-                    HashMap<String, String> event_from = hashmapList.get(fromIndex);
-                    HashMap<String, String> event_to = hashmapList.get(toIndex);
+                    HashMap<String, String> eventFrom = hashmapList.get(fromIndex);
+                    HashMap<String, String> eventTo = hashmapList.get(toIndex);
 
-                    if (linkEvent(event_from, event_to)) {
-                        //if linked, merge the from events to to events, and get rid of the to events.
-                        //also need to append embedding
+                    if (linkEvent(eventFrom, eventTo)) {
+                        //if linked, merge these two events and append them embedding
                         for (String feature : featureList) {
 
                             //embed needs to use seperated delimiter
                             if (feature != "embed") {
-                                event_to.put(feature, dedup(event_from.get(feature), event_to.get(feature)));
+                                eventTo.put(feature, dedup(eventFrom.get(feature), eventTo.get(feature)));
                             } else {
                                 //use | to seperate the embedding
-                                event_to.put("embed", event_from.get("embed") + "|" + event_to.get("embed"));
+                                eventTo.put("embed", eventFrom.get("embed") + "|" + eventTo.get("embed"));
                             }
                             //get rid of the event_from from the list
                             hashmapList.remove(fromIndex);
